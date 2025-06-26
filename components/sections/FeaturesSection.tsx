@@ -12,15 +12,15 @@ export default function Features() {
     },
     {
       icon: <FaRegFaceSmileBeam className="text-3xl text-primary_green" />,
-      title: "2000+ Happy Faces",
+      title: "6000+ Happy Faces",
       description:
-        "Our greatest achievement is the smiles we bring to our guest’s faces. With over 2000 happy faces and counting, we are dedicated to ensure customer satisfaction.",
+        "Our greatest achievement is the smiles we bring to our guest’s faces. With over 6000 happy faces and counting, we are dedicated to ensure customer satisfaction.",
     },
     {
       icon: <MdHiking className="text-3xl text-primary_green" />,
-      title: "5000+ Tours",
+      title: "2000+ Tours",
       description:
-        "Explore breathtaking landscapes and vibrant cultures with our curated selection of over 5000 tours. Adventure awaits at every corner, tailored for unforgettable memories.",
+        "Explore breathtaking landscapes and vibrant cultures with our curated selection of over 2000 tours. Adventure awaits at every corner, tailored for unforgettable memories.",
     },
   ];
 
