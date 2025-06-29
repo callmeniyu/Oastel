@@ -1,4 +1,6 @@
+"use client"
 import Image from "next/image"
+import GreenBtn from "./GreenBtn"
 
 type BlogCardProps = {
     image: string
@@ -18,12 +20,7 @@ export default function BlogCard({ image, title, description, category, onClick 
                     <p className="text-desc_gray text-sm font-poppins">{description}</p>
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                    <button
-                        onClick={onClick}
-                        className="bg-primary_green text-white text-sm px-4 py-2 rounded-md font-poppins"
-                    >
-                        Explore more
-                    </button>
+                    <GreenBtn text="Explore more" customStyles="" onClick={ ()=>{}} />
                     <span className="text-primary_green font-semibold text-sm font-poppins">{category}</span>
                 </div>
             </div>

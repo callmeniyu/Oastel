@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "keen-slider": "^6.8.6",
+    "lottie-react": "^2.4.1",
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

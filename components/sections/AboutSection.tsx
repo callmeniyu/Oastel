@@ -13,7 +13,7 @@ export default function AboutSection() {
                         More Than a Booking Platform
                     </h3>
                     <p className="text-gray-400 font-medium mb-4 ">
-                        At Oastel, we go beyond bookings—we help you experience Malaysia the right way.
+                        At Oastel, we go beyond bookings—we help you experience Cameron Highlands the right way.
                     </p>
                     <p className="text-white font-poppins mb-4 leading-relaxed text-sm md:text-base">
                         We offer a thoughtfully curated selection of tours, private group adventures,

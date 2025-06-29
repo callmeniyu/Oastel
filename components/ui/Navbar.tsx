@@ -16,7 +16,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="flex items-center justify-between px-2 sm:px-6 py-4 border-b shadow-sm">
+            <nav className="flex items-center justify-between px-2 sm:px-6 py-3 border-b shadow-sm">
                 <button onClick={() => setIsOpen(true)} aria-label="Open menu">
                     <CgMenuRightAlt size={28} className="text-primary_green" />
                 </button>
