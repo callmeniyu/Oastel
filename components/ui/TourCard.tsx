@@ -1,10 +1,12 @@
-"use client"
 import Image from "next/image"
 import { MdAccessTimeFilled } from "react-icons/md"
 import { FaBookmark } from "react-icons/fa"
 import Tag from "./Tag"
 import GreenBtn from "./GreenBtn"
+
 type TourCardProps = {
+    id: number
+    slug: string
     image: string
     title: string
     tags: string[]
@@ -15,7 +17,18 @@ type TourCardProps = {
     newPrice: number
 }
 
-export default function TourCard({ image, title, desc, duration, tags, bookedCount, oldPrice, newPrice }: TourCardProps) {
+export default function TourCard({
+    id,
+    slug,
+    image,
+    title,
+    desc,
+    duration,
+    tags,
+    bookedCount,
+    oldPrice,
+    newPrice,
+}: TourCardProps) {
     return (
         <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between">
             <Image src={image} alt={title} width={400} height={400} className="h-48 w-full object-cover rounded-t-lg" />
@@ -43,7 +56,7 @@ export default function TourCard({ image, title, desc, duration, tags, bookedCou
                         <h4 className="font-poppins text-xl font-bold">{newPrice} RM</h4>
                     </div>
 
-                    <GreenBtn text="Book" customStyles="font-semibold w-24" onClick={()=>{}}/>
+                    <GreenBtn text="Book" customStyles="font-semibold w-24" action={`/tours/${slug}`} />
                 </div>
             </div>
         </div>

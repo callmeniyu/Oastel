@@ -1,6 +1,5 @@
 import GreenBtn from "./GreenBtn"
 
-// components/ui/FilterSidebar.tsx
 type FilterState = {
     type: string
     prices: string[]

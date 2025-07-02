@@ -1,12 +1,29 @@
 "use client"
+
+import { useRouter } from "next/navigation"
+
 type GreenBtnProps = {
     customStyles?: string
-    onClick: () => void
-    text:string
+    action?: string
+    text: string
+    onClick?: () => void
 }
-const GreenBtn = ({ customStyles, onClick, text }: GreenBtnProps) => {
+const GreenBtn = ({ customStyles, action, text, onClick }: GreenBtnProps) => {
+    const router = useRouter()
+
+    const handleClick = () => {
+        if (onClick) {
+            onClick()
+            return
+        } else {
+            router.push(`${action}`)
+        }
+    }
     return (
-        <button onClick={onClick} className={`bg-primary_green text-white text-sm px-4 py-2 rounded-md font-poppins ${customStyles} `}>
+        <button
+            onClick={handleClick}
+            className={`bg-primary_green text-white text-sm px-4 py-2 rounded-md font-poppins ${customStyles} `}
+        >
             {text}
         </button>
     )

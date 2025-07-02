@@ -7,69 +7,10 @@ import TourCard from "@/components/ui/TourCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
+import  {allTours} from "@/lib/data"
+import Loader from "@/components/ui/Loader"
 
-const allTours = [
-    {
-        title: "Half Day Land Rover Road Trip",
-        image: "/images/tour1.jpg",
-        tags: ["Co-Tour", "Half-day", "Adventure"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "5-6",
-        bookedCount: "2.6k",
-        oldPrice: 70,
-        newPrice: 50,
-    },
-    {
-        title: "Full Day Land Rover Road Trip",
-        image: "/images/tour2.jpg",
-        tags: ["Co-Tour", "Full-day"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "8-10",
-        bookedCount: 1000,
-        oldPrice: 140,
-        newPrice: 100,
-    },
-    {
-        title: "Private Half Day Tour",
-        image: "/images/tour3.jpg",
-        tags: ["Private", "Half-day", "Upto 8 guests"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "5-6",
-        bookedCount: 1.5,
-        oldPrice: 400,
-        newPrice: 349,
-    },
-    {
-        title: "Half Day Tour - Coral Hills",
-        image: "/images/tour4.jpg",
-        tags: ["Private", "Half-day", "Upto 8 guests"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "5-6",
-        bookedCount: 500,
-        oldPrice: 549,
-        newPrice: 449,
-    },
-    {
-        title: "Sunrise + Half Day Tour",
-        image: "/images/tour5.jpg",
-        tags: ["Private", "Half-day", "Upto 8 guests"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "5-6",
-        bookedCount: 400,
-        oldPrice: 600,
-        newPrice: 549,
-    },
-    {
-        title: "Intimate Group Adventure",
-        image: "/images/tour3.jpg",
-        tags: ["Private", "Half-day", "Upto 8 guests"],
-        desc: "Explore cameron highlands with friends in thrilling land rover ride.",
-        duration: "5-6",
-        bookedCount: "1.5k",
-        oldPrice: 499,
-        newPrice: 399,
-    },
-]
+
 type FilterState = {
     type: string
     prices: string[]
@@ -116,7 +57,7 @@ export default function ToursPage() {
         })
 
         setFilteredTours(result)
-        setIsFilterOpen(false) // Close popup if on mobile
+        setIsFilterOpen(false)
     }
 
     useEffect(() => {
@@ -125,7 +66,6 @@ export default function ToursPage() {
 
     return (
         <div>
-            {/* Hero */}
             <div
                 className="relative h-96 md:h-[100vh] bg-cover bg-center"
                 style={{ backgroundImage: "url('/images/tour_main.png')" }}
@@ -134,13 +74,12 @@ export default function ToursPage() {
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white px-4">
                     <h1 className="text-3xl md:text-5xl font-extrabold sm:font-bold">Find Your Perfect Tour</h1>
                     <p className="mt-3 max-w-xl text-base md:text-lg">
-                        From scenic Land Rover rides to intimate group adventures, discover the best of Cameron Highlands through our
-                        curated tour packages.
+                        From scenic Land Rover rides to intimate group adventures, discover the best of Cameron Highlands
+                        through our curated tour packages.
                     </p>
                 </div>
             </div>
 
-            {/* Search & Mobile Filter Toggle */}
             <div className="flex gap-3 items-center justify-between px-5 mt-8">
                 <hr className="border-b-2 border-primary_green  w-full hidden md:flex" />
                 <SearchInput customeStyles="" value={searchTerm} onChange={setSearchTerm} onSearch={handleApply} />
@@ -152,18 +91,13 @@ export default function ToursPage() {
                 </button>
             </div>
 
-            {/* Main content */}
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-4 relative">
-                {/* Sidebar for desktop */}
                 <div className="hidden sm:block">
                     <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onApply={handleApply} />
                 </div>
 
-                {/* Mobile sidebar drawer */}
-                {/* Mobile popup modal for filters */}
                 {isFilterOpen && (
                     <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center px-4 sm:hidden">
-                        {/* Modal animation container */}
                         <div className="bg-white rounded-lg w-full max-w-sm p-4 relative animate-fadeInUp shadow-lg">
                             <button
                                 onClick={() => setIsFilterOpen(false)}
@@ -184,7 +118,6 @@ export default function ToursPage() {
                     </div>
                 )}
 
-                {/* Tour Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
                     {filteredTours.length === 0 ? (
                         <div className="col-span-full text-center text-desc_gray mt-4 text-sm">

@@ -2,7 +2,16 @@
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
-const faqs = [
+type FAQ = {
+  question: string;
+  answer: string;
+};
+
+type FAQSectionProps = {
+  faqs?: FAQ[];
+};
+
+const defaultFaqs = [
   {
     question: "How do I book a tour with Oastel?",
     answer:
@@ -35,7 +44,10 @@ const faqs = [
   },
 ];
 
-export default function FAQSection() {
+export default function FAQSection({ faqs }: FAQSectionProps) {
+  if (!faqs || faqs.length === 0) {
+    faqs = defaultFaqs;
+  }
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const toggleIndex = (index: number): void => {
