@@ -7,10 +7,11 @@ type TourBookPanelProps = {
     duration: string | number
     oldPrice: number
     newPrice: number
+    action?: string
 }
 import GreenBtn from "./GreenBtn"
 
-export default function TourBookPanel({ date, time, persons, duration, oldPrice, newPrice }: TourBookPanelProps) {
+export default function TourBookPanel({ date, time, persons, duration, oldPrice, newPrice, action }: TourBookPanelProps) {
     return (
         <div className="w-full max-w-xs mx-auto rounded-md border border-primary_green p-4 shadow-sm ">
             <div className="bg-primary_green text-white rounded-md py-2 px-4 flex items-center justify-center gap-2 mb-4">
@@ -43,7 +44,7 @@ export default function TourBookPanel({ date, time, persons, duration, oldPrice,
                 </div>
             </div>
 
-            <GreenBtn text="Change Details & Book Tour" customStyles="w-full font-semibold" action="" />
+            <GreenBtn text="Change Details & Book Tour" customStyles="w-full font-semibold" action={action} />
         </div>
     )
 }

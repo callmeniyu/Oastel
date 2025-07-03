@@ -30,7 +30,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
+        <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 font-poppins">
             <div className="flex flex-col lg:flex-row gap-8 md:px-8 lg:px-16">
                 <div className="flex-1 space-y-6">
                     <Image
@@ -67,11 +67,12 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         </div>
                         <TourBookPanel
                             date="18 Oct 2023"
-                            time={tourDetails.time}
+                            time={tourDetails.time[0]}
                             persons={1}
                             duration={tourDetails.duration}
                             oldPrice={tourDetails.oldPrice}
                             newPrice={tourDetails.newPrice}
+                            action={`/booking/${tourDetails.slug}`}
                         />
                     </div>
 
@@ -149,16 +150,18 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         </h2>
                         <div className="flex items-center gap-2">
                             <FaBookmark className="text-primary_green inline-block mr-1" />
-                            <span className="font-semibold">{tourDetails.bookedCount}</span>
+                            <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                         </div>
                     </div>
                     <TourBookPanel
                         date="18 Oct 2023"
-                        time={tourDetails.time}
+                        time={tourDetails.time[0]}
                         persons={1}
                         duration={tourDetails.duration}
                         oldPrice={tourDetails.oldPrice}
                         newPrice={tourDetails.newPrice}
+                        action={`/booking/${tourDetails.slug}`}
+
                     />
                 </div>
             </div>
@@ -184,7 +187,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
             {/* Book Button */}
             <div className="text-center">
-                <GreenBtn text="Book this tour" action={"/tours/book-tour"} />
+                <GreenBtn text="Book this tour" action={`/booking/${tourDetails.slug}`} />
             </div>
 
             {/* Other Tours */}

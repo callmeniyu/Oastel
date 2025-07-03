@@ -20,7 +20,7 @@ export default function Navbar() {
                 <button onClick={() => setIsOpen(true)} aria-label="Open menu">
                     <CgMenuRightAlt size={28} className="text-primary_green" />
                 </button>
-                <h1 className="text-xl font-bold text-black font-poppins">Oastel</h1>
+                <Link href={"/"} className="text-xl font-bold text-black font-poppins">Oastel</Link>
                 <div className="relative">
                     <button
                         className="flex items-center gap-2 bg-primary_green text-white rounded-full sm:pr-3 xs:pr-0 "

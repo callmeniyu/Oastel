@@ -9,11 +9,13 @@ export const allTours = [
         tags: ["Co-Tour", "Half-day", "Adventure"],
         desc: "Embark on a thrilling half-day journey through scenic trails and lush forests in a classic Land Rover.",
         // 110 characters max for description
+        type: "co-tour",
         duration: "5-6",
         bookedCount: "2.6k",
         oldPrice: 70,
         newPrice: 50,
-        time: "8:00 AM",
+        childPrice: 25,
+        time: ["8:00 AM", "1:30 PM"],
         details: {
             about: "Thrilling Land Rover Ride: Explore off-the-beaten-path trails and stunning landscapes.Local Culture: Visit traditional villages and meet the locals.Hidden Gems: Discover breathtaking viewpoints and untouched nature.Expert Guides: Knowledgeable and friendly guides ensure a safe and memorable trip.",
             itinerary: [
@@ -57,11 +59,13 @@ export const allTours = [
         image: "/images/tour2.jpg",
         tags: ["Co-Tour", "Full-day"],
         desc: "Experience the ultimate Cameron Highlands adventure with a full day of exploration, culture, and nature.",
+        type: "co-tour",
         duration: "8-10",
         bookedCount: 1000,
         oldPrice: 140,
         newPrice: 100,
-        time: "8:00 AM",
+        childPrice: 50,
+        time: ["8:00 AM", "1:30 PM", "5:00 PM"],
         details: {
             about: "Ultimate Full Day Adventure: Experience the best of Cameron Highlands with a comprehensive Land Rover journey. Diverse Landscapes: Traverse lush tea plantations, misty forests, and scenic valleys. Cultural Encounters: Engage with local communities and learn about their traditions. Extended Exploration: More stops and activities for a truly immersive day.",
             itinerary: [
@@ -103,11 +107,13 @@ export const allTours = [
         image: "/images/tour3.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Enjoy a personalized half-day tour with your own group, tailored to your interests and pace.",
+        type: "private",
         duration: "5-6",
         bookedCount: 1.5,
         oldPrice: 400,
         newPrice: 349,
-        time: "8:00 AM",
+        childPrice: 150,
+        time: ["9:00 AM", "11:30 PM"],
         details: {
             about: "Private Half Day Tour: Enjoy a personalized experience exploring Cameron Highlands with your own group. Flexible Itinerary: Tailor the tour to your interests with the help of your expert guide. Exclusive Access: Visit hidden gems and popular attractions at your own pace. Comfort & Privacy: Travel in comfort with up to 8 guests in a private Land Rover.",
             itinerary: [
@@ -147,11 +153,13 @@ export const allTours = [
         image: "/images/tour4.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Discover the unique Coral Hills area with a private guide, featuring nature walks and stunning viewpoints.",
+        type: "private",
         duration: "5-6",
         bookedCount: 500,
         oldPrice: 549,
         newPrice: 449,
-        time: "8:00 AM",
+        childPrice: 200,
+        time: ["7:20 AM"],
         details: {
             about: "Coral Hills Discovery: Experience the unique landscapes and biodiversity of the Coral Hills area in Cameron Highlands. Scenic Views: Enjoy panoramic vistas and photo opportunities at exclusive viewpoints. Nature Walks: Guided exploration of local flora and fauna. Personalized Experience: Private tour tailored to your group's interests.",
             itinerary: [
@@ -192,11 +200,13 @@ export const allTours = [
         image: "/images/tour5.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Start your day with a breathtaking sunrise followed by a half-day exploration of Cameron Highlands’ highlights.",
+        type: "private",
         duration: "5-6",
         bookedCount: 400,
         oldPrice: 600,
         newPrice: 549,
-        time: "5:00 AM",
+        childPrice: 200,
+        time: ["5:00 PM", "1:30 PM"],
         details: {
             about: "Sunrise Experience: Witness a breathtaking sunrise over the Cameron Highlands before embarking on a half-day adventure. Early Start: Begin your day with panoramic views and photo opportunities at exclusive sunrise viewpoints. Flexible Itinerary: After sunrise, explore tea plantations, forests, or local markets with your private guide. Personalized Tour: Tailor the experience to your group's interests for a memorable morning.",
             itinerary: [
@@ -234,14 +244,16 @@ export const allTours = [
         id: 6,
         slug: "intimate-group-adventure",
         title: "Intimate Group Adventure",
-        image: "/images/tour3.jpg",
+        image: "/images/tour6.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Perfect for small groups, this private tour offers a flexible and exclusive Cameron Highlands adventure.",
+        type: "private",
         duration: "5-6",
         bookedCount: "1.5k",
         oldPrice: 499,
         newPrice: 399,
-        time: "8:00 AM",
+        childPrice: 200,
+        time: ["8:00 AM"],
         details: {
             about: "Intimate Group Adventure: Enjoy a private half-day tour designed for small groups seeking a personalized experience in Cameron Highlands. Flexible Itinerary: Customize your journey with the help of your expert guide. Exclusive Access: Visit hidden gems and popular attractions at your own pace. Comfort & Privacy: Travel comfortably with up to 8 guests in a private Land Rover.",
             itinerary: [
@@ -275,4 +287,3 @@ export const allTours = [
         },
     },
 ]
-
