@@ -27,10 +27,10 @@ export default function BlogSection() {
             <div className="max-w-6xl mx-auto">
                 <div className="md:px-28">
                     <h2 className="section-title text-center">
-                        Explore Stories, Travel Tips, and Local Experiences from the Heart of Malaysia
+                        Real Stories, Tasty Bites, Local Brews & Everyday Travel Tips
                     </h2>
                     <p className="section-desc text-center mb-12">
-                        Read travel stories, destination guides, and curated insights for your next adventure.
+                        More Than a Guide - it's a Highland Lifestyle
                     </p>
                 </div>
 

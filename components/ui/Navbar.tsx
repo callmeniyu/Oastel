@@ -12,7 +12,7 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
 
     const [showProfile, setShowProfile] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(true)
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
 
     return (
         <>
@@ -28,7 +28,7 @@ export default function Navbar() {
                             if (isAuthenticated) {
                                 setShowProfile((prev) => !prev)
                             } else {
-                                router.push("/authenticate")
+                                router.push("/auth")
                             }
                         }}
                     >

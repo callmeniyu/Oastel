@@ -65,15 +65,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                             </div>
                         </div>
-                        <TourBookPanel
-                            date="18 Oct 2023"
-                            time={tourDetails.time[0]}
-                            persons={1}
-                            duration={tourDetails.duration}
-                            oldPrice={tourDetails.oldPrice}
-                            newPrice={tourDetails.newPrice}
-                            action={`/booking/${tourDetails.slug}`}
-                        />
+                        <GreenBtn text="Book Now" action={`/booking/${tourDetails.slug}`} customStyles="" />
+
                     </div>
 
                     <div className="space-y-6 mt-6">
@@ -153,16 +146,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                             <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                         </div>
                     </div>
-                    <TourBookPanel
-                        date="18 Oct 2023"
-                        time={tourDetails.time[0]}
-                        persons={1}
-                        duration={tourDetails.duration}
-                        oldPrice={tourDetails.oldPrice}
-                        newPrice={tourDetails.newPrice}
-                        action={`/booking/${tourDetails.slug}`}
-
-                    />
+                    <GreenBtn text="Book Now" action={`/booking/${tourDetails.slug}`} customStyles="" />
                 </div>
             </div>
 

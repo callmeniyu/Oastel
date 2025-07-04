@@ -1,6 +1,7 @@
 // components/ui/BookingDetails.tsx
 import { format } from "date-fns"
 import GreenBtn from "./GreenBtn"
+import { userInfo } from "os"
 
 type Props = {
     title: string
@@ -12,6 +13,9 @@ type Props = {
     children: number
     adultPrice: number
     childPrice: number
+    action?: string
+    onClick?: () => void
+    userInfo?: boolean
 }
 
 export default function BookingInfoPanel({
@@ -24,6 +28,9 @@ export default function BookingInfoPanel({
     children,
     adultPrice,
     childPrice,
+    action,
+    onClick,
+    userInfo,
 }: Props) {
     const total = adults * adultPrice + children * childPrice
 
@@ -51,7 +58,7 @@ export default function BookingInfoPanel({
                 </div>
                 <div className="text-sm mb-2 flex justify-between">
                     <h6 className="font-semibold">Duration</h6>
-                    <p className="text-desc_gray">{duration}</p>
+                    <p className="text-desc_gray">{duration} hrs</p>
                 </div>
                 <div className="text-sm mb-4 flex justify-between">
                     <h6 className="font-semibold">Persons</h6>
@@ -61,13 +68,34 @@ export default function BookingInfoPanel({
                     </div>
                 </div>
             </div>
-            <div className="border-y p-5 flex justify-between">
+            <div className={`border-y p-5 flex justify-between ${userInfo ? "hidden" : "flex"}`}>
                 <h4 className="text-xl font-bold">Amount</h4>
                 <h4 className="text-xl font-bold"> RM {total}</h4>
             </div>
-            <div className="flex flex-col gap-2 mt-4 px-6">
+            <div className={`border-y p-5 flex flex-col gap-2 justify-between ${userInfo ? "flex" : "hidden"}`}>
+                <div className="flex justify-between">
+                    <h4 className="text-lg font-semibold">Subtotal</h4>
+                    <h4 className="text-lg font-semibold"> RM {total}</h4>
+                </div>
+                <div className="flex justify-between">
+                    <h4 className="text-lg font-semibold">
+                        Bank Charge <span className="text-desc_gray text-sm font-medium">(2.8%)</span>
+                    </h4>
+                    <h4 className="text-lg font-semibold"> RM {(total * 0.028).toFixed(2)}</h4>
+                </div>
+                <div className="flex justify-between">
+                    <h4 className="text-lg font-semibold">GST</h4>
+                    <h4 className="text-lg font-semibold"> RM {(0.0).toFixed(2)}</h4>
+                </div>
+            </div>
+
+            <div className={`border-t p-5 flex text-primary_green gap-2 justify-between ${userInfo ? "flex" : "hidden"}`}>
+                <h4 className="text-2xl font-semibold">Total</h4>
+                <h4 className="text-2xl font-semibold"> RM {(total + total * 0.028).toFixed(2)}</h4>
+            </div>
+            <div className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "hidden" : ""}`}>
                 <GreenBtn customStyles="font-semibold text-lg py-3" text="Add to cart" />
-                <GreenBtn customStyles="font-semibold text-lg py-3" text="Buy Now" />
+                <GreenBtn customStyles="font-semibold text-lg py-3" text="Buy Now" onClick={onClick} />
             </div>
         </div>
     )
