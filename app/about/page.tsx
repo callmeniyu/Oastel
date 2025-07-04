@@ -24,7 +24,7 @@ export default function AboutPage() {
     return (
         <main className="font-poppins text-title_black">
             {/* Section 1: Hero */}
-            <section className="px-6 flex gap-6 items-end md:px-12 py-10 max-w-7xl mx-auto">
+            <section id="abou-tus" className="px-6 flex gap-6 items-end md:px-12 py-10 max-w-7xl mx-auto">
                 <div>
                     <h3 className="text-lg font-semibold mb-2">We are Oastel</h3>
                     <h1 className="text-3xl md:text-5xl font-bold text-primary_green mb-2">We Know What Travelers Need</h1>
@@ -48,7 +48,7 @@ export default function AboutPage() {
             </section>
 
             {/* Section 2: Our Story */}
-            <section className="bg-white px-6 md:px-12 py-16 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section id="our-story" className="bg-white px-6 md:px-12 py-16 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div>
                     <div className="text-4xl font-bold text-primary_green flex items-center gap-2">
                         <h2>Our Story</h2>{" "}
@@ -77,7 +77,7 @@ export default function AboutPage() {
             </section>
 
             {/* Section 3: Key Benefits */}
-            <section className="bg-[#F5F5F5] px-2 md:px-12 py-16">
+            <section id="our-features" className="bg-[#F5F5F5] px-2 md:px-12 py-16">
                 <div className="max-w-7xl mx-auto text-center mb-10">
                     <h2 className="text-xl font-semibold text-primary_green">
                         Your journey is more than just a destination

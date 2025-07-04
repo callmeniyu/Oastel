@@ -84,7 +84,7 @@ export default function BookingInfoPanel({
                     <h4 className="text-lg font-semibold"> RM {(total * 0.028).toFixed(2)}</h4>
                 </div>
                 <div className="flex justify-between">
-                    <h4 className="text-lg font-semibold">GST</h4>
+                    <h4 className="text-lg font-semibold">SST</h4>
                     <h4 className="text-lg font-semibold"> RM {(0.0).toFixed(2)}</h4>
                 </div>
             </div>

@@ -12,10 +12,10 @@ interface ToastProps {
 }
 
 const iconMap = {
-  success: <FiCheckCircle className="text-green-600 text-xl" />,
-  info: <FiInfo className="text-blue-600 text-xl" />,
-  warning: <FiAlertTriangle className="text-yellow-600 text-xl" />,
-  error: <FiXCircle className="text-red-600 text-xl" />,
+  success: <FiCheckCircle className="text-green-600 text-xl shrink-0" />,
+  info: <FiInfo className="text-blue-600 text-xl shrink-0" />,
+  warning: <FiAlertTriangle className="text-yellow-600 text-xl shrink-0" />,
+  error: <FiXCircle className="text-red-600 text-xl shrink-0" />,
 }
 
 const bgMap = {
@@ -33,18 +33,20 @@ export default function Toast({ type, title, message, onClose }: ToastProps) {
 
   return (
     <div
-      className={`fixed top-4 right-4  z-[9999] bg-white border w-full max-w-md flex items-start gap-4 border-l-4 px-4 py-3 font-poppins rounded-lg shadow-md   ${bgMap[type]} z-[9999]`}
+      className={`fixed top-4 left-4 right-4 md:right-4 md:left-auto md:ml-auto z-[9999] border w-auto md:max-w-md flex items-start gap-3 md:gap-4 border-l-4 px-3 py-3 md:px-4 md:py-3 font-poppins rounded-lg shadow-md ${bgMap[type]}`}
     >
       {iconMap[type]}
-      <div className="">
-        <p className="">{title}</p>
-        <p className="text-sm text-gray-700">{message}</p>
+
+      <div className="flex-1 min-w-0 mr-3">
+        <p className="text-sm font-medium text-gray-900">{title}</p>
+        <p className="text-sm text-gray-700 leading-snug break-words">{message}</p>
       </div>
+
       <button
         onClick={onClose}
         className="absolute top-2 right-2 text-gray-600 hover:text-black"
       >
-        <IoMdClose className="text-lg"/>
+        <IoMdClose className="text-lg ml-2" />
       </button>
     </div>
   )

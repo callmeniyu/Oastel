@@ -57,7 +57,7 @@ export default function BookingInfoPage() {
 
     const updateChildren = (newCount: number) => {
         const newTotal = adults + newCount
-        
+
         if (newTotal <= (tourDetails?.maximumPerson || Infinity)) {
             setChildren(newCount)
             setTotalGuests(newTotal)
@@ -65,14 +65,14 @@ export default function BookingInfoPage() {
     }
 
     useEffect(() => {
-        if (totalGuests >= (tourDetails?.maximumPerson || Infinity)) { 
+        if (totalGuests >= (tourDetails?.maximumPerson || Infinity)) {
             showToast({
-            type: "error",
-            title: "You have reached the maximum number of guests.",
-            message: "Please try contacting us for if more tickets.",
-          })
+                type: "error",
+                title: "You have reached the maximum number of guests.",
+                message: "Please try contacting us for if more tickets.",
+            })
         }
-     }, [adults, children])
+    }, [adults, children])
 
     const handleContinue = () => {
         if (!tourDetails) return
@@ -119,14 +119,12 @@ export default function BookingInfoPage() {
 
                 <div className="rounded-lg shadow-md p-4 bg-white">
                     <h3 className="text-primary_green text-xl font-bold mb-2">No. of Guests</h3>
-                    <div className="space-y-4 border p-3 rounded-lg my-4 ">
+
+                    <div className="space-y-6 border p-3 rounded-lg my-4">
                         {[
                             {
                                 label: "Adults",
-                                desc: [
-                                    `Minimum: ${tourDetails?.minimumPerson} person per group.`,
-                                    `Maximum: ${tourDetails?.maximumPerson} person per group.`,
-                                ],
+                                desc: [`Minimum: ${tourDetails?.minimumPerson} person per group.`],
                                 value: adults,
                                 onIncrement: () => updateAdults(adults + 1),
                                 onDecrement: () => updateAdults(adults - 1),
@@ -155,43 +153,57 @@ export default function BookingInfoPage() {
                                 disableIncrement,
                                 disableDecrement,
                             }) => (
-                                <div key={label} className="flex items-center justify-between">
-                                    <span className="font-semibold">
-                                        {label} <span className="text-sm text-desc_gray">(RM {price})</span>
-                                        <div className="space-y-1">
+                                <div
+                                    key={label}
+                                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                                >
+                                    {/* Label + Desc */}
+                                    <div className="flex-1">
+                                        <p className="font-semibold">
+                                            {label} <span className="text-sm text-desc_gray">(RM {price})</span>
+                                        </p>
+                                        <div className="space-y-1 mt-1">
                                             {desc.map((d, index) => (
                                                 <p key={index} className="text-xs text-desc_gray font-light">
                                                     {d}
                                                 </p>
                                             ))}
                                         </div>
-                                    </span>
-                                    <div className="flex items-center gap-2 border rounded-full">
-                                        <button
-                                            onClick={onDecrement}
-                                            disabled={disableDecrement}
-                                            className={`px-2 py-1 rounded-l-xl ${
-                                                disableDecrement
-                                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                                    : "hover:bg-primary_green hover:text-white"
-                                            }`}
-                                        >
-                                            -
-                                        </button>
-                                        <span>{value}</span>
-                                        <button
-                                            onClick={onIncrement}
-                                            disabled={disableIncrement}
-                                            className={`px-2 py-1 rounded-r-xl ${
-                                                disableIncrement
-                                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                                    : "hover:bg-primary_green hover:text-white"
-                                            }`}
-                                        >
-                                            +
-                                        </button>
                                     </div>
-                                    <span className="font-semibold text-primary_green">RM {value * price}</span>
+
+                                    {/* Controls */}
+                                    <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
+                                        <div className="flex items-center gap-2 border rounded-full">
+                                            <button
+                                                onClick={onDecrement}
+                                                disabled={disableDecrement}
+                                                className={`px-3 py-1.5 rounded-l-xl text-lg ${
+                                                    disableDecrement
+                                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                                        : "hover:bg-primary_green hover:text-white"
+                                                }`}
+                                            >
+                                                -
+                                            </button>
+                                            <span className="min-w-[24px] text-center">{value}</span>
+                                            <button
+                                                onClick={onIncrement}
+                                                disabled={disableIncrement}
+                                                className={`px-3 py-1.5 rounded-r-xl text-lg ${
+                                                    disableIncrement
+                                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                                        : "hover:bg-primary_green hover:text-white"
+                                                }`}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+
+                                        {/* Total */}
+                                        <span className="font-semibold text-primary_green min-w-[80px] text-right">
+                                            RM {value * price}
+                                        </span>
+                                    </div>
                                 </div>
                             )
                         )}
@@ -210,7 +222,6 @@ export default function BookingInfoPage() {
                 adultPrice={tourDetails?.newPrice || 0}
                 childPrice={tourDetails?.childPrice || 0}
                 onClick={handleContinue}
-
             />
         </div>
     )

@@ -46,16 +46,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         }`}
                     >
                         <li>
-                            <Link href="/about">- About Us</Link>
+                            <Link href="/about#about-us" onClick={onClose}>- About Us</Link>
                         </li>
                         <li>
-                            <Link href="/our-story">- Our Story</Link>
+                            <Link href="/about#our-story" onClick={onClose}>- Our Story</Link>
                         </li>
                         <li>
-                            <Link href="/vision">- Vision</Link>
-                        </li>
-                        <li>
-                            <Link href="/mission">- Mission</Link>
+                            <Link href="/about#our-features" onClick={onClose}>- Features</Link>
                         </li>
                     </ul>
                 </div>
