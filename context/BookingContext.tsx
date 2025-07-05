@@ -13,23 +13,26 @@ interface BookingContextProps {
 const BookingContext = createContext<BookingContextProps | undefined>(undefined)
 
 export const BookingProvider = ({ children }: { children: React.ReactNode }) => {
-  const [booking, setBookingState] = useState<BookingDetailsType | null>(null)
+  const [booking, setBookingState] = useState<BookingDetailsType | null>(() => {
+    const stored = localStorage.getItem("booking")
+    return stored ? JSON.parse(stored) : null
+  })
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("booking")
+    const stored = localStorage.getItem("booking")
     if (stored) setBookingState(JSON.parse(stored))
   }, [])
 
   const setBooking = (booking: BookingDetailsType) => {
     setBookingState(booking)
-    sessionStorage.setItem("booking", JSON.stringify(booking))
+    localStorage.setItem("booking", JSON.stringify(booking))
   }
 
     console.log("BookingProvider initialized with booking:", booking);
     
   const clearBooking = () => {
     setBookingState(null)
-    sessionStorage.removeItem("booking")
+    localStorage.removeItem("booking")
   }
 
   return (

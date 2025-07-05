@@ -1,8 +1,9 @@
 // components/ui/BookingDetails.tsx
 import { format } from "date-fns"
-import GreenBtn from "./GreenBtn"
-import { userInfo } from "os"
-
+import { useRouter } from "next/navigation";
+import { Router } from "next/router";
+import { IoCartOutline } from "react-icons/io5"
+import { IoBagOutline } from "react-icons/io5";
 type Props = {
     title: string
     date: Date
@@ -13,9 +14,11 @@ type Props = {
     children: number
     adultPrice: number
     childPrice: number
-    action?: string
+    action?: string[]
     onClick?: () => void
     userInfo?: boolean
+        totalPrice: number
+
 }
 
 export default function BookingInfoPanel({
@@ -32,6 +35,8 @@ export default function BookingInfoPanel({
     onClick,
     userInfo,
 }: Props) {
+
+    const router = useRouter()
     const total = adults * adultPrice + children * childPrice
 
     return (
@@ -94,8 +99,20 @@ export default function BookingInfoPanel({
                 <h4 className="text-2xl font-semibold"> RM {(total + total * 0.028).toFixed(2)}</h4>
             </div>
             <div className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "hidden" : ""}`}>
-                <GreenBtn customStyles="font-semibold text-lg py-3" text="Add to cart" />
-                <GreenBtn customStyles="font-semibold text-lg py-3" text="Buy Now" onClick={onClick} />
+                <div
+                    onClick={()=>router.push("/cart") }
+                    className={`bg-primary_green cursor-pointer text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold`}
+                >
+                    <IoCartOutline className="inline mr-2 text-2xl" />
+                    <p>Add to Cart</p>
+                </div>
+                <div
+                    onClick={onClick}
+                    className={`bg-primary_green cursor-pointer text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold`}
+                >
+                    <IoBagOutline className="inline mr-2 text-2xl" />
+                    <p>Buy Now</p>
+                </div>
             </div>
         </div>
     )

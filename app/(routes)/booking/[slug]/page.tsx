@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 import BookingCalendar from "@/components/ui/BookingCalendar"
 import BookingInfoPanel from "@/components/ui/BookingInfoPanel"
 import { getTourBySlug } from "@/lib/utils"
@@ -34,8 +34,10 @@ export default function BookingInfoPage() {
             const tour = await getTourBySlug(slug)
             if (tour) {
                 setTourDetails(tour)
-                setAdults(tour.minimumPerson || 1)
-                setTotalGuests(tour.minimumPerson || 1)
+                // Always start with 8 adults for private tours
+                const initialAdults = tour.type === "private" ? 8 : (tour.minimumPerson || 1)
+                setAdults(initialAdults)
+                setTotalGuests(initialAdults)
             }
         }
         getTourDetails()
@@ -43,22 +45,41 @@ export default function BookingInfoPage() {
 
     useEffect(() => {
         const key = selectedDate.toISOString().split("T")[0]
-        setAvailableTimes(defaultTimings[key] || ["8:00 am"]) // fallback to default
+        setAvailableTimes(defaultTimings[key] || ["8:00 am"])
         setSelectedTime(defaultTimings[key]?.[0] || "8:00 am")
     }, [selectedDate])
 
+    // Calculate price per person for private tours (newPrice / 8)
+    const getAdultPrice = () => {
+        if (!tourDetails) return 0
+        return tourDetails.type === "private" 
+            ? (tourDetails.newPrice || 0) / 8 
+            : (tourDetails.newPrice || 0)
+    }
+
     const updateAdults = (newCount: number) => {
-        const newTotal = newCount + children
-        if (newCount >= (tourDetails?.minimumPerson || 1) && newTotal <= (tourDetails?.maximumPerson || Infinity)) {
-            setAdults(newCount)
-            setTotalGuests(newTotal)
+        if (!tourDetails) return
+
+        if (tourDetails.type === "private") {
+            // Only allow increments of 8 for private tours
+            if (newCount % 8 === 0 && newCount >= 8 && newCount <= (tourDetails.maximumPerson || Infinity)) {
+                setAdults(newCount)
+                setTotalGuests(newCount)
+            }
+        } else {
+            const newTotal = newCount + children
+            if (newCount >= (tourDetails.minimumPerson || 1) && newTotal <= (tourDetails.maximumPerson || Infinity)) {
+                setAdults(newCount)
+                setTotalGuests(newTotal)
+            }
         }
     }
 
     const updateChildren = (newCount: number) => {
+        if (!tourDetails || tourDetails.type === "private") return
+        
         const newTotal = adults + newCount
-
-        if (newTotal <= (tourDetails?.maximumPerson || Infinity)) {
+        if (newTotal <= (tourDetails.maximumPerson || Infinity)) {
             setChildren(newCount)
             setTotalGuests(newTotal)
         }
@@ -85,10 +106,22 @@ export default function BookingInfoPage() {
             duration: tourDetails.duration || "4-6 hours",
             adults,
             children,
-            adultPrice: tourDetails.newPrice || 0,
+            adultPrice: getAdultPrice(),
             childPrice: tourDetails.childPrice || 0,
+            // Store the total price for private tours
+            totalPrice: tourDetails.type === "private" 
+                ? (adults / 8) * (tourDetails.newPrice || 0)
+                : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0)
         })
         router.push("/booking/user-info")
+    }
+
+    // Calculate total price based on tour type
+    const calculateTotalPrice = () => {
+        if (!tourDetails) return 0
+        return tourDetails.type === "private"
+            ? (adults / 8) * (tourDetails.newPrice || 0)
+            : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0)
     }
 
     return (
@@ -112,7 +145,7 @@ export default function BookingInfoPage() {
                                         {t}
                                     </button>
                                 ))}
-                            <p className="text-desc_gray text-sm my-1">No other timings are availabe for now</p>
+                            <p className="text-desc_gray text-sm my-1">No other timings are available for now</p>
                         </div>
                     </div>
                 </div>
@@ -124,24 +157,40 @@ export default function BookingInfoPage() {
                         {[
                             {
                                 label: "Adults",
-                                desc: [`Minimum: ${tourDetails?.minimumPerson} person per group.`],
+                                desc: [
+                                    tourDetails?.type === "private"
+                                        ? "Minimum: 8 persons per group. Increments by 8."
+                                        : `Minimum: ${tourDetails?.minimumPerson} person per group.`,
+                                ],
                                 value: adults,
-                                onIncrement: () => updateAdults(adults + 1),
-                                onDecrement: () => updateAdults(adults - 1),
-                                disableDecrement: adults <= (tourDetails?.minimumPerson || 1),
+                                onIncrement: () =>
+                                    tourDetails?.type === "private"
+                                        ? updateAdults(adults + 8)
+                                        : updateAdults(adults + 1),
+                                onDecrement: () =>
+                                    tourDetails?.type === "private"
+                                        ? updateAdults(adults - 8)
+                                        : updateAdults(adults - 1),
+                                disableDecrement: tourDetails?.type === "private"
+                                    ? adults <= 8
+                                    : adults <= (tourDetails?.minimumPerson || 1),
                                 disableIncrement: totalGuests >= (tourDetails?.maximumPerson || Infinity),
-                                price: tourDetails?.newPrice || 0,
+                                price: getAdultPrice(),
                             },
-                            {
-                                label: "Child",
-                                desc: [`Age between 3 to 7 years`],
-                                value: children,
-                                onIncrement: () => updateChildren(children + 1),
-                                onDecrement: () => updateChildren(children - 1),
-                                disableDecrement: children <= 0,
-                                disableIncrement: totalGuests >= (tourDetails?.maximumPerson || Infinity),
-                                price: tourDetails?.childPrice || 0,
-                            },
+                            ...(tourDetails?.type !== "private"
+                                ? [
+                                      {
+                                          label: "Child",
+                                          desc: ["Age between 3 to 7 years"],
+                                          value: children,
+                                          onIncrement: () => updateChildren(children + 1),
+                                          onDecrement: () => updateChildren(children - 1),
+                                          disableDecrement: children <= 0,
+                                          disableIncrement: totalGuests >= (tourDetails?.maximumPerson || Infinity),
+                                          price: tourDetails?.childPrice || 0,
+                                      },
+                                  ]
+                                : []),
                         ].map(
                             ({
                                 label,
@@ -157,10 +206,9 @@ export default function BookingInfoPage() {
                                     key={label}
                                     className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
                                 >
-                                    {/* Label + Desc */}
                                     <div className="flex-1">
                                         <p className="font-semibold">
-                                            {label} <span className="text-sm text-desc_gray">(RM {price})</span>
+                                            {label} <span className="text-sm text-desc_gray">(RM {price * 8})</span>
                                         </p>
                                         <div className="space-y-1 mt-1">
                                             {desc.map((d, index) => (
@@ -171,7 +219,6 @@ export default function BookingInfoPage() {
                                         </div>
                                     </div>
 
-                                    {/* Controls */}
                                     <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
                                         <div className="flex items-center gap-2 border rounded-full">
                                             <button
@@ -199,9 +246,11 @@ export default function BookingInfoPage() {
                                             </button>
                                         </div>
 
-                                        {/* Total */}
                                         <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                                            RM {value * price}
+                                            {tourDetails?.type === "private" 
+                                                ? `RM ${(value / 8) * (tourDetails.newPrice || 0)}`
+                                                : `RM ${value * price}`
+                                            }
                                         </span>
                                     </div>
                                 </div>
@@ -219,8 +268,9 @@ export default function BookingInfoPage() {
                 duration={tourDetails?.duration || "4-6 hours"}
                 adults={adults}
                 children={children}
-                adultPrice={tourDetails?.newPrice || 0}
+                adultPrice={getAdultPrice()}
                 childPrice={tourDetails?.childPrice || 0}
+                totalPrice={calculateTotalPrice()}
                 onClick={handleContinue}
             />
         </div>

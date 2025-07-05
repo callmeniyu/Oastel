@@ -41,4 +41,5 @@ export interface BookingDetailsType {
     children: number
     adultPrice: number
     childPrice: number
+    totalPrice: number
 }

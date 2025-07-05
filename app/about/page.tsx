@@ -48,7 +48,10 @@ export default function AboutPage() {
             </section>
 
             {/* Section 2: Our Story */}
-            <section id="our-story" className="bg-white px-6 md:px-12 py-16 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+            <section
+                id="our-story"
+                className="bg-white px-6 md:px-12 py-16 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12"
+            >
                 <div>
                     <div className="text-4xl font-bold text-primary_green flex items-center gap-2">
                         <h2>Our Story</h2>{" "}
@@ -60,18 +63,22 @@ export default function AboutPage() {
 
                 <div>
                     <p className="text-primary_green font-semibold text-lg mb-4">
-                        Oastel began with a simple idea: to make travel in Malaysia easier, more personal, and deeply
-                        enriching.
+                        Oastel began with a simple idea: to make travel in Cameron Highlands—especially in Tanah
+                        Rata—easier, more personal, and truly enriching.
                     </p>
                     <p className="text-desc_gray leading-relaxed">
-                        We started in the heart of Cameron Highlands, where we noticed travelers looking for something more
-                        than just a hotel or a ride—they were looking for real experiences. So we brought them closer to the
-                        beauty of the highlands, the culture of the locals, and the hidden gems that only a few get to see.
+                        It all started in the heart of the Highlands, where we noticed something: travelers weren’t just
+                        looking for a bed or a ride. They were searching for something deeper—real experiences that connect
+                        them with people, nature, and culture. So we built Oastel not just as a co-living space, but as a
+                        backpacker-friendly community. A space where travelers could meet, share stories, and explore
+                        together.
                         <br />
                         <br />
-                        While we handle logistics—you create memories. Our team is made up of passionate locals and travel
-                        lovers who care about every detail of your journey. Whether it’s a sunrise trek or a boat ride to an
-                        island, we ensure every trip booked with Oastel feels smooth, safe, and special.
+                        We brought them closer to the hidden gems of the highlands, the warmth of local life, and those
+                        unforgettable off-the-beaten-path adventures that only locals know. While we handle the details, you
+                        focus on what matters—making memories. Our team is made up of passionate locals and travelers who
+                        care about every part of your journey. At Oastel, every trip is designed to be smooth, safe, and
+                        full of meaning. More than just a stay—it’s a shared story.
                     </p>
                 </div>
             </section>
@@ -88,9 +95,7 @@ export default function AboutPage() {
                 <div className="flex flex-col gap-4 md:gap-8 items-start ">
                     <div className="flex flex-col md:flex-row gap-2">
                         <div className="flex gap-6 px-6 max-w-7xl mx-auto">
-                            <div
-                                className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4"
-                            >
+                            <div className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4">
                                 <div className="flex justify-between items-start overflow-hidden">
                                     <span className="text-sm font-bold text-gray-400 rounded-full bg-[#F5F5F5] px-4 py-2">
                                         {features[0].id}
@@ -108,9 +113,7 @@ export default function AboutPage() {
                             </div>
                         </div>
                         <div className="flex gap-6 px-6 max-w-7xl mx-auto">
-                            <div
-                                className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4"
-                            >
+                            <div className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4">
                                 <div className="flex justify-between items-start overflow-hidden">
                                     <span className="text-sm font-bold text-gray-400 rounded-full bg-[#F5F5F5] px-4 py-2">
                                         {features[1].id}
@@ -128,27 +131,21 @@ export default function AboutPage() {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="flex gap-6 px-6 max-w-7xl mx-auto">
-                            <div
-                                className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4"
-                            >
-                                <div className="flex justify-between items-start overflow-hidden">
-                                    <span className="text-sm font-bold text-gray-400 rounded-full bg-[#F5F5F5] px-4 py-2">
-                                        {features[2].id}
-                                    </span>
-                                    <img
-                                        src={features[2].icon}
-                                        alt={features[2].title}
-                                        className="w-32 h-36 relative left-6"
-                                    />
-                                </div>
-                                <div className="pr-6">
-                                    <h3 className="font-bold text-lg text-primary_green mb-1">{features[2].title}</h3>
-                                    <p className="text-desc_gray text-sm">{features[2].desc}</p>
-                                </div>
+                        <div className="bg-white rounded-lg py-6 pl-6 text-left shadow-md flex flex-col gap-4">
+                            <div className="flex justify-between items-start overflow-hidden">
+                                <span className="text-sm font-bold text-gray-400 rounded-full bg-[#F5F5F5] px-4 py-2">
+                                    {features[2].id}
+                                </span>
+                                <img src={features[2].icon} alt={features[2].title} className="w-32 h-36 relative left-6" />
+                            </div>
+                            <div className="pr-6">
+                                <h3 className="font-bold text-lg text-primary_green mb-1">{features[2].title}</h3>
+                                <p className="text-desc_gray text-sm">{features[2].desc}</p>
                             </div>
                         </div>
+                    </div>
                 </div>
             </section>
         </main>
