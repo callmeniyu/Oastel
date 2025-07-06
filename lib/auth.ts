@@ -45,8 +45,8 @@ export const authOptions = {
       },
     }),
     GoogleProvider({
-      clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
   callbacks: {
@@ -98,7 +98,7 @@ export const authOptions = {
     signIn: "/auth/login",
     error: "/auth/error",
   },
-  secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
