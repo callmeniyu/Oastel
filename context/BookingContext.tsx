@@ -34,7 +34,6 @@ export const BookingProvider = ({ children }: { children: React.ReactNode }) => 
         }
     }
 
-    console.log("BookingProvider initialized with booking:", booking)
 
     const clearBooking = () => {
         setBookingState(null)

@@ -1,1 +1,6 @@
 npm i date-fns
+
+  window.onbeforeunload = function () {
+  debugger
+  return true
+}

@@ -1,3 +1,4 @@
+import Link from "next/link"
 import BlogCard from "../ui/BlogCard"
 
 const blogData = [
@@ -39,6 +40,7 @@ export default function BlogSection() {
                         <BlogCard key={i} {...blog} />
                     ))}
                 </div>
+                <Link href="/blogs text-xl font-po">Show me all blogs</Link>
             </div>
         </section>
     )

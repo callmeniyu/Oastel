@@ -43,3 +43,17 @@ export interface BookingDetailsType {
     childPrice: number
     totalPrice: number
 }
+
+export type BlogType = {
+    _id:string
+    image: string
+    title: string
+    slug: string
+    desc: string
+    date: string
+    category: string
+    views: number
+    content: string
+}
+
+
