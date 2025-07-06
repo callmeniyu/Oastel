@@ -1,6 +1,8 @@
-import Image from "next/image"
 import BookingOptions from "./BookingOptionsSection"
-
+import { IoHomeOutline } from "react-icons/io5";
+import { FiMapPin } from "react-icons/fi";
+import { LiaShuttleVanSolid } from "react-icons/lia";
+import Link from "next/link";
 const tourCards = [
     {
         title: "Explore Nature Without the Noise",
@@ -43,6 +45,21 @@ export default function HeroSection() {
                 </p>
             </div>
             <BookingOptions />
+
+            <div className="px-8 py-4 bg-white flex gap-4 justify-between mx-3 rounded-full mt-6 md:hidden">
+                <Link href="https://booking.exely.com/en/oastel/" className="space-y-1 flex flex-col items-center flex-1 hover:scale-125 ease-in-out">
+                    <IoHomeOutline className="text-2xl text-primary_green" />
+                    <p className="text-sm text-primary_green font-semibold">Book Stay</p>
+                </Link>
+                <Link href="/tours" className="space-y-1 flex flex-col items-center flex-1 hover:scale-125 ease-in-out">
+                    <FiMapPin className="text-2xl text-primary_green" />
+                    <p className="text-sm text-primary_green font-semibold">Book Tour</p>
+                </Link>
+                <Link href="transports" className="space-y-1 flex flex-col items-center flex-1 hover:scale-125 ease-in-out">
+                    <LiaShuttleVanSolid className="text-2xl text-primary_green" />
+                    <p className="text-sm text-primary_green text-center font-semibold">Book Ticket</p>
+                </Link>
+            </div>
         </section>
     )
 }

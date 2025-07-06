@@ -28,7 +28,7 @@ export default function BookingOptions() {
   ];
 
   return (
-    <section className="px-2 md:px-8 font-poppins mt-6">
+    <section className="px-2 md:px-8 font-poppins mt-6 hidden md:block">
 
       <div className="grid grid-cols-3 gap-2 md:gap-6 max-w-5xl mx-auto">
         {options.map((opt, idx) => (

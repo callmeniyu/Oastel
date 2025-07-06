@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link"
 import { FaInstagram, FaWhatsapp } from "react-icons/fa"
 import { SiGmail } from "react-icons/si"
 
@@ -17,21 +18,21 @@ export default function ContactInfo() {
                     </p>
                 </div>
                 <div className="flex sm:flex-row px-3 sm:px-8 items-center justify-between gap-2 md:gap-8">
-                    <div className="flex flex-col items-center text-center">
+                    <Link href="https://www.instagram.com/oastelvibe?igsh=N3kxZGttN2ZqYXpv&utm_source=qr" className="flex flex-col items-center text-center">
                         <div className="bg-primary_green text-white p-3 md:p-4 rounded-full text-2xl">
                             <FaInstagram className="text-2xl md:text-4xl" />
                         </div>
                         <h4 className="mt-3 font-semibold text-title_black">Instagram</h4>
                         <p className="text-sm text-desc_gray mt-1">oastel.coliving</p>
-                    </div>
+                    </Link>
 
-                    <div className="flex flex-col items-center text-center">
+                    <Link href="http://wa.me/60196592141" className="flex flex-col items-center text-center">
                         <div className="bg-primary_green text-white p-3 md:p-4 rounded-full text-2xl">
                             <FaWhatsapp className="text-2xl md:text-4xl" />
                         </div>
                         <h4 className="mt-3 font-semibold text-title_black">Whatsapp</h4>
                         <p className="text-sm text-desc_gray mt-1">+60 19-659 2141</p>
-                    </div>
+                    </Link>
 
                     <div className="flex flex-col items-center text-center">
                         <div className="bg-primary_green text-white p-3 md:p-4 rounded-full text-2xl">

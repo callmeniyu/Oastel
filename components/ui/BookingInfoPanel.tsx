@@ -1,9 +1,9 @@
 // components/ui/BookingDetails.tsx
 import { format } from "date-fns"
-import { useRouter } from "next/navigation";
-import { Router } from "next/router";
+import { useRouter } from "next/navigation"
+import { Router } from "next/router"
 import { IoCartOutline } from "react-icons/io5"
-import { IoBagOutline } from "react-icons/io5";
+import { IoBagOutline } from "react-icons/io5"
 type Props = {
     title: string
     date: Date
@@ -17,8 +17,7 @@ type Props = {
     action?: string[]
     onClick?: () => void
     userInfo?: boolean
-        totalPrice: number
-
+    totalPrice: number
 }
 
 export default function BookingInfoPanel({
@@ -35,7 +34,6 @@ export default function BookingInfoPanel({
     onClick,
     userInfo,
 }: Props) {
-
     const router = useRouter()
     const total = adults * adultPrice + children * childPrice
 
@@ -68,8 +66,16 @@ export default function BookingInfoPanel({
                 <div className="text-sm mb-4 flex justify-between">
                     <h6 className="font-semibold">Persons</h6>
                     <div className="text-desc_gray space-y-1 flex flex-col items-end">
-                        <p>{adults}x Adults</p>
-                        <p>{children}x Children</p>
+                        {type === "private" ? (
+                            <div>
+                                <p>{adults}x Persons</p>
+                            </div>
+                        ) : (
+                            <div>
+                                <p>{adults}x Adults</p>
+                                <p>{children}x Children</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -100,7 +106,7 @@ export default function BookingInfoPanel({
             </div>
             <div className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "hidden" : ""}`}>
                 <div
-                    onClick={()=>router.push("/cart") }
+                    onClick={() => router.push("/cart")}
                     className={` cursor-pointer border border-primary_green text-primary_green text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold`}
                 >
                     <IoCartOutline className="inline mr-2 text-2xl" />
