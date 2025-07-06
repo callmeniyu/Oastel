@@ -57,13 +57,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </ul>
                 </div>
 
-                <Link href="/tours" className="px-3 py-1 border-b border-gray">
+                <Link href="/tours" onClick={onClose} className="px-3 py-1 border-b border-gray">
                     Tours
                 </Link>
-                <Link href="/vans" className="px-3 py-1 border-b border-gray">
+                <Link href="/vans" onClick={onClose} className="px-3 py-1 border-b border-gray">
                     Vans
                 </Link>
-                <Link href="/blogs" className="px-3 py-1 border-b border-gray">
+                <Link href="/blogs" onClick={onClose} className="px-3 py-1 border-b border-gray">
                     Blogs
                 </Link>
 
