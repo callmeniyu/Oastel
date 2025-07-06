@@ -18,8 +18,8 @@ type TourDetailPageProps = {
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
     const { slug } = params
-  const tourDetails = await getTourBySlug(slug)
-  const otherTours = await getOtherTours(slug)
+    const tourDetails = await getTourBySlug(slug)
+    const otherTours = await getOtherTours(slug)
 
     if (!tourDetails) {
         return (
@@ -57,8 +57,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         <div className="mb-4">
                             <p className="text-lg text-gray-400 line-through">RM {tourDetails.oldPrice}</p>
                             <h2 className="text-lg">
-                                <span className="text-3xl font-extrabold sm:font-bold">RM {tourDetails.newPrice}</span> /
-                                person
+                                <span className="text-3xl font-extrabold sm:font-bold">RM {tourDetails.newPrice}</span>{tourDetails.type === "private" ? " / group" : " / person"}
                             </h2>
                             <div className="flex items-center gap-2">
                                 <FaBookmark className="text-primary_green inline-block mr-1" />
@@ -66,7 +65,6 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                             </div>
                         </div>
                         <GreenBtn text="Book Now" action={`/booking/${tourDetails.slug}`} customStyles="" />
-
                     </div>
 
                     <div className="space-y-6 mt-6">
@@ -85,7 +83,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <FaClock className="text-xl text-primary_green" />
                                 <h5 className="font-semibold text-primary_green">Departure Time</h5>
                             </div>
-                <p className="text-sm font-semibold ml-8">{ tourDetails.time}</p>
+                            <p className="text-sm font-semibold ml-8">{tourDetails.time}</p>
                         </div>
 
                         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -127,9 +125,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Note</h5>
                             </div>
-                            <p className="text-sm text-desc_gray">
-                                {tourDetails.details.note}
-                            </p>
+                            <p className="text-sm text-desc_gray">{tourDetails.details.note}</p>
                         </div>
                     </div>
                 </div>
@@ -139,7 +135,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                     <div className="mb-6">
                         <p className="text-lg text-gray-400 line-through">RM {tourDetails.oldPrice}</p>
                         <h2 className="text-lg">
-                            <span className="text-3xl font-bold">RM {tourDetails.newPrice}</span> / person
+                        <span className="text-3xl font-bold">RM {tourDetails.newPrice}</span> {tourDetails.type === "private" ? " / group" : " / person"}
                         </h2>
                         <div className="flex items-center gap-2">
                             <FaBookmark className="text-primary_green inline-block mr-1" />
@@ -151,7 +147,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
             </div>
 
             <section>
-                <FAQSection faqs={tourDetails.details.faq}/>
+                <FAQSection faqs={tourDetails.details.faq} />
             </section>
 
             <section className="bg-white border rounded-md px-6 py-10 shadow-sm flex flex-col md:flex-row gap-6 mx-4 md:mx-10">

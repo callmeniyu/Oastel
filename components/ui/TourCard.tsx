@@ -15,6 +15,7 @@ type TourCardProps = {
     bookedCount: string | number
     oldPrice: number
     newPrice: number
+    type: string
 }
 
 export default function TourCard({
@@ -28,6 +29,7 @@ export default function TourCard({
     bookedCount,
     oldPrice,
     newPrice,
+    type
 }: TourCardProps) {
     return (
         <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between">
@@ -51,9 +53,9 @@ export default function TourCard({
                     </div>
                 </div>
                 <div className="flex justify-between items-center mt-2">
-                    <div className="flex gap-1 items-center">
+                    <div className="flex flex-col items-start">
                         <p className="text-gray-400 line-through font-poppins text-base ">{oldPrice}</p>
-                        <h4 className="font-poppins text-xl font-bold">{newPrice} RM</h4>
+                        <h4 className="font-poppins text-xl font-bold">{newPrice} RM <span className="text-sm font-light">{ type === "private" ? "/group" : "/person"}</span></h4>
                     </div>
 
                     <GreenBtn text="Book" customStyles="font-semibold w-24" action={`/tours/${slug}`} />

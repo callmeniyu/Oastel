@@ -90,11 +90,11 @@ export default function Footer() {
                         </div>
                     </div>
                     <div className="flex justify-between">
-                        <img src="/images/footer_payment1.png" className="w-13 h-12" alt="footer_payment" />
-                        <img src="/images/footer_payment2.png" className="w-13 h-12" alt="footer_payment" />
-                        <img src="/images/footer_payment3.png" className="w-13 h-12" alt="footer_payment" />
-                        <img src="/images/footer_payment4.png" className="w-13 h-12" alt="footer_payment" />
-                        <img src="/images/footer_payment5.png" className="w-13 h-12" alt="footer_payment" />
+                        <img src="/images/footer_payment1.png" className="w-9 h-8 md:w-11 md:h-10" alt="footer_payment" />
+                        <img src="/images/footer_payment2.png" className="w-9 h-8 md:w-11 md:h-10" alt="footer_payment" />
+                        <img src="/images/footer_payment3.png" className="w-9 h-8 md:w-11 md:h-10" alt="footer_payment" />
+                        <img src="/images/footer_payment4.png" className="w-9 h-8 md:w-11 md:h-10" alt="footer_payment" />
+                        <img src="/images/footer_payment5.png" className="w-9 h-8 md:w-11 md:h-10" alt="footer_payment" />
                     </div>
                 </div>
             </div>

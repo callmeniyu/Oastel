@@ -1,28 +1,11 @@
 import Link from "next/link"
 import BlogCard from "../ui/BlogCard"
+import {allBlogs} from "@/lib/data"
+import { FaArrowRightLong } from "react-icons/fa6";
 
-const blogData = [
-    {
-        image: "/images/blog1.jpg",
-        title: "The Magic of Shared Journeys: Why Co-Touring with Strangers Becomes",
-        description: "Learn how solo travelers and small groups find connection, laughter, and new friends on the road.",
-        category: "Co-Tour",
-    },
-    {
-        image: "/images/blog2.jpg",
-        title: "The Easiest Way to Book Reliable Van Transfers",
-        description: "Discover how our streamlined booking system and local knowledge make your travel smooth.",
-        category: "Transportation",
-    },
-    {
-        image: "/images/blog3.jpg",
-        title: "Staying with Oastel: Why Co-Living Is the Heart of Cameron Highlands",
-        description: "Looking for more than just a bed? Oastel’s co-living stays offer community, comfort, and character.",
-        category: "Stay",
-    },
-]
 
 export default function BlogSection() {
+    const blogData = allBlogs.slice(0, 3)
     return (
         <section className="py-16 px-6 bg-white">
             <div className="max-w-6xl mx-auto">
@@ -40,7 +23,7 @@ export default function BlogSection() {
                         <BlogCard key={i} {...blog} />
                     ))}
                 </div>
-                <Link href="/blogs text-xl font-po">Show me all blogs</Link>
+                <Link href="/blogs" className="text-xl font-poppins font-semibold flex justify-center items-center gap-2 mx-auto my-6 text-primary_green">Show me more tips <FaArrowRightLong className=""/></Link>
             </div>
         </section>
     )

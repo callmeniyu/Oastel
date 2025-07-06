@@ -8,10 +8,6 @@ export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
-  useEffect(() => {
-    // Log the error to the console for debugging
-    console.error("Authentication Error:", error);
-  }, [error]);
 
   const getErrorMessage = () => {
     console.log("Authentication Error:", error);

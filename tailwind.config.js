@@ -5,7 +5,7 @@ module.exports = {
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./app/**/*.{js,ts,jsx,tsx,mdx}",
     ],
-theme: {
+    theme: {
         extend: {
             screens: {
                 xs: "300px",
@@ -27,5 +27,5 @@ theme: {
             },
         },
     },
-    plugins: [],
+    plugins: [require("@tailwindcss/typography")],
 }

@@ -101,7 +101,7 @@ export default function BookingInfoPanel({
             <div className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "hidden" : ""}`}>
                 <div
                     onClick={()=>router.push("/cart") }
-                    className={`bg-primary_green cursor-pointer text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold`}
+                    className={` cursor-pointer border border-primary_green text-primary_green text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold`}
                 >
                     <IoCartOutline className="inline mr-2 text-2xl" />
                     <p>Add to Cart</p>

@@ -111,7 +111,8 @@ export default function BookingInfoPage() {
             // Store the total price for private tours
             totalPrice: tourDetails.type === "private" 
                 ? (adults / 8) * (tourDetails.newPrice || 0)
-                : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0)
+                : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0),
+            pickupLocations: tourDetails.details.pickupLocations || [""],
         })
         router.push("/booking/user-info")
     }
@@ -156,10 +157,10 @@ export default function BookingInfoPage() {
                     <div className="space-y-6 border p-3 rounded-lg my-4">
                         {[
                             {
-                                label: "Adults",
+                                label: tourDetails?.type === "private" ? "Group" : "Adults",
                                 desc: [
                                     tourDetails?.type === "private"
-                                        ? "Minimum: 8 persons per group. Increments by 8."
+                                        ? "Maximum: 8 persons per group. Increments by 8."
                                         : `Minimum: ${tourDetails?.minimumPerson} person per group.`,
                                 ],
                                 value: adults,
@@ -208,7 +209,7 @@ export default function BookingInfoPage() {
                                 >
                                     <div className="flex-1">
                                         <p className="font-semibold">
-                                            {label} <span className="text-sm text-desc_gray">(RM {price * 8})</span>
+                                            {label} <span className="text-sm text-desc_gray">(RM {price * 8} {label === "Group" && "for 8 persons"})</span>
                                         </p>
                                         <div className="space-y-1 mt-1">
                                             {desc.map((d, index) => (

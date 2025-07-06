@@ -3,18 +3,18 @@ import GreenBtn from "./GreenBtn"
 type FilterState = {
     type: string
     prices: string[]
-  durations: string[]
+    durations: string[]
 }
 
 type Props = {
     filters: FilterState
     onFilterChange: (field: keyof FilterState, value: string | string[]) => void
-  onApply: () => void
-        isSmallScreen?: boolean
-
+    onApply: () => void
+    isSmallScreen?: boolean
+    onClear?: () => void
 }
 
-export default function FilterSidebar({ filters, onFilterChange, onApply, isSmallScreen }: Props) {
+export default function FilterSidebar({ filters, onFilterChange, onApply, isSmallScreen, onClear }: Props) {
     const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onFilterChange("type", e.target.value)
     }
@@ -27,7 +27,11 @@ export default function FilterSidebar({ filters, onFilterChange, onApply, isSmal
     }
 
     return (
-        <aside className={`w-full sm:w-64 bg-white ${!isSmallScreen && "border"} rounded-md ${!isSmallScreen && "shadow-md"} p-4 max-h-max`}>
+        <aside
+            className={`w-full sm:w-64 bg-white ${!isSmallScreen && "border"} rounded-md ${
+                !isSmallScreen && "shadow-md"
+            } p-4 max-h-max`}
+        >
             <h3 className="text-lg font-semibold mb-4 text-title_black">Filters</h3>
 
             <div className="mb-4">
@@ -86,6 +90,7 @@ export default function FilterSidebar({ filters, onFilterChange, onApply, isSmal
                 </ul>
             </div>
             <GreenBtn text="Apply Filters" customStyles="w-full font-medium" onClick={onApply} />
+            <GreenBtn text="Clear Filters" customStyles="w-full font-medium bg-white border border-primary_green mt-3 !text-primary_green" onClick={onClear} />
         </aside>
     )
 }

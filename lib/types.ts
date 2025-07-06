@@ -42,18 +42,18 @@ export interface BookingDetailsType {
     adultPrice: number
     childPrice: number
     totalPrice: number
+    pickupLocations: string[]
 }
 
 export type BlogType = {
-    _id:string
+    _id: string
     image: string
     title: string
     slug: string
     desc: string
-    date: string
+    createdAt: Date
+    updatedAt: Date
     category: string
     views: number
     content: string
 }
-
-

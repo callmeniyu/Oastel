@@ -60,6 +60,17 @@ export default function ToursPage() {
         setIsFilterOpen(false)
     }
 
+    const handleClearFilters = () => {
+        setFilters({
+            type: "All",
+            prices: [],
+            durations: [],
+        })
+        setSearchTerm("")
+        setFilteredTours(allTours)
+        setIsFilterOpen(false)
+    }
+
     useEffect(() => {
         document.body.style.overflow = isFilterOpen ? "hidden" : "unset"
     }, [isFilterOpen])
@@ -93,7 +104,7 @@ export default function ToursPage() {
 
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-4 relative">
                 <div className="hidden sm:block">
-                    <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onApply={handleApply} />
+                    <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onApply={handleApply} onClear={handleClearFilters} />
                 </div>
 
                 {isFilterOpen && (

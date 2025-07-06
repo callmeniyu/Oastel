@@ -5,7 +5,6 @@ import User from "@/models/User";
 import dbConnect from "@/lib/dbConnect";
 import bcrypt from "bcryptjs";
 
-console.log("NEXT_PUBLIC_GOOGLE_CLIENT_ID:", process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
 export const authOptions = {
   providers: [
