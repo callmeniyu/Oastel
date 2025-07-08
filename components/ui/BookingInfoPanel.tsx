@@ -1,7 +1,6 @@
 // components/ui/BookingDetails.tsx
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
-import { Router } from "next/router"
 import { IoCartOutline } from "react-icons/io5"
 import { IoBagOutline } from "react-icons/io5"
 type Props = {
@@ -18,6 +17,7 @@ type Props = {
     onClick?: () => void
     userInfo?: boolean
     totalPrice: number
+    packageType:"tour" | "ticket"
 }
 
 export default function BookingInfoPanel({
@@ -33,6 +33,7 @@ export default function BookingInfoPanel({
     action,
     onClick,
     userInfo,
+    packageType
 }: Props) {
     const router = useRouter()
     const total = adults * adultPrice + children * childPrice
@@ -43,9 +44,9 @@ export default function BookingInfoPanel({
                 Booking Details
             </div>
             <div className="px-4 flex flex-col gap-2">
-                <div className="text-sm mb-2 flex justify-between">
-                    <h6 className="font-semibold">Tour</h6>
-                    <p className="text-desc_gray">{title}</p>
+                <div className="text-sm mb-2 flex gap-8 justify-between">
+                    <h6 className="font-semibold">{ packageType === "tour" ? "Tour" : "Ticket"}</h6>
+                    <p className="text-desc_gray text-right">{title}</p>
                 </div>
                 <div className="text-sm mb-2 flex justify-between">
                     <h6 className="font-semibold ">Date</h6>

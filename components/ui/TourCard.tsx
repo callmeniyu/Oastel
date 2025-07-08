@@ -32,7 +32,7 @@ export default function TourCard({
     type
 }: TourCardProps) {
     return (
-        <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between">
+        <div className="rounded-xl shadow-lg bg-white flex flex-col justify-between max-h-max">
             <Image src={image} alt={title} width={400} height={400} className="h-48 w-full object-cover rounded-t-lg" />
             <div className="p-4 flex flex-col justify-between gap-2 self-start">
                 <h3 className="text-primary_green font-semibold font-poppins text-base">{title}</h3>

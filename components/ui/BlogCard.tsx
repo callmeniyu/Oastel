@@ -15,7 +15,7 @@ export default function BlogCard({ _id, image, title, slug, desc, category }: Bl
                     <p className="text-desc_gray text-sm font-poppins">{desc}</p>
                 </div>
                 <div className="mt-4 flex justify-between items-center">
-                    <GreenBtn text="Explore more" customStyles="" action={`blogs/${slug}`} />
+                    <GreenBtn text="Explore more" customStyles="" action={`/blogs/${slug}`} />
                     <span className="text-primary_green font-semibold text-sm font-poppins">{category}</span>
                 </div>
             </div>

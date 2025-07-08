@@ -1,4 +1,4 @@
-import { BlogType } from "./types"
+import { BlogType, FAQType, TicketType } from "./types"
 
 export const allTours = [
     {
@@ -22,10 +22,8 @@ export const allTours = [
         time: ["8:00 AM", "1:30 PM"],
         details: {
             about: "Thrilling Land Rover Ride: Explore off-the-beaten-path trails and stunning landscapes.Local Culture: Visit traditional villages and meet the locals.Hidden Gems: Discover breathtaking viewpoints and untouched nature.Expert Guides: Knowledgeable and friendly guides ensure a safe and memorable trip.",
-            itinerary: [
-                "Mossy Forest Boardwalk :Explore the enchanting Mossy Forest (entrance fees excluded).Optional entry: Pay on-site to the Forestry Department officer.",
-                " BOH Sungei Palas Tea Plantations :Visit the Tea Factory, Tea Café, and Tea Shop .Note : BOH Tea Center is closed on Mondays.",
-            ],
+            itinerary:
+                "Mossy Forest Boardwalk :Explore the enchanting Mossy Forest (entrance fees excluded).Optional entry: Pay on-site to the Forestry Department officer BOH Sungei Palas Tea Plantations :Visit the Tea Factory, Tea Café, and Tea Shop .Note : BOH Tea Center is closed on Mondays.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "If the Mossy Forest is closed, the guide will take the group to other hiking trails.",
             faq: [
@@ -74,12 +72,8 @@ export const allTours = [
         time: ["8:00 AM", "1:30 PM", "5:00 PM"],
         details: {
             about: "Ultimate Full Day Adventure: Experience the best of Cameron Highlands with a comprehensive Land Rover journey. Diverse Landscapes: Traverse lush tea plantations, misty forests, and scenic valleys. Cultural Encounters: Engage with local communities and learn about their traditions. Extended Exploration: More stops and activities for a truly immersive day.",
-            itinerary: [
-                "Mossy Forest Boardwalk: Guided walk through the mystical Mossy Forest (entrance fees excluded). Optional entry: Pay on-site to the Forestry Department officer.",
-                "BOH Sungei Palas Tea Plantations: Tour the Tea Factory, enjoy refreshments at the Tea Café, and shop for local teas. Note: BOH Tea Center is closed on Mondays.",
-                "Local Market Visit: Explore a vibrant local market and sample fresh produce.",
-                "Strawberry Farm: Pick your own strawberries and learn about local agriculture.",
-            ],
+            itinerary:
+                "Mossy Forest Boardwalk: Guided walk through the mystical Mossy Forest (entrance fees excluded). Optional entry: Pay on-site to the Forestry Department officer. BOH Sungei Palas Tea Plantations: Tour the Tea Factory, enjoy refreshments at the Tea Café, and shop for local teas. Note: BOH Tea Center is closed on Mondays. Local Market Visit: Explore a vibrant local market and sample fresh produce. Strawberry Farm: Pick your own strawberries and learn about local agriculture.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "Lunch is not included; your guide will recommend local eateries. If the Mossy Forest is closed, alternative nature trails will be offered.",
             faq: [
@@ -124,10 +118,8 @@ export const allTours = [
         time: ["9:00 AM", "11:30 PM"],
         details: {
             about: "Private Half Day Tour: Enjoy a personalized experience exploring Cameron Highlands with your own group. Flexible Itinerary: Tailor the tour to your interests with the help of your expert guide. Exclusive Access: Visit hidden gems and popular attractions at your own pace. Comfort & Privacy: Travel in comfort with up to 8 guests in a private Land Rover.",
-            itinerary: [
-                "Customizable Stops: Choose from Mossy Forest, tea plantations, local markets, and more.",
-                "Expert Guidance: Your guide will suggest the best spots based on your preferences.",
-            ],
+            itinerary:
+                "Customizable Stops: Choose from Mossy Forest, tea plantations, local markets, and more. Expert Guidance: Your guide will suggest the best spots based on your preferences.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "Entry fees and meals are not included. The itinerary can be adjusted based on weather and group interests.",
             faq: [
@@ -172,11 +164,8 @@ export const allTours = [
         time: ["7:20 AM"],
         details: {
             about: "Coral Hills Discovery: Experience the unique landscapes and biodiversity of the Coral Hills area in Cameron Highlands. Scenic Views: Enjoy panoramic vistas and photo opportunities at exclusive viewpoints. Nature Walks: Guided exploration of local flora and fauna. Personalized Experience: Private tour tailored to your group's interests.",
-            itinerary: [
-                "Coral Hills Nature Walk: Guided walk through the Coral Hills area, learning about its unique ecosystem.",
-                "Scenic Viewpoints: Stop at the best spots for breathtaking views and photography.",
-                "Local Culture: Optional visit to nearby villages or markets, based on group preference.",
-            ],
+            itinerary:
+                "Coral Hills Nature Walk: Guided walk through the Coral Hills area, learning about its unique ecosystem. Scenic Viewpoints: Stop at the best spots for breathtaking views and photography. Local Culture: Optional visit to nearby villages or markets, based on group preference.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "Entry fees and meals are not included. The itinerary may be adjusted based on weather and group interests.",
             faq: [
@@ -221,11 +210,8 @@ export const allTours = [
         time: ["5:00 PM", "1:30 PM"],
         details: {
             about: "Sunrise Experience: Witness a breathtaking sunrise over the Cameron Highlands before embarking on a half-day adventure. Early Start: Begin your day with panoramic views and photo opportunities at exclusive sunrise viewpoints. Flexible Itinerary: After sunrise, explore tea plantations, forests, or local markets with your private guide. Personalized Tour: Tailor the experience to your group's interests for a memorable morning.",
-            itinerary: [
-                "Sunrise Viewpoint: Early morning drive to a scenic spot for sunrise viewing and photography.",
-                "Tea Plantation Visit: Explore a local tea plantation and learn about tea production.",
-                "Optional Stops: Choose from Mossy Forest, local markets, or strawberry farms based on group preference.",
-            ],
+            itinerary:
+                "Sunrise Viewpoint: Early morning drive to a scenic spot for sunrise viewing and photography. Tea Plantation Visit: Explore a local tea plantation and learn about tea production. Optional Stops: Choose from Mossy Forest, local markets, or strawberry farms based on group preference.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "Entry fees and meals are not included. The itinerary may be adjusted based on weather and group interests.",
             faq: [
@@ -270,10 +256,8 @@ export const allTours = [
         time: ["8:00 AM"],
         details: {
             about: "Intimate Group Adventure: Enjoy a private half-day tour designed for small groups seeking a personalized experience in Cameron Highlands. Flexible Itinerary: Customize your journey with the help of your expert guide. Exclusive Access: Visit hidden gems and popular attractions at your own pace. Comfort & Privacy: Travel comfortably with up to 8 guests in a private Land Rover.",
-            itinerary: [
-                "Customizable Stops: Choose from Mossy Forest, tea plantations, local markets, and more.",
-                "Expert Guidance: Your guide will suggest the best spots based on your preferences.",
-            ],
+            itinerary:
+                "Customizable Stops: Choose from Mossy Forest, tea plantations, local markets, and more. Expert Guidance: Your guide will suggest the best spots based on your preferences.",
             pickupLocations: ["Tanah Rata", "Golden Hills", "Brinchang", "Kea Farm"],
             note: "Entry fees and meals are not included. The itinerary can be adjusted based on weather and group interests.",
             faq: [
@@ -301,172 +285,6 @@ export const allTours = [
         },
     },
 ]
-
-// export const allBlogs: BlogType[] = [
-//   // TRAVEL TIPS
-//   {
-//     _id: "1",
-//     image: "/images/blog1.jpg",
-//     title: "Top 10 Essentials to Pack for Your Malaysia Trip",
-//     slug: "top-10-essentials-to-pack",
-//     desc: "Don’t leave these behind! Travel light, travel smart across Malaysia.",
-//     createdAt: new Date("2025-06-01"),
-//     updatedAt: new Date("2025-06-01"),
-//     category: "Travel Tips",
-//     views: 132,
-//     content:
-//       "Packing smart makes your travel smoother. From lightweight clothing to mosquito repellent and universal adapters, here’s what every traveler to Malaysia should carry. Also, don’t forget your sunblock, water bottle, and a good pair of walking shoes — especially if you're exploring the Cameron Highlands with Oastel!"
-//   },
-//   {
-//     _id: "2",
-//     image: "/images/blog2.jpg",
-//     title: "Getting Around in Malaysia: A Quick Guide",
-//     slug: "getting-around-malaysia",
-//     desc: "From vans to boats — everything you need to know about transportation in Malaysia.",
-//     createdAt: new Date("2025-06-03"),
-//     updatedAt: new Date("2025-06-03"),
-//     category: "Travel Tips",
-//     views: 88,
-//     content:
-//       "Malaysia offers diverse transport options, but booking your tour or van in advance with Oastel ensures you skip the hassle. Whether you're headed to an island or highland, we handle your rides with local drivers who know the terrain best."
-//   },
-//   {
-//     _id: "3",
-//     image: "/images/blog3.jpg",
-//     title: "How to Travel Malaysia on a Budget",
-//     slug: "malaysia-travel-budget-tips",
-//     desc: "Smart ways to explore without overspending — perfect for backpackers.",
-//     createdAt: new Date("2025-06-05"),
-//     updatedAt: new Date("2025-06-05"),
-//     category: "Travel Tips",
-//     views: 210,
-//     content:
-//       "From booking co-tours with Oastel to eating like a local at street markets, there are plenty of ways to stretch your ringgits. Skip expensive taxis, book group van rides, and explore budget-friendly stays for a complete yet affordable adventure."
-//   },
-
-//   // LOCAL CULTURE
-//   {
-//     _id: "4",
-//     image: "/images/blog2.jpg",
-//     title: "Exploring Indigenous Culture in Cameron Highlands",
-//     slug: "indigenous-culture-cameron-highlands",
-//     desc: "Get close to traditions, crafts, and people of the highlands.",
-//     createdAt: new Date("2025-06-07"),
-//     updatedAt: new Date("2025-06-07"),
-//     category: "Local Culture",
-//     views: 175,
-//     content:
-//       "Cameron Highlands is not just tea plantations and cool weather — it’s home to Orang Asli communities. Oastel tours connect travelers with local guides to experience their crafts, food, and folklore respectfully and authentically."
-//   },
-//   {
-//     _id: "5",
-//     image: "/images/blog1.jpg",
-//     title: "Heritage Walks: Uncovering Hidden Stories of Ipoh",
-//     slug: "heritage-walks-ipoh",
-//     desc: "A walk through Ipoh’s old town reveals stories untold.",
-//     createdAt: new Date("2025-06-09"),
-//     updatedAt: new Date("2025-06-09"),
-//     category: "Local Culture",
-//     views: 92,
-//     content:
-//       "Ipoh's colonial buildings, colorful murals, and heritage cafés are a feast for the senses. With Oastel’s private tours, travelers can explore beyond the usual stops, guided by locals who bring the stories to life."
-//   },
-//   {
-//     _id: "6",
-//     image: "/images/blog3.jpg",
-//     title: "A Festival for Every Month: Malaysia’s Cultural Calendar",
-//     slug: "malaysia-festival-calendar",
-//     desc: "Plan your trip around local celebrations to feel the true vibe of Malaysia.",
-//     createdAt: new Date("2025-06-10"),
-//     updatedAt: new Date("2025-06-10"),
-//     category: "Local Culture",
-//     views: 130,
-//     content:
-//       "From Thaipusam to Hari Raya, Malaysia celebrates diversity all year long. Oastel helps you align your journey with these vibrant events for an unforgettable experience. Ask us which events coincide with your travel dates!"
-//   },
-
-//   // FOOD & CUISINE
-//   {
-//     _id: "7",
-//     image: "/images/blog3.jpg",
-//     title: "10 Must-Try Street Foods in Malaysia",
-//     slug: "malaysian-street-foods",
-//     desc: "Roti Canai, Nasi Lemak, Satay and more — here’s your food checklist.",
-//     createdAt: new Date("2025-06-12"),
-//     updatedAt: new Date("2025-06-12"),
-//     category: "Food & Cuisine",
-//     views: 320,
-//     content:
-//       "Malaysia is a paradise for foodies. Whether you're trying smoky Char Kway Teow in Penang or sipping Teh Tarik in KL, every region has unique flavors. Oastel's local guides even take you to lesser-known stalls loved by locals."
-//   },
-//   {
-//     _id: "8",
-//     image: "/images/blog2.jpg",
-//     title: "Sipping Serenity: Tea Tasting in Cameron Highlands",
-//     slug: "tea-tasting-cameron-highlands",
-//     desc: "More than a drink — it's a scenic, aromatic experience.",
-//     createdAt: new Date("2025-06-13"),
-//     updatedAt: new Date("2025-06-13"),
-//     category: "Food & Cuisine",
-//     views: 190,
-//     content:
-//       "Visit lush tea plantations where every sip tells a story. With Oastel’s curated routes, you get behind-the-scenes access to tea factories and panoramic views few tourists ever see. It’s not just tea — it’s therapy."
-//   },
-//   {
-//     _id: "9",
-//     image: "/images/blog1.jpg",
-//     title: "Where to Find the Best Vegan Food in Malaysia",
-//     slug: "vegan-malaysia-guide",
-//     desc: "Yes, Malaysia is vegan-friendly — here’s where to go.",
-//     createdAt: new Date("2025-06-14"),
-//     updatedAt: new Date("2025-06-14"),
-//     category: "Food & Cuisine",
-//     views: 105,
-//     content:
-//       "From Indian banana leaf meals to Chinese tofu stir-fries, there’s plenty of plant-based goodness to explore. Oastel’s food tours cater to all diets — just let us know your preferences while booking!"
-//   },
-
-//   // ADVENTURE & NATURE
-//   {
-//     _id: "10",
-//     image: "/images/blog1.jpg",
-//     title: "A Day Trek Through the Malaysian Rainforest",
-//     slug: "rainforest-day-trek",
-//     desc: "Sweat, mud, and beauty — all in one unforgettable trail.",
-//     createdAt: new Date("2025-06-16"),
-//     updatedAt: new Date("2025-06-16"),
-//     category: "Adventure & Nature",
-//     views: 242,
-//     content:
-//       "From mossy forests to hidden waterfalls, Malaysia’s trails are packed with biodiversity. With Oastel’s experienced trek guides, you explore safely and gain insights into flora and fauna most miss."
-//   },
-//   {
-//     _id: "11",
-//     image: "/images/blog3.jpg",
-//     title: "Snorkeling the Crystal Waters of Perhentian Islands",
-//     slug: "snorkeling-perhentian-islands",
-//     desc: "Turquoise waters, coral reefs, and sea turtles await.",
-//     createdAt: new Date("2025-06-18"),
-//     updatedAt: new Date("2025-06-18"),
-//     category: "Adventure & Nature",
-//     views: 275,
-//     content:
-//       "The Perhentian Islands are postcard-perfect. Oastel offers van + boat packages with local snorkeling partners who know the safe and quiet spots to enjoy marine life up-close."
-//   },
-//   {
-//     _id: "12",
-//     image: "/images/blog2.jpg",
-//     title: "Chasing Fireflies: A Magical River Tour at Night",
-//     slug: "firefly-river-tour-malaysia",
-//     desc: "A romantic, surreal boat ride through nature’s fairy lights.",
-//     createdAt: new Date("2025-06-19"),
-//     updatedAt: new Date("2025-06-19"),
-//     category: "Adventure & Nature",
-//     views: 159,
-//     content:
-//       "Hop into a quiet river boat after sunset and drift past mangroves that twinkle with fireflies. Oastel arranges firefly tours in small groups to preserve the calm, magical mood of this rare spectacle."
-//   }
-// ]
 
 export const allBlogs: BlogType[] = [
     // TRAVEL TIPS
@@ -1179,4 +997,706 @@ export const allBlogs: BlogType[] = [
       <p><strong>Pro Tip:</strong> Combine your firefly tour with our "Mangrove Mystery" daytime package that includes a morning kayak through the same waterways to spot monkeys, otters, and migratory birds.</p>
     `,
     },
+]
+
+export const allTickets: TicketType[] = [
+    {
+        _id: "1",
+        title: "Cameron Highlands → Taman Negara in van",
+        slug: "cameron-highlands-taman-negara-van",
+        image: "/images/ticket1.jpg",
+        from: "Cameron Highlands",
+        to: "Taman Negara",
+        tags: ["Van", "Fun", "Adventure"],
+        desc: "Comfortable van transfer from Cameron Highlands to Taman Negara with scenic stops.",
+        type: "Van",
+        duration: "4 hours",
+        bookedCount: "1.5k",
+        oldPrice: 150,
+        newPrice: 95,
+        childPrice: 50,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        createdAt: new Date("2025-06-01"),
+        updatedAt: new Date("2025-06-01"),
+        details: {
+            about: "Enjoy a scenic van ride through Malaysia's lush highlands, stopping at key viewpoints and local markets. Perfect for small groups or families.",
+            itinerary:
+                "Depart from Cameron Highlands and enjoy scenic mountain views. Stop at local markets and viewpoints along the way. Arrive at Taman Negara with comfortable seating throughout the journey.",
+            pickupLocations: ["Tanah Rata", "Brinchang"],
+            note: "Journey time may vary depending on weather and road conditions.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local markets and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "2",
+        title: "Cameron Highland → Kuala Besut Jetty in van",
+        slug: "cameron-highland-kuala-besut-van",
+        image: "/images/ticket2.jpg",
+        from: "Cameron Highlands",
+        to: "Kuala Besut Jetty",
+        tags: ["Van", "Comfort", "Scenic"],
+        desc: "Relaxing van transfer from Cameron Highlands to Kuala Besut Jetty with beautiful views.",
+        type: "Van",
+        duration: "3.5",
+        bookedCount: "1.2k",
+        oldPrice: 150,
+        newPrice: 110,
+        childPrice: 60,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-02"),
+        updatedAt: new Date("2025-06-02"),
+        details: {
+            about: "Experience a comfortable van ride from the cool Cameron Highlands to the bustling Kuala Besut Jetty, gateway to the Perhentian Islands. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Cameron Highlands and travel through picturesque landscapes. Stop at local attractions and viewpoints. Arrive at Kuala Besut Jetty ready for your island adventure.",
+            pickupLocations: ["Tanah Rata", "Brinchang"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "3",
+        title: "Taman Negara → Kuala Lumpur in van",
+        slug: "taman-negara-kuala-lumpur-van",
+        image: "/images/ticket3.jpg",
+        from: "Taman Negara",
+        to: "Kuala Lumpur",
+        tags: ["Van", "Convenient", "Scenic"],
+        desc: "Convenient van transfer from Taman Negara to Kuala Lumpur with scenic views and comfortable seating.",
+        type: "Van",
+        duration: "3.5",
+        bookedCount: "900",
+        oldPrice: 130,
+        newPrice: 95,
+        childPrice: 50,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        createdAt: new Date("2025-06-03"),
+        updatedAt: new Date("2025-06-03"),
+        details: {
+            about: "Travel from the heart of Taman Negara to the bustling city of Kuala Lumpur in comfort. Enjoy scenic views and local insights during your journey.",
+            itinerary:
+                "Depart from Taman Negara and travel through lush landscapes. Stop at local attractions and viewpoints. Arrive in Kuala Lumpur ready to explore the city.",
+            pickupLocations: ["Taman Negara Park Entrance", "Kuala Tahan"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "4",
+        title: "Taman Nagara → Kuala Besut",
+        slug: "taman-negara-kuala-besut-van",
+        image: "/images/ticket4.jpg",
+        from: "Taman Negara",
+        to: "Kuala Besut Jetty",
+        tags: ["Van", "Comfort", "Scenic"],
+        desc: "Comfortable van transfer from Taman Negara to Kuala Besut Jetty with beautiful views.",
+        type: "Van",
+        duration: "5.5",
+        bookedCount: "800",
+        oldPrice: 180,
+        newPrice: 130,
+        childPrice: 70,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-04"),
+        updatedAt: new Date("2025-06-04"),
+        details: {
+            about: "Experience a comfortable van ride from Taman Negara to Kuala Besut Jetty, gateway to the Perhentian Islands. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Taman Negara and travel through picturesque landscapes. Stop at local attractions and viewpoints. Arrive at Kuala Besut Jetty ready for your island adventure.",
+            pickupLocations: ["Taman Negara Park Entrance", "Kuala Tahan"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "5",
+        title: "Taman Nagara → Cameron Highlands in Van",
+        slug: "taman-negara-cameron-highlands-van",
+        image: "/images/ticket5.jpg",
+        from: "Taman Negara",
+        to: "Cameron Highlands",
+        tags: ["Van", "Comfort", "Scenic"],
+        desc: "Comfortable van transfer from Taman Negara to Cameron Highlands with beautiful views.",
+        type: "Van",
+        duration: "4.5",
+        bookedCount: "600",
+        oldPrice: 160,
+        newPrice: 95,
+        childPrice: 70,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-05"),
+        updatedAt: new Date("2025-06-05"),
+        details: {
+            about: "Experience a comfortable van ride from Taman Negara to the cool Cameron Highlands. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Taman Negara and travel through picturesque landscapes. Stop at local attractions and viewpoints. Arrive at Cameron Highlands ready to explore the tea plantations and cool climate.",
+            pickupLocations: ["Taman Negara Park Entrance", "Kuala Tahan"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "6",
+        title: "Kuala Besut → Cameron Highlands in Van",
+        slug: "kuala-besut-cameron-highlands-van",
+        image: "/images/ticket6.jpg",
+        from: "Kuala Besut Jetty",
+        to: "Cameron Highlands",
+        tags: ["Van", "Comfort", "Scenic"],
+        desc: "Comfortable van transfer from Kuala Besut Jetty to Cameron Highlands with beautiful views.",
+        type: "Van",
+        duration: "5.5",
+        bookedCount: "500",
+        oldPrice: 140,
+        newPrice: 110,
+        childPrice: 30,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-06"),
+        updatedAt: new Date("2025-06-06"),
+        details: {
+            about: "Experience a comfortable van ride from Kuala Besut Jetty to the cool Cameron Highlands. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Kuala Besut Jetty and travel through picturesque landscapes. Stop at local attractions and viewpoints. Arrive at Cameron Highlands ready to explore the tea plantations and cool climate.",
+            pickupLocations: ["Kuala Besut Jetty"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the van transfer?",
+                    answer: "Air-conditioned van transportation with experienced driver and scenic stops along the way.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "7",
+        title: "Cameron Highlands → Taman Negara in Ferry",
+        slug: "cameron-highlands-taman-negara-ferry",
+        image: "/images/ticket7.jpg",
+        from: "Cameron Highlands",
+        to: "Taman Negara",
+        tags: ["Ferry", "Adventure", "Scenic"],
+        desc: "Scenic ferry ride from Cameron Highlands to Taman Negara with beautiful views.",
+        type: "Van + Ferry",
+        duration: "5",
+        bookedCount: "300",
+        oldPrice: 200,
+        newPrice: 145,
+        childPrice: 80,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        createdAt: new Date("2025-06-07"),
+        updatedAt: new Date("2025-06-07"),
+        details: {
+            about: "Experience a unique ferry ride from the cool Cameron Highlands to the heart of Taman Negara. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Cameron Highlands and travel to the nearest ferry terminal. Board the ferry and enjoy the scenic ride through Malaysia's lush landscapes. Arrive at Taman Negara ready for your adventure.",
+            pickupLocations: ["Tanah Rata", "Brinchang"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the ferry transfer?",
+                    answer: "Air-conditioned van transportation to the ferry terminal, ferry ride, and experienced guide.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "8",
+        title: "Taman Nagara → Cameron Highlands in Ferry",
+        slug: "taman-negara-cameron-highlands-ferry",
+        image: "/images/ticket2.jpg",
+        from: "Taman Negara",
+        to: "Cameron Highlands",
+        tags: ["Ferry", "Adventure", "Scenic"],
+        desc: "Scenic ferry ride from Taman Negara to Cameron Highlands with beautiful views.",
+        type: "Van + Ferry",
+        duration: "5",
+        bookedCount: "250",
+        oldPrice: 200,
+        newPrice: 145,
+        childPrice: 80,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        createdAt: new Date("2025-06-08"),
+        updatedAt: new Date("2025-06-08"),
+        details: {
+            about: "Experience a unique ferry ride from the heart of Taman Negara to the cool Cameron Highlands. Enjoy scenic views and local insights along the way.",
+            itinerary:
+                "Depart from Taman Negara and travel to the nearest ferry terminal. Board the ferry and enjoy the scenic ride through Malaysia's lush landscapes. Arrive at Cameron Highlands ready for your adventure.",
+            pickupLocations: ["Taman Negara Park Entrance", "Kuala Tahan"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the ferry transfer?",
+                    answer: "Air-conditioned van transportation to the ferry terminal, ferry ride, and experienced guide.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "9",
+        title: " Cameron Highlands → Perhentian islands",
+        slug: "cameron-highlands-perhentian-islands",
+        image: "/images/ticket1.jpg",
+        from: "Cameron Highlands",
+        to: "Perhentian Islands",
+        tags: ["Ferry", "Island", "Adventure"],
+        desc: "Scenic ferry ride from Cameron Highlands to the beautiful Perhentian Islands with stunning views.",
+        type: "Van + Ferry",
+        duration: "6",
+        bookedCount: "400",
+        oldPrice: 220,
+        newPrice: 100,
+        childPrice: 50,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-09"),
+        updatedAt: new Date("2025-06-09"),
+        details: {
+            about: "Experience a scenic ferry ride from the cool Cameron Highlands to the stunning Perhentian Islands. Enjoy breathtaking views and local insights along the way.",
+            itinerary:
+                "Depart from Cameron Highlands and travel to the nearest ferry terminal. Board the ferry and enjoy the scenic ride through Malaysia's lush landscapes. Arrive at Perhentian Islands ready for your island adventure.",
+            pickupLocations: ["Tanah Rata", "Brinchang"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the ferry transfer?",
+                    answer: "Air-conditioned van transportation to the ferry terminal, ferry ride, and experienced guide.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "10",
+        title: "Taman Nagara → Perhentian Islands",
+        slug: "taman-negara-perhentian-islands",
+        image: "/images/ticket2.jpg",
+        from: "Taman Negara",
+        to: "Perhentian Islands",
+        tags: ["Ferry", "Island", "Adventure"],
+        desc: "Scenic ferry ride from Taman Negara to the beautiful Perhentian Islands with stunning views.",
+        type: "Van + Ferry",
+        duration: "6",
+        bookedCount: "350",
+        oldPrice: 320,
+        newPrice: 300,
+        childPrice: 150,
+        minimumPerson: 1,
+        maximumPerson: 8,
+        time: ["08:00 AM", "12:00 PM", "04:00 PM"],
+        createdAt: new Date("2025-06-10"),
+        updatedAt: new Date("2025-06-10"),
+        details: {
+            about: "Experience a scenic ferry ride from the heart of Taman Negara to the stunning Perhentian Islands. Enjoy breathtaking views and local insights along the way.",
+            itinerary:
+                "Depart from Taman Negara and travel to the nearest ferry terminal. Board the ferry and enjoy the scenic ride through Malaysia's lush landscapes. Arrive at Perhentian Islands ready for your island adventure.",
+            pickupLocations: ["Taman Negara Park Entrance", "Kuala Tahan"],
+            note: "Please arrive 15 minutes before departure time.",
+            faq: [
+                {
+                    question: "What is included in the ferry transfer?",
+                    answer: "Air-conditioned van transportation to the ferry terminal, ferry ride, and experienced guide.",
+                },
+                {
+                    question: "Can I book this transfer for a group?",
+                    answer: "Yes, the van can accommodate up to 8 passengers. Please contact us for group bookings.",
+                },
+                {
+                    question: "Is there a child discount?",
+                    answer: "Yes, children under 12 years old receive a 50% discount on the ticket price.",
+                },
+                {
+                    question: "What if I need to cancel my booking?",
+                    answer: "Cancellations made 24 hours before the scheduled transfer will receive a full refund. No refunds for cancellations within 24 hours.",
+                },
+                {
+                    question: "Are there any stops during the transfer?",
+                    answer: "Yes, we make scenic stops at local attractions and viewpoints to enhance your travel experience.",
+                },
+            ],
+        },
+    },
+    {
+        _id: "7",
+        title: "Kuala Lumpur → Cameron Highlands Private Transfer",
+        slug: "kuala-lumpur-cameron-highlands-private",
+        image: "/images/ticket7.jpg",
+        from: "Kuala Lumpur",
+        to: "Cameron Highlands",
+        tags: ["Private", "Luxury", "Direct"],
+        desc: "Private luxury transfer from Kuala Lumpur to Cameron Highlands with personalized service.",
+        type: "Private",
+        duration: "3",
+        bookedCount: "800",
+        oldPrice: 400,
+        newPrice: 350,
+        childPrice: 175,
+        minimumPerson: 1,
+        maximumPerson: 6,
+        time: ["07:00 AM", "11:00 AM", "03:00 PM"],
+        createdAt: new Date("2025-06-07"),
+        updatedAt: new Date("2025-06-07"),
+        details: {
+            about: "Experience luxury and comfort with our private transfer service from Kuala Lumpur to Cameron Highlands.",
+            itinerary:
+                "Direct transfer with optional scenic stops along the way. Personalized service with experienced driver.",
+            pickupLocations: ["KLIA", "KL Sentral", "Any KL Hotel"],
+            note: "Driver will contact you 30 minutes before pickup time.",
+            faq: [
+                {
+                    question: "What type of vehicle is used?",
+                    answer: "We use comfortable private vehicles including Toyota Innova and similar models based on group size.",
+                },
+            ],
+        },
+    },
+]
+
+
+export const allFaqs: FAQType[] = [
+  // 🏨 Stay
+  {
+    question: "What types of accommodations does Oastel offer?",
+    answer: "Oastel provides a range of stays including boutique hotels, hostels, homestays, and eco-lodges depending on your travel preference and budget.",
+    category: "Stay",
+  },
+  {
+    question: "Are the stays suitable for families with children?",
+    answer: "Yes, many of our stays are family-friendly and include child-safe amenities, family rooms, and kid-friendly activities.",
+    category: "Stay",
+  },
+  {
+    question: "Can I choose my preferred room type while booking?",
+    answer: "Yes, during the booking process, you can select from the available room types such as single, double, family, or deluxe rooms.",
+    category: "Stay",
+  },
+  {
+    question: "Is breakfast included with the stay?",
+    answer: "Some accommodations include complimentary breakfast. The details will be mentioned in the listing before you book.",
+    category: "Stay",
+  },
+  {
+    question: "Are pets allowed in Oastel stays?",
+    answer: "Pet policies vary by property. Please check the individual stay's listing or contact support to confirm.",
+    category: "Stay",
+  },
+
+  // 🚐 Transportation
+  {
+    question: "What types of transportation options are available?",
+    answer: "Oastel offers vans, minibuses, and cars with professional drivers for intercity travel and local exploration.",
+    category: "Transportation",
+  },
+  {
+    question: "How do I book a van for a group trip?",
+    answer: "You can book a van directly on our website by selecting your route, date, and number of passengers.",
+    category: "Transportation",
+  },
+  {
+    question: "Can I request a custom pick-up or drop-off point?",
+    answer: "Yes, custom pick-ups are possible depending on the route. Please mention your request while booking.",
+    category: "Transportation",
+  },
+  {
+    question: "Do your vehicles have air conditioning?",
+    answer: "Yes, all our vehicles come with air conditioning to ensure a comfortable journey.",
+    category: "Transportation",
+  },
+  {
+    question: "What happens if I miss my van departure?",
+    answer: "If you're running late, please contact our support immediately. Rebooking depends on availability and refund policies.",
+    category: "Transportation",
+  },
+
+  // 🗺️ Tours
+  {
+    question: "What is the difference between Co-Tour and Private Tour?",
+    answer: "A Co-Tour involves joining a group with other travelers, while a Private Tour is exclusive for you and your group.",
+    category: "Tours",
+  },
+  {
+    question: "Can I customize a private tour?",
+    answer: "Yes, private tours are customizable. You can choose your itinerary, duration, and preferences.",
+    category: "Tours",
+  },
+  {
+    question: "Are guides included in the tours?",
+    answer: "All tours include experienced local guides who ensure safety and offer cultural insights.",
+    category: "Tours",
+  },
+  {
+    question: "Do the tours include meals?",
+    answer: "Some tours include meals depending on the duration and package. Check the tour details for inclusions.",
+    category: "Tours",
+  },
+  {
+    question: "What is the maximum group size for Co-Tours?",
+    answer: "Group size varies but is usually limited to 12-15 people for a more personalized experience.",
+    category: "Tours",
+  },
+
+  // 💳 Booking & Payment
+  {
+    question: "How do I know my booking is confirmed?",
+    answer: "You will receive a confirmation email and receipt immediately after successful payment.",
+    category: "Booking",
+  },
+  {
+    question: "What payment methods are accepted?",
+    answer: "We accept credit/debit cards, online banking, and selected e-wallets like GrabPay and Touch ‘n Go.",
+    category: "Booking",
+  },
+  {
+    question: "Can I modify my booking after payment?",
+    answer: "Modifications depend on the service and timing. Contact support at least 24 hours in advance.",
+    category: "Booking",
+  },
+  {
+    question: "Is there a refund policy if I cancel my booking?",
+    answer: "Refund policies vary. Please refer to the cancellation terms provided during booking.",
+    category: "Booking",
+  },
+  {
+    question: "Will I get an invoice for my booking?",
+    answer: "Yes, an invoice will be sent via email upon completion of your transaction.",
+    category: "Booking",
+  },
+
+  // 👤 Account & Support
+  {
+    question: "Do I need to create an account to book?",
+    answer: "You can checkout as a guest, but creating an account gives access to booking history, offers, and faster checkouts.",
+    category: "Account",
+  },
+  {
+    question: "How can I update my profile details?",
+    answer: "You can update your name, contact info, and preferences from your dashboard under ‘Profile’.",
+    category: "Account",
+  },
+  {
+    question: "What should I do if I forget my password?",
+    answer: "Click on ‘Forgot Password’ on the login page and follow the instructions to reset it.",
+    category: "Account",
+  },
+  {
+    question: "How can I reach Oastel customer support?",
+    answer: "You can contact us through live chat, WhatsApp, or email at support@oastel.com.",
+    category: "Account",
+  },
+  {
+    question: "Is my personal information secure?",
+    answer: "Yes, we use encrypted servers and secure protocols to protect your data at all times.",
+    category: "Account",
+  },
+
+  // 🌐 General
+  {
+    question: "Is Oastel available across all of Malaysia?",
+    answer: "We currently operate in top tourist destinations like Cameron Highlands, Langkawi, Penang, and Kuala Lumpur.",
+    category: "General",
+  },
+  {
+    question: "Does Oastel offer group discounts?",
+    answer: "Yes, group discounts are available for tours and transport bookings. Contact support for custom quotes.",
+    category: "General",
+  },
+  {
+    question: "Can I book on behalf of someone else?",
+    answer: "Yes, you can book for others. Just make sure to enter their details accurately during checkout.",
+    category: "General",
+  },
+  {
+    question: "Does Oastel offer packages for school or corporate trips?",
+    answer: "Yes, we provide tailored packages for institutions and companies. Reach out for customized plans.",
+    category: "General",
+  },
+  {
+    question: "Is Oastel a licensed travel service provider?",
+    answer: "Yes, Oastel is a registered and licensed travel service provider operating under Malaysian tourism regulations.",
+    category: "General",
+  },
 ]

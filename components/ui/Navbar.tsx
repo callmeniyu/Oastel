@@ -96,6 +96,11 @@ export default function Navbar() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
+                                    Cart
+                                </Link>
+                            </li>
+                            <li>
                                 <button className="block w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleSignOut}>Sign Out</button>
                             </li>
                         </ul>

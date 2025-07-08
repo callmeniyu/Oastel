@@ -1,20 +1,21 @@
-export type TourFAQType = {
+export type FAQType = {
     question: string
     answer: string
+    category?: string
 }
 
 export type TourDetailsType = {
     about: string
-    itinerary: string[]
+    itinerary: string
     pickupLocations: string[]
     note: string
-    faq: TourFAQType[]
+    faq: FAQType[]
 }
 
 export type TourType = {
     id: number
-    slug: string
     title: string
+    slug: string
     image: string
     tags: string[]
     desc: string
@@ -30,12 +31,44 @@ export type TourType = {
     details: TourDetailsType
 }
 
+export type TicketDetailsType = {
+    about: string
+    itinerary: string
+    pickupLocations: string[]
+    note: string
+    faq: FAQType[]
+}
+
+export type TicketType = {
+    _id: string
+    slug: string
+    title: string
+    image: string
+    from: string
+    to: string
+    tags: string[]
+    desc: string
+    type: "Van" | "Van + Ferry" | "Private"
+    duration: string
+    bookedCount: string | number
+    oldPrice: number
+    newPrice: number
+    childPrice: number
+    minimumPerson: number
+    maximumPerson?: number
+    time: string[]
+    details: TicketDetailsType
+    createdAt: Date
+    updatedAt: Date
+}
+
 export interface BookingDetailsType {
     title: string
     slug: string
     date: string
     time: string
     type: string
+    transport?: "Van" | "Van + Ferry" | "Private"
     duration: string
     adults: number
     children: number

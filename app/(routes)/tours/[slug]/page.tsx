@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Tag from "@/components/ui/Tag"
-import TourBookPanel from "@/components/ui/TourBookPanel"
 import TourCard from "@/components/ui/TourCard"
 import FAQSection from "@/components/sections/FAQSection"
 import GreenBtn from "@/components/ui/GreenBtn"
@@ -64,7 +63,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                             </div>
                         </div>
-                        <GreenBtn text="Book Now" action={`/booking/${tourDetails.slug}`} customStyles="" />
+                        <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} customStyles="" />
                     </div>
 
                     <div className="space-y-6 mt-6">
@@ -93,10 +92,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
                             </div>
-                            <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1">
-                                {tourDetails.details.itinerary.map((item, index) => (
-                                    <li key={index}>{item}</li>
-                                ))}
+                            <ul className="ml-5 text-sm text-desc_gray space-y-1">
+                                    <p>{tourDetails.details.itinerary}</p>
                             </ul>
                         </div>
 
@@ -142,7 +139,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                             <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                         </div>
                     </div>
-                    <GreenBtn text="Book Now" action={`/booking/${tourDetails.slug}`} customStyles="" />
+                    <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} customStyles="" />
                 </div>
             </div>
 
@@ -161,13 +158,13 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                 <hr className="hidden md:block border border-gray-200 w-40 rotate-90 self-center" />
                 <hr className="block md:hidden border border-gray-200 w-full" />
                 <div className="flex justify-center md:w-1/2">
-                    <GreenBtn text="📄 See T&C" action={"terms&conditions"} customStyles="w-32" />
+                    <GreenBtn text="📄 See T&C" action={"/privacy-policy"} customStyles="w-32" />
                 </div>
             </section>
 
             {/* Book Button */}
             <div className="text-center">
-                <GreenBtn text="Book this tour" action={`/booking/${tourDetails.slug}`} />
+                <GreenBtn text="Book this tour" action={`/booking/tour/${tourDetails.slug}`} />
             </div>
 
             {/* Other Tours */}

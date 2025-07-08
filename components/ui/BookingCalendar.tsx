@@ -21,10 +21,11 @@ export default function BookingCalendar({ selectedDate, onDateChange }: Props) {
                 onSelect={(date) => date && onDateChange(date)}
                 fromDate={today}
                 toDate={maxDate}
+                disabled={{ before: today }}
                 animate
                 modifiersClassNames={{
                     today: "border border-primary_green",
-                    selected: "bg-primary_green text-white rounded-full"
+                    selected: "bg-primary_green text-white rounded-full",
                 }}
             />
         </div>

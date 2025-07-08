@@ -1,15 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import FilterSidebar from "@/components/ui/FilterSideBar"
+import FilterSidebar from "@/components/ui/TourFilterBar"
 import SearchInput from "@/components/ui/SearchInput"
 import TourCard from "@/components/ui/TourCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
-import  {allTours} from "@/lib/data"
+import { allTours } from "@/lib/data"
 import Loader from "@/components/ui/Loader"
-
 
 type FilterState = {
     type: string
@@ -28,6 +27,7 @@ export default function ToursPage() {
 
     const [filteredTours, setFilteredTours] = useState(allTours)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
+    const [filtersApplied, setFiltersApplied] = useState(false)
 
     const handleFilterChange = (field: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [field]: value }))
@@ -51,12 +51,21 @@ export default function ToursPage() {
                 durations.some((dur) => tour.tags.some((tag) => tag.toLowerCase().includes(dur.toLowerCase())))
 
             const matchSearch =
-                searchTerm.trim() === "" || tour.title.toLowerCase().includes(searchTerm.toLowerCase().trim())
+                searchTerm.trim() === "" ||
+                tour.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                tour.desc.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                tour.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim()))
 
             return matchType && matchPrice && matchDuration && matchSearch
         })
 
         setFilteredTours(result)
+
+        // Check if any filters/search are actually active
+        const hasActiveFilters =
+            searchTerm.trim() !== "" || filters.type !== "All" || filters.prices.length > 0 || filters.durations.length > 0
+
+        setFiltersApplied(hasActiveFilters)
         setIsFilterOpen(false)
     }
 
@@ -68,7 +77,14 @@ export default function ToursPage() {
         })
         setSearchTerm("")
         setFilteredTours(allTours)
+        setFiltersApplied(false)
         setIsFilterOpen(false)
+    }
+
+    const handleClearSearch = () => {
+        setSearchTerm("")
+        setFilteredTours(allTours)
+        setFiltersApplied(false)
     }
 
     useEffect(() => {
@@ -93,18 +109,29 @@ export default function ToursPage() {
 
             <div className="flex gap-3 items-center justify-between px-5 mt-8">
                 <hr className="border-b-2 border-primary_green  w-full hidden md:flex" />
-                <SearchInput customeStyles="" value={searchTerm} onChange={setSearchTerm} onSearch={handleApply} />
+                <SearchInput
+                    customeStyles=""
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    onSearch={handleApply}
+                    onClear={handleClearSearch}
+                />
                 <button
                     className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
-                    onClick={() => setIsFilterOpen(true)}
+                    onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
                 >
-                    <IoFilterSharp /> Filters
+                    {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
                 </button>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-4 relative">
                 <div className="hidden sm:block">
-                    <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onApply={handleApply} onClear={handleClearFilters} />
+                    <FilterSidebar
+                        filters={filters}
+                        onFilterChange={handleFilterChange}
+                        onApply={handleApply}
+                        onClear={handleClearFilters}
+                    />
                 </div>
 
                 {isFilterOpen && (
@@ -129,7 +156,7 @@ export default function ToursPage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredTours.length === 0 ? (
                         <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
                             <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />

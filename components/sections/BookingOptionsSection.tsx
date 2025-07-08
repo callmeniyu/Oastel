@@ -23,7 +23,7 @@ export default function BookingOptions() {
       title: "Book Transport",
       description: "Schedule your van transfer across destinations",
       icon: <LiaShuttleVanSolid size={40} />,
-      href: "/transports",
+      href: "/tickets",
     },
   ];
 
