@@ -21,6 +21,7 @@ export const allTours = [
         minimumPerson: 1,
         maximumPerson: 32,
         time: ["8:00 AM", "1:30 PM"],
+        label: "Recommended",
         details: {
             about: "Thrilling Land Rover Ride: Explore off-the-beaten-path trails and stunning landscapes.Local Culture: Visit traditional villages and meet the locals.Hidden Gems: Discover breathtaking viewpoints and untouched nature.Expert Guides: Knowledgeable and friendly guides ensure a safe and memorable trip.",
             itinerary:
@@ -72,6 +73,7 @@ export const allTours = [
         minimumPerson: 2,
         maximumPerson: 32,
         time: ["8:00 AM", "1:30 PM", "5:00 PM"],
+        label: "Popular",
         details: {
             about: "Ultimate Full Day Adventure: Experience the best of Cameron Highlands with a comprehensive Land Rover journey. Diverse Landscapes: Traverse lush tea plantations, misty forests, and scenic valleys. Cultural Encounters: Engage with local communities and learn about their traditions. Extended Exploration: More stops and activities for a truly immersive day.",
             itinerary:
@@ -1126,7 +1128,8 @@ export const allTickets: TicketType[] = [
         childPrice: 50,
         minimumPerson: 1,
         maximumPerson: 8,
-        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+      time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        label:"Best Value",
         createdAt: new Date("2025-06-03"),
         updatedAt: new Date("2025-06-03"),
         details: {

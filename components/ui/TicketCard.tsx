@@ -21,6 +21,7 @@ type TicketCardProps = {
     type: string
     from: string
     to: string
+    label?: "Recommended" | "Popular" | "Best Value" | null
 }
 
 export default function TicketCard({
@@ -37,9 +38,33 @@ export default function TicketCard({
     type,
     from,
     to,
+    label,
 }: TicketCardProps) {
+    // Label styling based on type
+    const getLabelStyles = (labelType: string) => {
+        switch (labelType) {
+            case "Recommended":
+                return "bg-primary_green text-white"
+            case "Popular":
+                return "bg-orange-500 text-white"
+            case "Best Value":
+                return "bg-blue-500 text-white"
+            default:
+                return "bg-gray-500 text-white"
+        }
+    }
     return (
-        <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between">
+        <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between relative">
+            {/* Label Badge */}
+            {label && (
+                <div
+                    className={`absolute top-3 left-3 z-10 px-3 py-1 rounded-full text-xs font-semibold ${getLabelStyles(
+                        label
+                    )}`}
+                >
+                    {label}
+                </div>
+            )}
             <Image src={image} alt={title} width={400} height={400} className="h-48 w-full object-cover rounded-t-lg" />
             <div className="p-4 flex flex-col justify-between gap-2 self-start">
                 <h3 className="text-primary_green font-semibold font-poppins text-base">{title}</h3>

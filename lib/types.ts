@@ -29,7 +29,10 @@ export type TourType = {
     minimumPerson: number
     maximumPerson?: number
     time: string[]
+    label?: "Recommended" | "Popular" | "Best Value" | null
     details: TourDetailsType
+    createdAt: Date
+    updatedAt: Date
 }
 
 export type TicketDetailsType = {
@@ -59,6 +62,7 @@ export type TicketType = {
     minimumPerson: number
     maximumPerson?: number
     time: string[]
+    label?: "Recommended" | "Popular" | "Best Value" | null
     details: TicketDetailsType
     createdAt: Date
     updatedAt: Date
@@ -70,7 +74,7 @@ export interface BookingDetailsType {
     date: string
     time: string
     packageType: "tour" | "ticket"
-    type:string
+    type: string
     transport?: "Van" | "Van + Ferry" | "Private"
     duration: string
     adults: number
@@ -94,8 +98,8 @@ export type BlogType = {
     content: string
 }
 
- export  type CartItemType = {
-    id: string,
-    title: string,
-    slug: string,
+export type CartItemType = {
+    id: string
+    title: string
+    slug: string
 }
