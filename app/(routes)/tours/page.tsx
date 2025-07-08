@@ -9,6 +9,7 @@ import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
 import { allTours } from "@/lib/data"
 import Loader from "@/components/ui/Loader"
+import Image from "next/image"
 
 type FilterState = {
     type: string
@@ -93,17 +94,22 @@ export default function ToursPage() {
 
     return (
         <div>
-            <div
-                className="relative h-96 md:h-[100vh] bg-cover bg-center"
-                style={{ backgroundImage: "url('/images/tour_main.png')" }}
-            >
-                <div className="absolute inset-0 bg-black/20" />
+            <div className="relative h-96 md:h-[90vh] pt-16 overflow-hidden">
+                {/* Background Image */}
+                <Image src="/images/tour_main.png" alt="Van transfers background" fill className="object-cover" priority />
+                {/* Light black overlay */}
+                <div className="absolute inset-0 bg-black/40" />
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white px-4">
-                    <h1 className="text-3xl md:text-5xl font-extrabold sm:font-bold">Find Your Perfect Tour</h1>
-                    <p className="mt-3 max-w-xl text-base md:text-lg">
+                    <h1 className="text-3xl md:text-5xl font-semibold sm:font-bold font-poppins">Find Your Perfect Tour</h1>
+                    <p className="mt-3 max-w-xl text-base md:text-lg font-poppins">
                         From scenic Land Rover rides to intimate group adventures, discover the best of Cameron Highlands
                         through our curated tour packages.
                     </p>
+                </div>
+                <div className="sm:flex hidden  justify-center absolute bottom-8 left-0 right-0 z-20">
+                    <div className="animate-bounce w-8 h-14 rounded-full border-2 border-white/50 flex justify-center">
+                        <div className="w-1 h-3 bg-white rounded-full mt-2"></div>
+                    </div>
                 </div>
             </div>
 
@@ -149,6 +155,10 @@ export default function ToursPage() {
                                 isSmallScreen={true}
                                 onApply={() => {
                                     handleApply()
+                                    setIsFilterOpen(false)
+                                }}
+                                onClear={() => {
+                                    handleClearFilters()
                                     setIsFilterOpen(false)
                                 }}
                             />

@@ -7,11 +7,12 @@ export const allTours = [
         title: "Half Day Land Rover Road Trip",
         //100 characters max for title
         //30-45 characters recommended for title
-        image: "/images/tour1.jpg",
+        image: "/images/tour7.jpg",
         tags: ["Co-Tour", "Half-day", "Adventure"],
         desc: "Embark on a thrilling half-day journey through scenic trails and lush forests in a classic Land Rover.",
         // 110 characters max for description
         type: "co-tour",
+        packageType: "tour",
         duration: "5-6",
         bookedCount: "2.6k",
         oldPrice: 70,
@@ -62,6 +63,7 @@ export const allTours = [
         tags: ["Co-Tour", "Full-day"],
         desc: "Experience the ultimate Cameron Highlands adventure with a full day of exploration, culture, and nature.",
         type: "co-tour",
+        packageType: "tour",
         duration: "8-10",
         bookedCount: 1000,
         oldPrice: 140,
@@ -104,10 +106,11 @@ export const allTours = [
         id: 3,
         slug: "private-half-day-tour",
         title: "Private Half Day Tour",
-        image: "/images/tour3.jpg",
+        image: "/images/tour1.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Enjoy a personalized half-day tour with your own group, tailored to your interests and pace.",
         type: "private",
+        packageType: "tour",
         duration: "5-6",
         bookedCount: 1.5,
         oldPrice: 400,
@@ -150,10 +153,11 @@ export const allTours = [
         id: 4,
         slug: "half-day-tour-coral-hills",
         title: "Half Day Tour - Coral Hills",
-        image: "/images/tour4.jpg",
+        image: "/images/tour8.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Discover the unique Coral Hills area with a private guide, featuring nature walks and stunning viewpoints.",
         type: "private",
+        packageType: "tour",
         duration: "5-6",
         bookedCount: 500,
         oldPrice: 549,
@@ -196,10 +200,11 @@ export const allTours = [
         id: 5,
         slug: "sunrise-half-day-tour",
         title: "Sunrise + Half Day Tour",
-        image: "/images/tour5.jpg",
+        image: "/images/tour9.jpg",
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Start your day with a breathtaking sunrise followed by a half-day exploration of Cameron Highlands’ highlights.",
         type: "private",
+        packageType: "tour",
         duration: "5-6",
         bookedCount: 400,
         oldPrice: 600,
@@ -246,6 +251,7 @@ export const allTours = [
         tags: ["Private", "Half-day", "Upto 8 guests"],
         desc: "Perfect for small groups, this private tour offers a flexible and exclusive Cameron Highlands adventure.",
         type: "private",
+        packageType: "tour",
         duration: "5-6",
         bookedCount: "1.5k",
         oldPrice: 499,
@@ -1010,6 +1016,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Fun", "Adventure"],
         desc: "Comfortable van transfer from Cameron Highlands to Taman Negara with scenic stops.",
         type: "Van",
+        packageType: "ticket",
         duration: "4 hours",
         bookedCount: "1.5k",
         oldPrice: 150,
@@ -1060,6 +1067,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Comfort", "Scenic"],
         desc: "Relaxing van transfer from Cameron Highlands to Kuala Besut Jetty with beautiful views.",
         type: "Van",
+        packageType: "ticket",
         duration: "3.5",
         bookedCount: "1.2k",
         oldPrice: 150,
@@ -1110,6 +1118,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Convenient", "Scenic"],
         desc: "Convenient van transfer from Taman Negara to Kuala Lumpur with scenic views and comfortable seating.",
         type: "Van",
+        packageType: "ticket",
         duration: "3.5",
         bookedCount: "900",
         oldPrice: 130,
@@ -1160,6 +1169,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Comfort", "Scenic"],
         desc: "Comfortable van transfer from Taman Negara to Kuala Besut Jetty with beautiful views.",
         type: "Van",
+        packageType: "ticket",
         duration: "5.5",
         bookedCount: "800",
         oldPrice: 180,
@@ -1210,6 +1220,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Comfort", "Scenic"],
         desc: "Comfortable van transfer from Taman Negara to Cameron Highlands with beautiful views.",
         type: "Van",
+        packageType: "ticket",
         duration: "4.5",
         bookedCount: "600",
         oldPrice: 160,
@@ -1260,6 +1271,7 @@ export const allTickets: TicketType[] = [
         tags: ["Van", "Comfort", "Scenic"],
         desc: "Comfortable van transfer from Kuala Besut Jetty to Cameron Highlands with beautiful views.",
         type: "Van",
+        packageType: "ticket",
         duration: "5.5",
         bookedCount: "500",
         oldPrice: 140,
@@ -1310,6 +1322,7 @@ export const allTickets: TicketType[] = [
         tags: ["Ferry", "Adventure", "Scenic"],
         desc: "Scenic ferry ride from Cameron Highlands to Taman Negara with beautiful views.",
         type: "Van + Ferry",
+        packageType: "ticket",
         duration: "5",
         bookedCount: "300",
         oldPrice: 200,
@@ -1360,6 +1373,7 @@ export const allTickets: TicketType[] = [
         tags: ["Ferry", "Adventure", "Scenic"],
         desc: "Scenic ferry ride from Taman Negara to Cameron Highlands with beautiful views.",
         type: "Van + Ferry",
+        packageType: "ticket",
         duration: "5",
         bookedCount: "250",
         oldPrice: 200,
@@ -1410,6 +1424,7 @@ export const allTickets: TicketType[] = [
         tags: ["Ferry", "Island", "Adventure"],
         desc: "Scenic ferry ride from Cameron Highlands to the beautiful Perhentian Islands with stunning views.",
         type: "Van + Ferry",
+        packageType: "ticket",
         duration: "6",
         bookedCount: "400",
         oldPrice: 220,
@@ -1460,6 +1475,7 @@ export const allTickets: TicketType[] = [
         tags: ["Ferry", "Island", "Adventure"],
         desc: "Scenic ferry ride from Taman Negara to the beautiful Perhentian Islands with stunning views.",
         type: "Van + Ferry",
+        packageType: "ticket",
         duration: "6",
         bookedCount: "350",
         oldPrice: 320,
@@ -1501,7 +1517,7 @@ export const allTickets: TicketType[] = [
         },
     },
     {
-        _id: "7",
+        _id: "11",
         title: "Kuala Lumpur → Cameron Highlands Private Transfer",
         slug: "kuala-lumpur-cameron-highlands-private",
         image: "/images/ticket7.jpg",
@@ -1510,6 +1526,7 @@ export const allTickets: TicketType[] = [
         tags: ["Private", "Luxury", "Direct"],
         desc: "Private luxury transfer from Kuala Lumpur to Cameron Highlands with personalized service.",
         type: "Private",
+        packageType: "ticket",
         duration: "3",
         bookedCount: "800",
         oldPrice: 400,
@@ -1536,167 +1553,168 @@ export const allTickets: TicketType[] = [
     },
 ]
 
-
 export const allFaqs: FAQType[] = [
-  // 🏨 Stay
-  {
-    question: "What types of accommodations does Oastel offer?",
-    answer: "Oastel provides a range of stays including boutique hotels, hostels, homestays, and eco-lodges depending on your travel preference and budget.",
-    category: "Stay",
-  },
-  {
-    question: "Are the stays suitable for families with children?",
-    answer: "Yes, many of our stays are family-friendly and include child-safe amenities, family rooms, and kid-friendly activities.",
-    category: "Stay",
-  },
-  {
-    question: "Can I choose my preferred room type while booking?",
-    answer: "Yes, during the booking process, you can select from the available room types such as single, double, family, or deluxe rooms.",
-    category: "Stay",
-  },
-  {
-    question: "Is breakfast included with the stay?",
-    answer: "Some accommodations include complimentary breakfast. The details will be mentioned in the listing before you book.",
-    category: "Stay",
-  },
-  {
-    question: "Are pets allowed in Oastel stays?",
-    answer: "Pet policies vary by property. Please check the individual stay's listing or contact support to confirm.",
-    category: "Stay",
-  },
+    // 🏨 Stay
+    {
+        question: "What types of accommodations does Oastel offer?",
+        answer: "Oastel provides a range of stays including boutique hotels, hostels, homestays, and eco-lodges depending on your travel preference and budget.",
+        category: "Stay",
+    },
+    {
+        question: "Are the stays suitable for families with children?",
+        answer: "Yes, many of our stays are family-friendly and include child-safe amenities, family rooms, and kid-friendly activities.",
+        category: "Stay",
+    },
+    {
+        question: "Can I choose my preferred room type while booking?",
+        answer: "Yes, during the booking process, you can select from the available room types such as single, double, family, or deluxe rooms.",
+        category: "Stay",
+    },
+    {
+        question: "Is breakfast included with the stay?",
+        answer: "Some accommodations include complimentary breakfast. The details will be mentioned in the listing before you book.",
+        category: "Stay",
+    },
+    {
+        question: "Are pets allowed in Oastel stays?",
+        answer: "Pet policies vary by property. Please check the individual stay's listing or contact support to confirm.",
+        category: "Stay",
+    },
 
-  // 🚐 Transportation
-  {
-    question: "What types of transportation options are available?",
-    answer: "Oastel offers vans, minibuses, and cars with professional drivers for intercity travel and local exploration.",
-    category: "Transportation",
-  },
-  {
-    question: "How do I book a van for a group trip?",
-    answer: "You can book a van directly on our website by selecting your route, date, and number of passengers.",
-    category: "Transportation",
-  },
-  {
-    question: "Can I request a custom pick-up or drop-off point?",
-    answer: "Yes, custom pick-ups are possible depending on the route. Please mention your request while booking.",
-    category: "Transportation",
-  },
-  {
-    question: "Do your vehicles have air conditioning?",
-    answer: "Yes, all our vehicles come with air conditioning to ensure a comfortable journey.",
-    category: "Transportation",
-  },
-  {
-    question: "What happens if I miss my van departure?",
-    answer: "If you're running late, please contact our support immediately. Rebooking depends on availability and refund policies.",
-    category: "Transportation",
-  },
+    // 🚐 Transportation
+    {
+        question: "What types of transportation options are available?",
+        answer: "Oastel offers vans, minibuses, and cars with professional drivers for intercity travel and local exploration.",
+        category: "Transportation",
+    },
+    {
+        question: "How do I book a van for a group trip?",
+        answer: "You can book a van directly on our website by selecting your route, date, and number of passengers.",
+        category: "Transportation",
+    },
+    {
+        question: "Can I request a custom pick-up or drop-off point?",
+        answer: "Yes, custom pick-ups are possible depending on the route. Please mention your request while booking.",
+        category: "Transportation",
+    },
+    {
+        question: "Do your vehicles have air conditioning?",
+        answer: "Yes, all our vehicles come with air conditioning to ensure a comfortable journey.",
+        category: "Transportation",
+    },
+    {
+        question: "What happens if I miss my van departure?",
+        answer: "If you're running late, please contact our support immediately. Rebooking depends on availability and refund policies.",
+        category: "Transportation",
+    },
 
-  // 🗺️ Tours
-  {
-    question: "What is the difference between Co-Tour and Private Tour?",
-    answer: "A Co-Tour involves joining a group with other travelers, while a Private Tour is exclusive for you and your group.",
-    category: "Tours",
-  },
-  {
-    question: "Can I customize a private tour?",
-    answer: "Yes, private tours are customizable. You can choose your itinerary, duration, and preferences.",
-    category: "Tours",
-  },
-  {
-    question: "Are guides included in the tours?",
-    answer: "All tours include experienced local guides who ensure safety and offer cultural insights.",
-    category: "Tours",
-  },
-  {
-    question: "Do the tours include meals?",
-    answer: "Some tours include meals depending on the duration and package. Check the tour details for inclusions.",
-    category: "Tours",
-  },
-  {
-    question: "What is the maximum group size for Co-Tours?",
-    answer: "Group size varies but is usually limited to 12-15 people for a more personalized experience.",
-    category: "Tours",
-  },
+    // 🗺️ Tours
+    {
+        question: "What is the difference between Co-Tour and Private Tour?",
+        answer: "A Co-Tour involves joining a group with other travelers, while a Private Tour is exclusive for you and your group.",
+        category: "Tours",
+    },
+    {
+        question: "Can I customize a private tour?",
+        answer: "Yes, private tours are customizable. You can choose your itinerary, duration, and preferences.",
+        category: "Tours",
+    },
+    {
+        question: "Are guides included in the tours?",
+        answer: "All tours include experienced local guides who ensure safety and offer cultural insights.",
+        category: "Tours",
+    },
+    {
+        question: "Do the tours include meals?",
+        answer: "Some tours include meals depending on the duration and package. Check the tour details for inclusions.",
+        category: "Tours",
+    },
+    {
+        question: "What is the maximum group size for Co-Tours?",
+        answer: "Group size varies but is usually limited to 12-15 people for a more personalized experience.",
+        category: "Tours",
+    },
 
-  // 💳 Booking & Payment
-  {
-    question: "How do I know my booking is confirmed?",
-    answer: "You will receive a confirmation email and receipt immediately after successful payment.",
-    category: "Booking",
-  },
-  {
-    question: "What payment methods are accepted?",
-    answer: "We accept credit/debit cards, online banking, and selected e-wallets like GrabPay and Touch ‘n Go.",
-    category: "Booking",
-  },
-  {
-    question: "Can I modify my booking after payment?",
-    answer: "Modifications depend on the service and timing. Contact support at least 24 hours in advance.",
-    category: "Booking",
-  },
-  {
-    question: "Is there a refund policy if I cancel my booking?",
-    answer: "Refund policies vary. Please refer to the cancellation terms provided during booking.",
-    category: "Booking",
-  },
-  {
-    question: "Will I get an invoice for my booking?",
-    answer: "Yes, an invoice will be sent via email upon completion of your transaction.",
-    category: "Booking",
-  },
+    // 💳 Booking & Payment
+    {
+        question: "How do I know my booking is confirmed?",
+        answer: "You will receive a confirmation email and receipt immediately after successful payment.",
+        category: "Booking",
+    },
+    {
+        question: "What payment methods are accepted?",
+        answer: "We accept credit/debit cards, online banking, and selected e-wallets like GrabPay and Touch ‘n Go.",
+        category: "Booking",
+    },
+    {
+        question: "Can I modify my booking after payment?",
+        answer: "Modifications depend on the service and timing. Contact support at least 24 hours in advance.",
+        category: "Booking",
+    },
+    {
+        question: "Is there a refund policy if I cancel my booking?",
+        answer: "Refund policies vary. Please refer to the cancellation terms provided during booking.",
+        category: "Booking",
+    },
+    {
+        question: "Will I get an invoice for my booking?",
+        answer: "Yes, an invoice will be sent via email upon completion of your transaction.",
+        category: "Booking",
+    },
 
-  // 👤 Account & Support
-  {
-    question: "Do I need to create an account to book?",
-    answer: "You can checkout as a guest, but creating an account gives access to booking history, offers, and faster checkouts.",
-    category: "Account",
-  },
-  {
-    question: "How can I update my profile details?",
-    answer: "You can update your name, contact info, and preferences from your dashboard under ‘Profile’.",
-    category: "Account",
-  },
-  {
-    question: "What should I do if I forget my password?",
-    answer: "Click on ‘Forgot Password’ on the login page and follow the instructions to reset it.",
-    category: "Account",
-  },
-  {
-    question: "How can I reach Oastel customer support?",
-    answer: "You can contact us through live chat, WhatsApp, or email at support@oastel.com.",
-    category: "Account",
-  },
-  {
-    question: "Is my personal information secure?",
-    answer: "Yes, we use encrypted servers and secure protocols to protect your data at all times.",
-    category: "Account",
-  },
+    // 👤 Account & Support
+    {
+        question: "Do I need to create an account to book?",
+        answer: "You can checkout as a guest, but creating an account gives access to booking history, offers, and faster checkouts.",
+        category: "Account",
+    },
+    {
+        question: "How can I update my profile details?",
+        answer: "You can update your name, contact info, and preferences from your dashboard under ‘Profile’.",
+        category: "Account",
+    },
+    {
+        question: "What should I do if I forget my password?",
+        answer: "Click on ‘Forgot Password’ on the login page and follow the instructions to reset it.",
+        category: "Account",
+    },
+    {
+        question: "How can I reach Oastel customer support?",
+        answer: "You can contact us through live chat, WhatsApp, or email at support@oastel.com.",
+        category: "Account",
+    },
+    {
+        question: "Is my personal information secure?",
+        answer: "Yes, we use encrypted servers and secure protocols to protect your data at all times.",
+        category: "Account",
+    },
 
-  // 🌐 General
-  {
-    question: "Is Oastel available across all of Malaysia?",
-    answer: "We currently operate in top tourist destinations like Cameron Highlands, Langkawi, Penang, and Kuala Lumpur.",
-    category: "General",
-  },
-  {
-    question: "Does Oastel offer group discounts?",
-    answer: "Yes, group discounts are available for tours and transport bookings. Contact support for custom quotes.",
-    category: "General",
-  },
-  {
-    question: "Can I book on behalf of someone else?",
-    answer: "Yes, you can book for others. Just make sure to enter their details accurately during checkout.",
-    category: "General",
-  },
-  {
-    question: "Does Oastel offer packages for school or corporate trips?",
-    answer: "Yes, we provide tailored packages for institutions and companies. Reach out for customized plans.",
-    category: "General",
-  },
-  {
-    question: "Is Oastel a licensed travel service provider?",
-    answer: "Yes, Oastel is a registered and licensed travel service provider operating under Malaysian tourism regulations.",
-    category: "General",
-  },
+    // 🌐 General
+    {
+        question: "Is Oastel available across all of Malaysia?",
+        answer: "We currently operate in top tourist destinations like Cameron Highlands, Langkawi, Penang, and Kuala Lumpur.",
+        category: "General",
+    },
+    {
+        question: "Does Oastel offer group discounts?",
+        answer: "Yes, group discounts are available for tours and transport bookings. Contact support for custom quotes.",
+        category: "General",
+    },
+    {
+        question: "Can I book on behalf of someone else?",
+        answer: "Yes, you can book for others. Just make sure to enter their details accurately during checkout.",
+        category: "General",
+    },
+    {
+        question: "Does Oastel offer packages for school or corporate trips?",
+        answer: "Yes, we provide tailored packages for institutions and companies. Reach out for customized plans.",
+        category: "General",
+    },
+    {
+        question: "Is Oastel a licensed travel service provider?",
+        answer: "Yes, Oastel is a registered and licensed travel service provider operating under Malaysian tourism regulations.",
+        category: "General",
+    },
 ]
+
+// export cartItems: CartItemType[] = []

@@ -91,6 +91,7 @@ export default function BookingInfoPage() {
             childPrice: ticketDetails.childPrice || 0,
             totalPrice: totalPrice,
             pickupLocations: ticketDetails.details.pickupLocations || [""],
+            packageType: "ticket",
         })
         router.push("/booking/user-info")
     }

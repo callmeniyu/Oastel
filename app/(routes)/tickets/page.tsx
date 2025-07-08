@@ -8,6 +8,7 @@ import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
 import { allTickets } from "@/lib/data"
+import Image from "next/image"
 
 type FilterState = {
     from: string
@@ -166,19 +167,31 @@ export default function Tickets() {
     return (
         <div>
             {/* Hero */}
-            <div
-                className="relative h-96 md:h-[100vh] bg-cover bg-center"
-                style={{ backgroundImage: "url('/images/ticket-main.jpg')" }}
-            >
-                <div className="absolute inset-0 bg-black/20" />
+            <div className="relative h-96 md:h-[100vh] pt-16 overflow-hidden">
+                {/* Background Image */}
+                <Image
+                    src="/images/ticket-main.jpg"
+                    alt="Van transfers background"
+                    fill
+                    className="object-cover"
+                    priority
+                />
+                {/* Light black overlay */}
+                <div className="absolute inset-0 bg-black/40" />
                 <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white px-4">
-                    <h1 className="text-3xl md:text-5xl font-extrabold sm:font-bold">
+                    <h1 className="text-3xl md:text-5xl font-semibold sm:font-bold font-poppins">
                         Comfortable Van Transfers, One Click Away
                     </h1>
-                    <p className="mt-3 max-w-xl text-base md:text-lg">
+                    <p className="mt-3 max-w-xl text-base md:text-lg font-poppins">
                         Browse our van and boat transfer tickets to and from Cameron Highlands, Taman Negara, Kuala Besut,
                         and more. Comfortable rides, trusted service.
                     </p>
+                </div>
+
+                <div className="sm:flex hidden  justify-center absolute bottom-8 left-0 right-0 z-20">
+                    <div className="animate-bounce w-8 h-14 rounded-full border-2 border-white/50 flex justify-center">
+                        <div className="w-1 h-3 bg-white rounded-full mt-2"></div>
+                    </div>
                 </div>
             </div>
 
@@ -228,6 +241,10 @@ export default function Tickets() {
                                 isSmallScreen={true}
                                 onApply={() => {
                                     handleApply()
+                                    setIsFilterOpen(false)
+                                }}
+                                onClear={() => {
+                                    handleClearFilters()
                                     setIsFilterOpen(false)
                                 }}
                             />

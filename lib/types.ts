@@ -20,6 +20,7 @@ export type TourType = {
     tags: string[]
     desc: string
     type: string
+    packageType: string
     duration: string
     bookedCount: string | number
     oldPrice: number
@@ -49,6 +50,7 @@ export type TicketType = {
     tags: string[]
     desc: string
     type: "Van" | "Van + Ferry" | "Private"
+    packageType: string
     duration: string
     bookedCount: string | number
     oldPrice: number
@@ -67,7 +69,8 @@ export interface BookingDetailsType {
     slug: string
     date: string
     time: string
-    type: string
+    packageType: "tour" | "ticket"
+    type:string
     transport?: "Van" | "Van + Ferry" | "Private"
     duration: string
     adults: number
@@ -89,4 +92,10 @@ export type BlogType = {
     category: string
     views: number
     content: string
+}
+
+ export  type CartItemType = {
+    id: string,
+    title: string,
+    slug: string,
 }

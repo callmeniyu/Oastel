@@ -22,7 +22,7 @@ export default function HeroSection() {
             bgColor: "bg-[#4CAF50]",
         },
         {
-            title: "Book Transport",
+            title: "Book Transfer",
             description: "Seamless transfers between destinations",
             icon: <LiaShuttleVanSolid className="text-2xl" />,
             href: "/tickets",
@@ -39,9 +39,9 @@ export default function HeroSection() {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 pt-24 pb-16 px-4 md:px-8 lg:px-28">
+            <div className="relative z-10 pt-24 md:pt-32 pb-10 md:pb-16 px-4 md:px-8 lg:px-28">
                 {/* Hero Text */}
-                <div className="max-w-4xl mx-auto text-center mb-12">
+                <div className="max-w-4xl mx-auto text-center mb-6 md:mb-12">
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
                         Unforgettable Adventures in <br className="hidden md:block" />
                         <span className="text-primary_green-light">Cameron Highlands</span>
@@ -52,7 +52,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* Booking Options - Desktop */}
-                <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+                <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-2 md:mt-12">
                     {bookingOptions.map((option, index) => (
                         <Link
                             href={option.href}

@@ -113,6 +113,7 @@ export default function BookingInfoPage() {
                 ? (adults / 8) * (tourDetails.newPrice || 0)
                 : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0),
             pickupLocations: tourDetails.details.pickupLocations || [""],
+            packageType: "tour",
         })
         router.push("/booking/user-info")
     }

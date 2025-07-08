@@ -1,9 +1,9 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CgMenuRightAlt } from "react-icons/cg"
 import { IoPersonOutline } from "react-icons/io5"
 import Sidebar from "./SideBar"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import UseSession from "@/hooks/SessionHook"
@@ -13,15 +13,31 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 
 export default function Navbar() {
     const router = useRouter()
+    const pathname = usePathname()
     const [isOpen, setIsOpen] = useState(false)
-
     const [showProfile, setShowProfile] = useState(false)
+    const [isScrolled, setIsScrolled] = useState(false)
 
     const { user, isLoading, isAuthenticated } = UseSession()
+    const { showToast } = useToast()
 
-    const {showToast} = useToast()
+    // Determine if current page should have glass navbar
+    const isGlassPage = pathname === "/" || pathname === "/tours" || pathname === "/tickets"
 
-    const handleSignOut = () => { 
+    // Handle scroll detection
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY
+            setIsScrolled(scrollTop > 50) // Change after 50px scroll
+        }
+
+        if (isGlassPage) {
+            window.addEventListener("scroll", handleScroll)
+            return () => window.removeEventListener("scroll", handleScroll)
+        }
+    }, [isGlassPage])
+
+    const handleSignOut = () => {
         signOut({
             callbackUrl: "/auth",
         })
@@ -36,16 +52,38 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="flex items-center justify-between px-2 sm:px-6 py-3 border-b shadow-sm">
+            <nav
+                className={`flex items-center justify-between px-2 sm:px-6 py-3 transition-all duration-300 ${
+                    isGlassPage
+                        ? `fixed top-0 left-0 right-0 z-40 ${
+                              isScrolled ? "bg-white border-b border-gray-200 shadow-md" : "bg-transparent"
+                          }`
+                        : "bg-white border-b border-gray-200 shadow-sm"
+                }`}
+            >
                 <button onClick={() => setIsOpen(true)} aria-label="Open menu">
-                    <CgMenuRightAlt size={28} className="text-primary_green" />
+                    <CgMenuRightAlt
+                        size={28}
+                        className={isGlassPage ? (isScrolled ? "text-primary_green" : "text-white") : "text-primary_green"}
+                    />
                 </button>
-                <Link href={"/"} className="text-xl font-bold text-black font-poppins">
+                <Link
+                    href={"/"}
+                    className={`text-xl font-bold font-poppins ${
+                        isGlassPage ? (isScrolled ? "text-black" : "text-white drop-shadow-sm") : "text-black"
+                    }`}
+                >
                     Oastel
                 </Link>
                 <div className="relative">
                     <button
-                        className="flex items-center gap-2 bg-primary_green text-white rounded-full sm:pr-3 xs:pr-0 "
+                        className={`flex items-center gap-2 rounded-full sm:pr-3 xs:pr-0 transition-all duration-300 ${
+                            isGlassPage
+                                ? isScrolled
+                                    ? "bg-primary_green text-white hover:bg-primary_green/90"
+                                    : "bg-white/15 border border-white/20 text-white hover:bg-white/25"
+                                : "bg-primary_green text-white hover:bg-primary_green/90"
+                        }`}
                         onClick={() => {
                             if (isAuthenticated) {
                                 setShowProfile((prev) => !prev)
@@ -54,7 +92,15 @@ export default function Navbar() {
                             }
                         }}
                     >
-                        <div className="border-r-[1.5px] border-white rounded-full p-2">
+                        <div
+                            className={`rounded-full p-2 ${
+                                isGlassPage
+                                    ? isScrolled
+                                        ? "border-r-[1.5px] border-white"
+                                        : "border-r-[1.5px] border-white/30"
+                                    : "border-r-[1.5px] border-white"
+                            }`}
+                        >
                             <IoPersonOutline size={20} />
                         </div>
                         <span className="text-sm font-medium font-poppins xs:hidden sm:flex">
@@ -82,7 +128,7 @@ export default function Navbar() {
                                     </AvatarFallback>
                                 )}
                             </Avatar>
-                            <h6 className="text-sm font-medium">{ user?.name || "Guest"}</h6>
+                            <h6 className="text-sm font-medium">{user?.name || "Guest"}</h6>
                         </div>
                         <ul className="py-2 text-sm font-medium text-gray-700">
                             <li>
@@ -101,7 +147,12 @@ export default function Navbar() {
                                 </Link>
                             </li>
                             <li>
-                                <button className="block w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleSignOut}>Sign Out</button>
+                                <button
+                                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                    onClick={handleSignOut}
+                                >
+                                    Sign Out
+                                </button>
                             </li>
                         </ul>
                     </div>

@@ -40,14 +40,15 @@ export default function TourFilterBar({ filters, onFilterChange, onApply, isSmal
                 <ul className="space-y-1 text-desc_gray text-sm">
                     {["All", "Co-Tour", "Private"].map((val) => (
                         <li key={val}>
-                            <label>
+                            <label className="flex items-center cursor-pointer">
                                 <input
                                     type="radio"
-                                    name="type"
+                                    name={isSmallScreen ? "type-mobile" : "type-desktop"}
                                     value={val}
                                     checked={filters.type === val}
                                     onChange={handleRadioChange}
-                                />{" "}
+                                    className="mr-2"
+                                />
                                 {val}
                             </label>
                         </li>
@@ -60,12 +61,13 @@ export default function TourFilterBar({ filters, onFilterChange, onApply, isSmal
                 <ul className="space-y-1 text-desc_gray text-sm">
                     {["50-200", "200-300", "300-450", "450-600"].map((range) => (
                         <li key={range}>
-                            <label>
+                            <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
                                     checked={filters.prices.includes(range)}
                                     onChange={() => handleCheckboxChange("prices", range)}
-                                />{" "}
+                                    className="mr-2"
+                                />
                                 RM {range}
                             </label>
                         </li>
@@ -78,12 +80,13 @@ export default function TourFilterBar({ filters, onFilterChange, onApply, isSmal
                 <ul className="space-y-1 text-desc_gray text-sm">
                     {["Half-day", "Full-day"].map((dur) => (
                         <li key={dur}>
-                            <label>
+                            <label className="flex items-center cursor-pointer">
                                 <input
                                     type="checkbox"
                                     checked={filters.durations.includes(dur)}
                                     onChange={() => handleCheckboxChange("durations", dur)}
-                                />{" "}
+                                    className="mr-2"
+                                />
                                 {dur}
                             </label>
                         </li>
@@ -91,11 +94,13 @@ export default function TourFilterBar({ filters, onFilterChange, onApply, isSmal
                 </ul>
             </div>
             <GreenBtn text="Apply Filters" customStyles="w-full font-medium" onClick={onApply} />
-            <GreenBtn
-                text="Clear Filters"
-                customStyles="w-full hidden sm:block font-medium bg-white border border-primary_green mt-3 !text-primary_green"
-                onClick={onClear}
-            />
+            {onClear && (
+                <GreenBtn
+                    text="Clear Filters"
+                    customStyles="w-full font-medium bg-white border border-primary_green mt-3 !text-primary_green"
+                    onClick={onClear}
+                />
+            )}
         </aside>
     )
 }

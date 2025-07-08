@@ -75,7 +75,7 @@ export default function BookingUserInfoPage() {
                 <div className="space-y-4">
                     {/* Name, Email, Pickup Location */}
                     {["name", "email", "pickupLocation"].map((field) => (
-                        <div key={field}>
+                        <div key={field} className="w-full">
                             <input
                                 name={field}
                                 value={(form as any)[field]}
@@ -89,14 +89,16 @@ export default function BookingUserInfoPage() {
                             />
                             {field === "pickupLocation" && booking?.pickupLocations && (
                                 <div className="mt-2">
-                                    <div className="flex gap-1 text-xs text-gray-500">
-                                        <p>Pickups are available from hostels/hotels in</p>
-                                        {booking.pickupLocations.map((location, i) => (
-                                            <span key={i} className="">
-                                                {location}
-                                                {i < booking.pickupLocations.length - 1 ? ", " : "."}
-                                            </span>
-                                        ))}
+                                    <div className="flex flex-col sm:flex-row flex-wrap gap-x-1 text-xs text-gray-500">
+                                        <p className="mb-1 sm:mb-0">Pickups are available from hostels/hotels in</p>
+                                        <div className="flex flex-wrap gap-x-1">
+                                            {booking.pickupLocations.map((location, i) => (
+                                                <span key={i}>
+                                                    {location}
+                                                    {i < booking.pickupLocations.length - 1 ? "," : "."}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -152,6 +154,7 @@ export default function BookingUserInfoPage() {
                         childPrice={booking.childPrice}
                         userInfo={true}
                         totalPrice={booking.totalPrice}
+                        packageType={booking.packageType}
                     />
                 </div>
             )}
