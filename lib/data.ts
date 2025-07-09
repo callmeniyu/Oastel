@@ -538,7 +538,7 @@ export const allBlogs: BlogType[] = [
     <h2>Ipoh's Living History</h2>
     <p>Beyond the famous white coffee, Ipoh's heritage quarter hides century-old secrets in every corner.</p>
     
-    <h3>1. Architectural Time Capsules</h3>
+    <h3>1. Architectural time Capsules</h3>
     <p>Key landmarks include:
       <ul>
         <li><strong>Birch Memorial Clock Tower:</strong> With its controversial colonial history</li>

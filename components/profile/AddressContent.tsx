@@ -20,13 +20,6 @@ export default function AddressContent() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-desc_gray mb-1">Contact Email</label>
-          <input
-            type="email"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary_green focus:border-transparent"
-          />
-        </div>
-        <div>
           <label className="block text-sm font-medium text-desc_gray mb-1">Pickup Address 1</label>
           <input
             type="text"
