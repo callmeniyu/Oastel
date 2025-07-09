@@ -2,39 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-
-@layer utilities{
-    .section-title{
-        @apply text-primary_green text-2xl md:text-3xl font-semibold mb-3
+@layer utilities {
+    .section-title {
+        @apply text-primary_green text-2xl md:text-3xl font-semibold mb-3;
     }
-    .section-desc{
-        @apply text-desc_gray text-base font-poppins font-medium
+    .section-desc {
+        @apply text-desc_gray text-base font-poppins font-medium;
     }
 }
 
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
+
+.sticky-filter {
+    position: sticky;
+    top: 6rem;
+    height: fit-content;
+    align-self: flex-start;
+    transition: all 0.3s ease-in-out;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 .scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-
 @keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-fadeInUp {
-  animation: fadeInUp 0.3s ease-out both;
+    animation: fadeInUp 0.3s ease-out both;
 }

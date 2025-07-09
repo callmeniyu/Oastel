@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { CgMenuRightAlt } from "react-icons/cg"
 import { IoPersonOutline } from "react-icons/io5"
 import Sidebar from "./SideBar"
@@ -17,9 +17,39 @@ export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false)
     const [showProfile, setShowProfile] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
+    const dropdownRef = useRef<HTMLDivElement>(null)
 
     const { user, isLoading, isAuthenticated } = UseSession()
     const { showToast } = useToast()
+
+    // Close dropdown when pathname changes
+    useEffect(() => {
+        setShowProfile(false)
+    }, [pathname])
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowProfile(false)
+            }
+        }
+
+        const handleEscapeKey = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setShowProfile(false)
+            }
+        }
+
+        if (showProfile) {
+            document.addEventListener("mousedown", handleClickOutside)
+            document.addEventListener("keydown", handleEscapeKey)
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside)
+                document.removeEventListener("keydown", handleEscapeKey)
+            }
+        }
+    }, [showProfile])
 
     // Determine if current page should have glass navbar
     const isGlassPage = pathname === "/" || pathname === "/tours" || pathname === "/tickets"
@@ -50,6 +80,10 @@ export default function Navbar() {
         setIsOpen(false)
     }
 
+    const closeDropdown = () => {
+        setShowProfile(false)
+    }
+
     return (
         <>
             <nav
@@ -75,7 +109,7 @@ export default function Navbar() {
                 >
                     Oastel
                 </Link>
-                <div className="relative">
+                <div className="relative" ref={dropdownRef}>
                     <button
                         className={`flex items-center gap-2 rounded-full sm:pr-3 xs:pr-0 transition-all duration-300 ${
                             isGlassPage
@@ -91,6 +125,8 @@ export default function Navbar() {
                                 router.push("/auth")
                             }
                         }}
+                        aria-expanded={showProfile}
+                        aria-haspopup="true"
                     >
                         <div
                             className={`rounded-full p-2 ${
@@ -132,17 +168,17 @@ export default function Navbar() {
                         </div>
                         <ul className="py-2 text-sm font-medium text-gray-700">
                             <li>
-                                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
+                                <Link href="/profile" onClick={closeDropdown} className="block px-4 py-2 hover:bg-gray-100">
                                     Profile
                                 </Link>
                             </li>
                             <li>
-                                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
+                                <Link href="/booking" onClick={closeDropdown} className="block px-4 py-2 hover:bg-gray-100">
                                     Bookings
                                 </Link>
                             </li>
                             <li>
-                                <Link href="#" className="block px-4 py-2 hover:bg-gray-100">
+                                <Link href="/cart" onClick={closeDropdown} className="block px-4 py-2 hover:bg-gray-100">
                                     Cart
                                 </Link>
                             </li>

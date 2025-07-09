@@ -20,9 +20,9 @@ type FilterState = {
 
 export default function Tickets() {
     const [searchTerm, setSearchTerm] = useState("")
-    const vanTickets = allTickets.filter((ticket) => ticket.type === "Van")
-    const ferryTickets = allTickets.filter((ticket) => ticket.type === "Van + Ferry")
-    const privateTickets = allTickets.filter((ticket) => ticket.type === "Private")
+    const vanTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "van")
+    const ferryTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "van + ferry")
+    const privateTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "private")
 
     const [filters, setFilters] = useState<FilterState>({
         from: "",
@@ -60,26 +60,51 @@ export default function Tickets() {
             const matchTransport =
                 transports.length === 0 ||
                 transports.some((t) => {
-                    switch (t.toLowerCase()) {
-                        case "van only":
-                            return ticket.type === "Van"
-                        case "van + ferry":
-                            return ticket.type === "Van + Ferry"
-                        case "private innova":
-                        case "private welfare":
-                        case "private toyota van":
+                    const transportLower = t.toLowerCase()
+                    const ticketTypeLower = ticket.type.toLowerCase()
+
+                    switch (transportLower) {
+                        case "shared mini van":
+                            return ticketTypeLower === "van"
+                        case "shared van + ferry":
+                            return ticketTypeLower === "van + ferry"
+                        case "private alphard":
                             return (
-                                ticket.type === "Private" ||
+                                ticketTypeLower === "private" ||
+                                ticket.tags.some(
+                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("alphard")
+                                )
+                            )
+                        case "private innova":
+                            return (
+                                ticketTypeLower === "private" ||
+                                ticket.tags.some(
+                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("innova")
+                                )
+                            )
+                        case "private welfare":
+                            return (
+                                ticketTypeLower === "private" ||
+                                ticket.tags.some(
+                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("welfare")
+                                )
+                            )
+                        case "private mini van":
+                            return (
+                                ticketTypeLower === "private" ||
                                 ticket.tags.some(
                                     (tag) =>
                                         tag.toLowerCase().includes("private") ||
-                                        tag.toLowerCase().includes("innova") ||
-                                        tag.toLowerCase().includes("welfare") ||
-                                        tag.toLowerCase().includes("toyota")
+                                        tag.toLowerCase().includes("mini") ||
+                                        tag.toLowerCase().includes("van")
                                 )
                             )
                         default:
-                            return ticket.tags.some((tag) => tag.toLowerCase().includes(t.toLowerCase()))
+                            // Generic matching for any transport type
+                            return (
+                                ticketTypeLower.includes(transportLower) ||
+                                ticket.tags.some((tag) => tag.toLowerCase().includes(transportLower))
+                            )
                     }
                 })
 
@@ -162,6 +187,12 @@ export default function Tickets() {
 
     useEffect(() => {
         document.body.style.overflow = isFilterOpen ? "hidden" : "unset"
+        // Add smooth scrolling behavior
+        document.documentElement.style.scrollBehavior = "smooth"
+
+        return () => {
+            document.documentElement.style.scrollBehavior = "auto"
+        }
     }, [isFilterOpen])
 
     return (
@@ -214,9 +245,9 @@ export default function Tickets() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-4 relative">
+            <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
                 {/* Sidebar */}
-                <div className="hidden sm:block">
+                <div className="hidden sm:block sticky-filter">
                     <TicketFilterBar
                         filters={filters}
                         onFilterChange={handleFilterChange}

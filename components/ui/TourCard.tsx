@@ -16,7 +16,7 @@ type TourCardProps = {
     oldPrice: number
     newPrice: number
     type: string
-    label?: "Recommended" | "Popular" | "Best Value" | null
+    label?: string | null
 }
 
 export default function TourCard({

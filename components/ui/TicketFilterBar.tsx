@@ -55,7 +55,11 @@ export default function TicketFilterBar({ filters, onFilterChange, onApply, onCl
     }
 
     return (
-        <aside className={`w-full sm:w-72 bg-white ${!isSmallScreen && "border shadow-md"} rounded-xl p-4 font-poppins`}>
+        <aside
+            className={`w-full sm:w-72 bg-white ${
+                !isSmallScreen && "border shadow-md"
+            } rounded-xl p-4 font-poppins max-h-[80vh] overflow-y-auto`}
+        >
             <h3 className="text-center text-lg font-semibold bg-primary_green text-white py-2 rounded-t-lg mb-4">
                 Filters
             </h3>
@@ -135,7 +139,14 @@ export default function TicketFilterBar({ filters, onFilterChange, onApply, onCl
             <div className="border-t pt-4 mb-4">
                 <h4 className="font-semibold text-title_black mb-2 text-sm">Type of transport</h4>
                 <ul className="space-y-1 text-desc_gray text-sm">
-                    {["Van only", "Van + Ferry", "Private Innova", "Private Welfare", "Private toyota van"].map((val) => (
+                    {[
+                        "Shared Mini Van",
+                        "Shared Van + Ferry",
+                        "Private Alphard",
+                        "Private Innova",
+                        "Private Welfare",
+                        "Private Mini Van",
+                    ].map((val) => (
                         <li key={val}>
                             <label className="flex items-center gap-2">
                                 <input

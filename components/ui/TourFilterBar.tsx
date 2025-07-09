@@ -30,7 +30,7 @@ export default function TourFilterBar({ filters, onFilterChange, onApply, isSmal
         <aside
             className={`w-full sm:w-64 bg-white ${!isSmallScreen && "border"} rounded-md ${
                 !isSmallScreen && "shadow-md"
-            } p-4 max-h-max`}
+            } p-4 max-h-[80vh] overflow-y-auto`}
         >
             <h3 className="text-center text-lg font-semibold bg-primary_green text-white py-2 rounded-t-lg mb-4">
                 Filters

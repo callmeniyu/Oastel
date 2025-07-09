@@ -90,6 +90,12 @@ export default function ToursPage() {
 
     useEffect(() => {
         document.body.style.overflow = isFilterOpen ? "hidden" : "unset"
+        // Add smooth scrolling behavior
+        document.documentElement.style.scrollBehavior = "smooth"
+
+        return () => {
+            document.documentElement.style.scrollBehavior = "auto"
+        }
     }, [isFilterOpen])
 
     return (
@@ -130,8 +136,8 @@ export default function ToursPage() {
                 </button>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-4 relative">
-                <div className="hidden sm:block">
+            <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
+                <div className="hidden sm:block sticky-filter">
                     <FilterSidebar
                         filters={filters}
                         onFilterChange={handleFilterChange}
