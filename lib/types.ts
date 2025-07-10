@@ -56,37 +56,36 @@ export type TourType = {
     updatedAt: Date
 }
 
-export type TransferDetailsType = {
-    about: string
-    itinerary: string
-    pickupLocations: string[]
-    note: string
-    faq: FAQType[]
+export interface TransferDetails {
+  about: string
+  itinerary: string[]
+  pickupLocations: string[]
+  note?: string
+  faq: FAQType[]
 }
 
-export type TransferType = {
-    _id: string
-    slug: string
-    title: string
-    image: string
-    from: string
-    to: string
-    tags: string[]
-    desc: string
-    type: "Van" | "Van + Ferry" | "Private"
-    packageType: string
-    duration: string
-    bookedCount: string | number
-    oldPrice: number
-    newPrice: number
-    childPrice: number
-    minimumPerson: number
-    maximumPerson?: number
-    time: string[]
-    label?: "Recommended" | "Popular" | "Best Value" | null
-    details: TransferDetailsType
-    createdAt: Date
-    updatedAt: Date
+export interface TransferType {
+  slug: string
+  title: string
+  image: string
+  from: string
+  to: string
+  tags: string[]
+  desc: string
+  type: "Van" | "Van + Ferry" | "Private"
+  packageType: "transfer"
+  duration: string
+  bookedCount: number
+  oldPrice: number
+  newPrice: number
+  childPrice: number
+  minimumPerson: number
+  maximumPerson?: number
+  times: string[]
+  label?: "Recommended"|"Popular"|"Best Value"
+  details: TransferDetails
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface BookingDetailsType {
