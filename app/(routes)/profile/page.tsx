@@ -1,5 +1,4 @@
 "use client"
-import { useState, useEffect } from "react"
 import { signOut } from "next-auth/react"
 import { motion, AnimatePresence } from "framer-motion"
 import ProfileContent from "@/components/profile/ProfileContent"
@@ -7,31 +6,20 @@ import PasswordContent from "@/components/profile/PasswordContent"
 import AddressContent from "@/components/profile/AddressContent"
 import MyBookingsContent from "@/components/profile/MyBookingsContent"
 import Confirmation from "@/components/ui/Confirmation"
-import SessionHook from "@/hooks/SessionHook"
 import { FiChevronRight } from "react-icons/fi"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
+import MyCartContent from "@/components/profile/MyCartContent"
+import { useRef } from "react"
 import { useToast } from "@/context/ToastContext"
 import { useRouter } from "next/navigation"
+import SessionHook from "@/hooks/SessionHook"
+import { useState, useEffect } from "react"
 
 export default function ProfilePage() {
     const { user, isAuthenticated } = SessionHook()
     const router = useRouter()
     const { showToast } = useToast()
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            showToast({
-                type: "error",
-                title: "Unauthorized",
-                message: "You must be logged in to access profile page.",
-            })
-            router.push("/auth")
-        }
-    }, [isAuthenticated, showToast, router])
-
-    if (!isAuthenticated) {
-        return null // or a loading spinner
-    }
+    const hasRedirected = useRef(false)
 
     const [userData, setUserData] = useState({
         username: "",
@@ -46,19 +34,41 @@ export default function ProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    // Update profileImage and userData when user data is loaded
+    // Redirect unauthenticated users (after hooks are defined)
     useEffect(() => {
-        if (user) {
-            setProfileImage(user?.image || null)
-            setUserData({
-                username: user.name || "",
-                email: user.email || "",
-                image: user.image || "",
-                location: "",
-                bio: "",
+        if (!isAuthenticated && !hasRedirected.current) {
+            hasRedirected.current = true
+            showToast({
+                type: "error",
+                title: "Unauthorized",
+                message: "You must be logged in to access profile page.",
             })
+            // router.push("/auth")
         }
-    }, [user])
+    }, [isAuthenticated, showToast, router])
+
+    // Update user data when available
+   useEffect(() => {
+    if (user) {
+        const userImage = user.image || null
+        console.log("👤 User Image URL:", userImage) // Add this
+        setProfileImage(userImage)
+        setUserData({
+            username: user.name || "",
+            email: user.email || "",
+            image: user.image || "",
+            location: "",
+            bio: "",
+        })
+    }
+}, [user])
+
+    // ❌ DON’T put `return null` before all hooks run
+    // ✅ DO it here, after all hooks have been declared
+    if (!isAuthenticated) {
+        return console.log("User is not authenticated, redirecting...") // Redirect or show a loading spinner;
+        // or a loading spinner
+    }
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -145,6 +155,7 @@ export default function ProfilePage() {
         { id: "password", label: "Password" },
         { id: "address", label: "Address & Contact" },
         { id: "bookings", label: "My Bookings" },
+        { id: "cart", label: "My Cart" },
         { id: "signout", label: "Signout" },
         { id: "delete", label: "Delete Account" },
     ]
@@ -168,6 +179,8 @@ export default function ProfilePage() {
                 return <AddressContent />
             case "bookings":
                 return <MyBookingsContent />
+            case "cart":
+                return <MyCartContent />
             default:
                 return null
         }

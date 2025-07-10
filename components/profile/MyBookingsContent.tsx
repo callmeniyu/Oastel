@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import Image from "next/image"
-import { FiClock, FiMapPin, FiCalendar, FiUser, FiCreditCard, FiXCircle } from "react-icons/fi"
+import { FiClock, FiMapPin, FiCalendar, FiUser, FiCreditCard } from "react-icons/fi"
 import { isTripCompleted } from "@/lib/utils"
 
 type Booking = {
