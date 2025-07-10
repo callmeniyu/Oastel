@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Tag from "@/components/ui/Tag"
-import TicketCard from "@/components/ui/TicketCard"
+import TransferCard from "@/components/ui/TransferCard"
 import FAQSection from "@/components/sections/FAQSection"
 import GreenBtn from "@/components/ui/GreenBtn"
 import { FaBookmark } from "react-icons/fa"
@@ -9,22 +9,22 @@ import { FaClock } from "react-icons/fa6"
 import { RiRouteFill } from "react-icons/ri"
 import { RiMapPinLine } from "react-icons/ri"
 import { IoWarningOutline } from "react-icons/io5"
-import { getOtherTickets, getTicketBySlug } from "@/lib/utils"
+import { getOtherTransfers, getTransferBySlug } from "@/lib/utils"
 import { FaBus, FaWalking } from "react-icons/fa"
 
-type TicketDetailPageProps = {
+type TransferDetailPageProps = {
     params: { slug: string }
 }
 
-export default async function ticketDetailPage({ params }: TicketDetailPageProps) {
+export default async function TransferDetailPage({ params }: TransferDetailPageProps) {
     const { slug } = params
-    const ticketDetails = await getTicketBySlug(slug)
-    const othertickets = await getOtherTickets(slug)
+    const transferDetails = await getTransferBySlug(slug)
+    const othertransfers = await getOtherTransfers(slug)
 
-    if (!ticketDetails) {
+    if (!transferDetails) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-10">
-                <h1 className="text-2xl font-bold text-red-600">ticket not found</h1>
+                <h1 className="text-2xl font-bold text-red-600">transfer not found</h1>
             </div>
         )
     }
@@ -34,19 +34,19 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
             <div className="flex flex-col lg:flex-row gap-8 md:px-8 lg:px-16">
                 <div className="flex-1 space-y-6">
                     <Image
-                        src={ticketDetails.image}
-                        alt={ticketDetails.title}
+                        src={transferDetails.image}
+                        alt={transferDetails.title}
                         width={700}
                         height={500}
                         className="rounded-xl sm:w-full sm:h-[25rem] object-cover"
                     />
                     <div>
                         <h1 className="text-2xl md:text-3xl font-extrabold sm:font-bold text-primary_green">
-                            {ticketDetails.title}
+                            {transferDetails.title}
                         </h1>
-                        <p className="text-desc_gray mt-2">{ticketDetails.desc}</p>
+                        <p className="text-desc_gray mt-2">{transferDetails.desc}</p>
                         <div className="flex flex-wrap gap-2 mt-4">
-                            {ticketDetails.tags.map((tag, i) => (
+                            {transferDetails.tags.map((tag, i) => (
                                 <Tag key={i} tag={tag} />
                             ))}
                         </div>
@@ -55,17 +55,17 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                     {/* ✅ Booking Panel for small screens */}
                     <div className="block lg:hidden bg-white border rounded-md p-4 shadow-sm mt-6">
                         <div className="mb-4">
-                            <p className="text-lg text-gray-400 line-through">RM {ticketDetails.oldPrice}</p>
+                            <p className="text-lg text-gray-400 line-through">RM {transferDetails.oldPrice}</p>
                             <h2 className="text-3xl font-extrabold sm:font-bold">
-                                RM {ticketDetails.newPrice}
+                                RM {transferDetails.newPrice}
                                 <span className="">/person</span>
                             </h2>
                             <div className="flex items-center gap-2">
                                 <FaBookmark className="text-primary_green inline-block mr-1" />
-                                <span className="font-semibold">{ticketDetails.bookedCount} + Booked</span>
+                                <span className="font-semibold">{transferDetails.bookedCount} + Booked</span>
                             </div>
                         </div>
-                        <GreenBtn text="Book Now" action={`/booking/ticket/${ticketDetails.slug}`} customStyles="" />
+                        <GreenBtn text="Book Now" action={`/booking/transfer/${transferDetails.slug}`} customStyles="" />
                     </div>
 
                     <div className="space-y-6 mt-6">
@@ -77,7 +77,7 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                                 <h5 className="font-semibold text-primary_green">From</h5>
                             </div>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                                <p>{ticketDetails.from}</p>
+                                <p>{transferDetails.from}</p>
                             </ul>
                         </div>
                         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -88,26 +88,26 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                                 <h5 className="font-semibold text-primary_green">To</h5>
                             </div>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                                <p>{ticketDetails.to}</p>
+                                <p>{transferDetails.to}</p>
                             </ul>
                         </div>
                         <div className="bg-white border rounded-md p-4 shadow-sm">
                             <div className="flex gap-2 items-center">
                                 <BsInfoCircleFill className="text-xl text-primary_green" />
-                                <h5 className="font-semibold text-primary_green">About this ticket</h5>
+                                <h5 className="font-semibold text-primary_green">About this transfer</h5>
                             </div>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                                <p>{ticketDetails.details.about}</p>
+                                <p>{transferDetails.details.about}</p>
                             </ul>
                         </div>
 
                         <div className="bg-white border rounded-md p-4 shadow-sm">
                             <div className="flex gap-2 items-center">
                                 <FaClock className="text-xl text-primary_green" />
-                                <h5 className="font-semibold text-primary_green">Departure Time</h5>
+                                <h5 className="font-semibold text-primary_green">Departure Times</h5>
                             </div>
                             <ul className="mt-2 space-y-1">
-                                {ticketDetails.time.map((time, index) => (
+                                {transferDetails.time.map((time, index) => (
                                     <li key={index} className="text-sm text-desc_gray ml-5">
                                         {time}
                                     </li>
@@ -123,7 +123,7 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
                             </div>
                             <ul className="ml-5 text-sm text-desc_gray space-y-1">
-                                <p>{ticketDetails.details.itinerary}</p>
+                                <p>{transferDetails.details.itinerary}</p>
                             </ul>
                         </div>
 
@@ -139,7 +139,7 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                                 following places.
                             </p>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1">
-                                {ticketDetails.details.pickupLocations.map((item, index) => (
+                                {transferDetails.details.pickupLocations.map((item: string, index: number) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ul>
@@ -152,7 +152,7 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Note</h5>
                             </div>
-                            <p className="text-sm text-desc_gray">{ticketDetails.details.note}</p>
+                            <p className="text-sm text-desc_gray">{transferDetails.details.note}</p>
                         </div>
                     </div>
                 </div>
@@ -160,23 +160,23 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
                 {/* ✅ Booking Panel for large screens */}
                 <div className="w-full lg:w-80 shrink-0 hidden lg:block">
                     <div className="mb-6">
-                        <p className="text-lg text-gray-400 line-through">RM {ticketDetails.oldPrice}</p>
+                        <p className="text-lg text-gray-400 line-through">RM {transferDetails.oldPrice}</p>
                         <h2 className="text-lg">
                             <h2 className="text-3xl font-bold">
-                                RM {ticketDetails.newPrice} <span>/person</span>
+                                RM {transferDetails.newPrice} <span>/person</span>
                             </h2>
                         </h2>
                         <div className="flex items-center gap-2">
                             <FaBookmark className="text-primary_green inline-block mr-1" />
-                            <span className="font-semibold">{ticketDetails.bookedCount} + Booked</span>
+                            <span className="font-semibold">{transferDetails.bookedCount} + Booked</span>
                         </div>
                     </div>
-                    <GreenBtn text="Book Now" action={`/booking/ticket/${ticketDetails.slug}`} customStyles="" />
+                    <GreenBtn text="Book Now" action={`/booking/transfer/${transferDetails.slug}`} customStyles="" />
                 </div>
             </div>
 
             <section>
-                <FAQSection faqs={ticketDetails.details.faq} />
+                <FAQSection faqs={transferDetails.details.faq} />
             </section>
 
             <section className="bg-white border rounded-md px-6 py-10 shadow-sm flex flex-col md:flex-row gap-6 mx-4 md:mx-10">
@@ -196,21 +196,21 @@ export default async function ticketDetailPage({ params }: TicketDetailPageProps
 
             {/* Book Button */}
             <div className="text-center">
-                <GreenBtn text="Book this ticket" action={`/booking/ticket/${ticketDetails.slug}`} />
+                <GreenBtn text="Book this transfer" action={`/booking/transfer/${transferDetails.slug}`} />
             </div>
 
-            {/* Other tickets */}
+            {/* Other transfers */}
             <section>
                 <div className="flex items-center gap-2">
                     <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
                     <h2 className="text-2xl font-extrabold sm:font-bold text-primary_green mb-4 pt-2  min-w-max">
-                        Other tickets
+                        Other transfers
                     </h2>
                     <hr className="border-b-2 border-primary_green  w-full  md:flex" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {othertickets.map((ticket, i) => (
-                        <TicketCard key={i} {...ticket} />
+                    {othertransfers.map((transfer, i) => (
+                        <TransferCard key={i} {...transfer} />
                     ))}
                 </div>
             </section>

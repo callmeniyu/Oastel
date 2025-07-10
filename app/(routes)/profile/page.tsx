@@ -11,11 +11,28 @@ import SessionHook from "@/hooks/SessionHook"
 import { FiChevronRight } from "react-icons/fi"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { useToast } from "@/context/ToastContext"
+import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
     const { user, isAuthenticated } = SessionHook()
-
+    const router = useRouter()
     const { showToast } = useToast()
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            showToast({
+                type: "error",
+                title: "Unauthorized",
+                message: "You must be logged in to access profile page.",
+            })
+            router.push("/auth")
+        }
+    }, [isAuthenticated, showToast, router])
+
+    if (!isAuthenticated) {
+        return null // or a loading spinner
+    }
+
     const [userData, setUserData] = useState({
         username: "",
         email: "",
@@ -213,7 +230,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Right Content */}
-                <div className="md:col-span-3 bg-white rounded-xl shadow-sm p-6 min-h-[400px]">
+                <div className="md:col-span-3 bg-white rounded-xl shadow-sm md:p-6 min-h-[400px]">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}

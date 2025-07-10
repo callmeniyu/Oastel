@@ -56,7 +56,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         <div className="mb-4">
                             <p className="text-lg text-gray-400 line-through">RM {tourDetails.oldPrice}</p>
                             <h2 className="text-lg">
-                                <span className="text-3xl font-extrabold sm:font-bold">RM {tourDetails.newPrice}</span>{tourDetails.type === "private" ? " / group" : " / person"}
+                                <span className="text-3xl font-extrabold sm:font-bold">RM {tourDetails.newPrice}</span>
+                                {tourDetails.type === "private" ? " / group" : " / person"}
                             </h2>
                             <div className="flex items-center gap-2">
                                 <FaBookmark className="text-primary_green inline-block mr-1" />
@@ -80,9 +81,15 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         <div className="bg-white border rounded-md p-4 shadow-sm">
                             <div className="flex gap-2 items-center">
                                 <FaClock className="text-xl text-primary_green" />
-                                <h5 className="font-semibold text-primary_green">Departure Time</h5>
+                                <h5 className="font-semibold text-primary_green">Departure Times</h5>
                             </div>
-                            <p className="text-sm font-semibold ml-8">{tourDetails.time}</p>
+                            <ul className="mt-2 space-y-1">
+                                {tourDetails.time.map((time, index) => (
+                                    <li key={index} className="text-sm text-desc_gray ml-5">
+                                        {time}
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
 
                         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -93,7 +100,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
                             </div>
                             <ul className="ml-5 text-sm text-desc_gray space-y-1">
-                                    <p>{tourDetails.details.itinerary}</p>
+                                <p>{tourDetails.details.itinerary}</p>
                             </ul>
                         </div>
 
@@ -132,7 +139,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                     <div className="mb-6">
                         <p className="text-lg text-gray-400 line-through">RM {tourDetails.oldPrice}</p>
                         <h2 className="text-lg">
-                        <span className="text-3xl font-bold">RM {tourDetails.newPrice}</span> {tourDetails.type === "private" ? " / group" : " / person"}
+                            <span className="text-3xl font-bold">RM {tourDetails.newPrice}</span>{" "}
+                            {tourDetails.type === "private" ? " / group" : " / person"}
                         </h2>
                         <div className="flex items-center gap-2">
                             <FaBookmark className="text-primary_green inline-block mr-1" />

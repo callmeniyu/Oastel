@@ -7,7 +7,7 @@ import { IoFlagSharp } from "react-icons/io5"
 import Tag from "./Tag"
 import GreenBtn from "./GreenBtn"
 
-type TicketCardProps = {
+type TransferCardProps = {
     _id: string
     slug: string
     image: string
@@ -24,7 +24,7 @@ type TicketCardProps = {
     label?: "Recommended" | "Popular" | "Best Value" | null
 }
 
-export default function TicketCard({
+export default function TransferCard({
     _id,
     slug,
     image,
@@ -39,7 +39,7 @@ export default function TicketCard({
     from,
     to,
     label,
-}: TicketCardProps) {
+}: TransferCardProps) {
     // Label styling based on type
     const getLabelStyles = (labelType: string) => {
         switch (labelType) {
@@ -105,7 +105,7 @@ export default function TicketCard({
                         </h4>
                     </div>
 
-                    <GreenBtn text="Book" customStyles="font-semibold w-24" action={`/tickets/${slug}`} />
+                    <GreenBtn text="Book" customStyles="font-semibold w-24" action={`/transfers/${slug}`} />
                 </div>
             </div>
         </div>

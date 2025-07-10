@@ -17,7 +17,7 @@ type Props = {
     onClick?: () => void
     userInfo?: boolean
     totalPrice: number
-    packageType:"tour" | "ticket"
+    packageType:"tour" | "transfer"
 }
 
 export default function BookingInfoPanel({
@@ -45,7 +45,7 @@ export default function BookingInfoPanel({
             </div>
             <div className="px-4 flex flex-col gap-2">
                 <div className="text-sm mb-2 flex gap-8 justify-between">
-                    <h6 className="font-semibold">{ packageType === "tour" ? "Tour" : "Ticket"}</h6>
+                    <h6 className="font-semibold">{ packageType === "tour" ? "Tour" : "Transfer"}</h6>
                     <p className="text-desc_gray text-right">{title}</p>
                 </div>
                 <div className="text-sm mb-2 flex justify-between">

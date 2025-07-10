@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react"
 import BookingCalendar from "@/components/ui/BookingCalendar"
 import BookingInfoPanel from "@/components/ui/BookingInfoPanel"
-import { getTicketBySlug } from "@/lib/utils"
-import { TicketType } from "@/lib/types"
+import { getTransferBySlug } from "@/lib/utils"
+import { TransferType } from "@/lib/types"
 import { useParams } from "next/navigation"
 import { useBooking } from "@/context/BookingContext"
 import { useRouter } from "next/navigation"
@@ -19,8 +19,7 @@ export default function BookingInfoPage() {
     const { setBooking } = useBooking()
     const router = useRouter()
     const { showToast } = useToast()
-
-    const [ticketDetails, setticketDetails] = useState<TicketType>()
+    const [transferDetails, setTransferDetails] = useState<TransferType>()
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedTime, setSelectedTime] = useState("8:00 am")
     const [availableTimes, setAvailableTimes] = useState<string[]>([])
@@ -30,15 +29,15 @@ export default function BookingInfoPage() {
     const [totalGuests, setTotalGuests] = useState(0)
 
     useEffect(() => {
-        const getticketDetails = async () => {
-            const ticket = await getTicketBySlug(slug)
-            if (ticket) {
-                setticketDetails(ticket)
+        const getTransferDetails = async () => {
+            const transfer = await getTransferBySlug(slug)
+            if (transfer) {
+                setTransferDetails(transfer)
                 setAdults(1)
                 setTotalGuests(1)
             }
         }
-        getticketDetails()
+        getTransferDetails()
     }, [slug])
 
     useEffect(() => {
@@ -48,10 +47,10 @@ export default function BookingInfoPage() {
     }, [selectedDate])
 
     const updateAdults = (newCount: number) => {
-        if (!ticketDetails) return
+        if (!transferDetails) return
 
         const newTotal = newCount + children
-        if (newCount >= (ticketDetails.minimumPerson || 1) && newTotal <= (ticketDetails.maximumPerson || Infinity)) {
+        if (newCount >= (transferDetails.minimumPerson || 1) && newTotal <= (transferDetails.maximumPerson || Infinity)) {
             setAdults(newCount)
             setTotalGuests(newTotal)
         }
@@ -59,14 +58,14 @@ export default function BookingInfoPage() {
 
     const updateChildren = (newCount: number) => {
         const newTotal = adults + newCount
-        if (newTotal <= (ticketDetails?.maximumPerson || Infinity)) {
+        if (newTotal <= (transferDetails?.maximumPerson || Infinity)) {
             setChildren(newCount)
             setTotalGuests(newTotal)
         }
     }
 
     useEffect(() => {
-        if (totalGuests >= (ticketDetails?.maximumPerson || Infinity)) {
+        if (totalGuests >= (transferDetails?.maximumPerson || Infinity)) {
             showToast({
                 type: "error",
                 title: "You have reached the maximum number of guests.",
@@ -76,30 +75,30 @@ export default function BookingInfoPage() {
     }, [adults, children])
 
     const handleContinue = () => {
-        if (!ticketDetails) return
+        if (!transferDetails) return
         const totalPrice = calculateTotalPrice()
         setBooking({
-            title: ticketDetails.title,
+            title: transferDetails.title,
             slug: slug,
             date: selectedDate.toISOString(),
             time: selectedTime,
-            type: ticketDetails.type || "Private ticket",
-            duration: ticketDetails.duration || "4-6 hours",
+            type: transferDetails.type || "Private transfer",
+            duration: transferDetails.duration || "4-6 hours",
             adults,
             children,
-            adultPrice: ticketDetails.newPrice || 0,
-            childPrice: ticketDetails.childPrice || 0,
+            adultPrice: transferDetails.newPrice || 0,
+            childPrice: transferDetails.childPrice || 0,
             totalPrice: totalPrice,
-            pickupLocations: ticketDetails.details.pickupLocations || [""],
-            packageType: "ticket",
+            pickupLocations: transferDetails.details.pickupLocations || [""],
+            packageType: "transfer",
         })
         router.push("/booking/user-info")
     }
 
     // Calculate total price based on ticket type
     const calculateTotalPrice = () => {
-        if (!ticketDetails) return 0
-        return adults * (ticketDetails.newPrice || 0) + children * (ticketDetails.childPrice || 0)
+        if (!transferDetails) return 0
+        return adults * (transferDetails.newPrice || 0) + children * (transferDetails.childPrice || 0)
     }
 
     return (
@@ -111,8 +110,8 @@ export default function BookingInfoPage() {
                     <div className="w-full flex flex-col rounded-lg shadow-md p-4 bg-white">
                         <h3 className="text-primary_green text-xl font-bold mb-2">Select your time</h3>
                         <div className="flex flex-col gap-2 ">
-                            {ticketDetails &&
-                                ticketDetails.time.map((t) => (
+                            {transferDetails &&
+                                transferDetails.time.map((t) => (
                                     <button
                                         key={t}
                                         className={`px-4 py-2 rounded border ${
@@ -135,15 +134,15 @@ export default function BookingInfoPage() {
                         {[
                             {
                                 label: "Adults",
-                                desc: `Minimum: ${ticketDetails?.minimumPerson} person per group.`,
+                                desc: `Minimum: ${transferDetails?.minimumPerson} person per group.`,
                                 value: adults,
                                 onIncrement: () => updateAdults(adults + 1),
                                 onDecrement: () => updateAdults(adults - 1),
-                                disableDecrement: adults <= (ticketDetails?.minimumPerson || 1),
-                                disableIncrement: totalGuests >= (ticketDetails?.maximumPerson || Infinity),
-                                price: ticketDetails?.newPrice || 0,
+                                disableDecrement: adults <= (transferDetails?.minimumPerson || 1),
+                                disableIncrement: totalGuests >= (transferDetails?.maximumPerson || Infinity),
+                                price: transferDetails?.newPrice || 0,
                             },
-                            ...(ticketDetails?.type !== "Private"
+                            ...(transferDetails?.type !== "Private"
                                 ? [
                                       {
                                           label: "Children",
@@ -152,8 +151,8 @@ export default function BookingInfoPage() {
                                           onIncrement: () => updateChildren(children + 1),
                                           onDecrement: () => updateChildren(children - 1),
                                           disableDecrement: children <= 0,
-                                          disableIncrement: totalGuests >= (ticketDetails?.maximumPerson || Infinity),
-                                          price: ticketDetails?.childPrice || 0,
+                                          disableIncrement: totalGuests >= (transferDetails?.maximumPerson || Infinity),
+                                          price: transferDetails?.childPrice || 0,
                                       },
                                   ]
                                 : []),
@@ -176,7 +175,7 @@ export default function BookingInfoPage() {
                                         <p className="font-semibold">
                                             {label}{" "}
                                             <span className="text-sm text-desc_gray">
-                                                (RM {price} {ticketDetails?.type === "Private" ? "/group" : "/person"})
+                                                (RM {price} {transferDetails?.type === "Private" ? "/group" : "/person"})
                                             </span>
                                         </p>
                                         <div className="space-y-1 mt-1">
@@ -223,18 +222,18 @@ export default function BookingInfoPage() {
             </div>
 
             <BookingInfoPanel
-                title={ticketDetails?.title || "ticket Title"}
+                title={transferDetails?.title || "transfer Title"}
                 date={selectedDate}
                 time={selectedTime}
-                type={ticketDetails?.type || "Private ticket"}
-                duration={ticketDetails?.duration || "4-6 hours"}
+                type={transferDetails?.type || "Private transfer"}
+                duration={transferDetails?.duration || "4-6 hours"}
                 adults={adults}
                 children={children}
-                adultPrice={ticketDetails?.newPrice || 0}
-                childPrice={ticketDetails?.childPrice || 0}
+                adultPrice={transferDetails?.newPrice || 0}
+                childPrice={transferDetails?.childPrice || 0}
                 totalPrice={calculateTotalPrice()}
                 onClick={handleContinue}
-                packageType="ticket"
+                packageType="transfer"
             />
         </div>
     )

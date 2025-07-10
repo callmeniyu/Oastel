@@ -25,7 +25,7 @@ export default function HeroSection() {
             title: "Book Transfer",
             description: "Seamless transfers between destinations",
             icon: <LiaShuttleVanSolid className="text-2xl" />,
-            href: "/tickets",
+            href: "/transfers",
             bgColor: "bg-[#2196F3]",
         },
     ]

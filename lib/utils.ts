@@ -1,6 +1,6 @@
 import { allTours } from "./data"
 import { allBlogs } from "./data"
-import { allTickets } from "./data"
+import { allTransfers } from "./data"
 
 
 export const getOtherTours = async (slug:string) => {
@@ -20,10 +20,17 @@ export const getOtherBlogs = async (slug: string) => {
     return allBlogs.filter(blog => blog.slug !== slug).slice(0, 4);
 }
 
-export const getTicketBySlug = async (slug: string) => {
-    return allTickets.find((ticket) => ticket.slug === slug)
+export const getTransferBySlug = async (slug: string) => {
+    return allTransfers.find((transfer) => transfer.slug === slug)
 }
 
-export const getOtherTickets = async (slug: string) => {
-    return allTickets.filter(ticket => ticket.slug !== slug).slice(0, 4);
+export const getOtherTransfers = async (slug: string) => {
+    return allTransfers.filter(transfer => transfer.slug !== slug).slice(0, 4);
+}
+
+
+export const isTripCompleted = (bookingDate: string, bookingTime: string) => {
+    const currentDate = new Date();
+    const tripDate = new Date(`${bookingDate} ${bookingTime}`);
+    return tripDate < currentDate;
 }

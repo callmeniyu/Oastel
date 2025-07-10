@@ -19,7 +19,7 @@ type Props = {
     isSmallScreen?: boolean
 }
 
-export default function TicketFilterBar({ filters, onFilterChange, onApply, onClear, isSmallScreen }: Props) {
+export default function TransferFilterBar({ filters, onFilterChange, onApply, onClear, isSmallScreen }: Props) {
     const [fromDropdownOpen, setFromDropdownOpen] = useState(false)
     const [toDropdownOpen, setToDropdownOpen] = useState(false)
     const fromDropdownRef = useRef<HTMLDivElement>(null)

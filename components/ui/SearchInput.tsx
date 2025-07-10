@@ -7,15 +7,16 @@ type SearchInputProps = {
     onChange: (value: string) => void
     onSearch: () => void
     onClear?: () => void
+    placeholder?: string
 }
 
-export default function SearchInput({ customeStyles, value, onChange, onSearch, onClear }: SearchInputProps) {
+export default function SearchInput({ customeStyles, value, onChange, onSearch, onClear, placeholder }: SearchInputProps) {
     return (
         <div className={`w-full max-w-md mx-auto ${customeStyles}`}>
             <div className="flex items-center border border-primary_green rounded-full overflow-hidden pl-4 px-3 py-2 bg-white">
                 <input
                     type="text"
-                    placeholder="Search for any tour packages"
+                    placeholder={placeholder || "Search for any tour packages"}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     className="w-full outline-none text-sm font-poppins placeholder:font-poppins"

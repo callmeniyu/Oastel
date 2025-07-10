@@ -33,9 +33,9 @@ export default function BookingInfoPage() {
         const getTourDetails = async () => {
             const tour = await getTourBySlug(slug)
             if (tour) {
-                setTourDetails(tour)
+                setTourDetails(tour as TourType)
                 // Always start with 8 adults for private tours
-                const initialAdults = tour.type === "private" ? 8 : (tour.minimumPerson || 1)
+                const initialAdults = tour.type === "private" ? 8 : tour.minimumPerson || 1
                 setAdults(initialAdults)
                 setTotalGuests(initialAdults)
             }
@@ -52,9 +52,7 @@ export default function BookingInfoPage() {
     // Calculate price per person for private tours (newPrice / 8)
     const getAdultPrice = () => {
         if (!tourDetails) return 0
-        return tourDetails.type === "private" 
-            ? (tourDetails.newPrice || 0) / 8 
-            : (tourDetails.newPrice || 0)
+        return tourDetails.type === "private" ? (tourDetails.newPrice || 0) / 8 : tourDetails.newPrice || 0
     }
 
     const updateAdults = (newCount: number) => {
@@ -77,7 +75,7 @@ export default function BookingInfoPage() {
 
     const updateChildren = (newCount: number) => {
         if (!tourDetails || tourDetails.type === "private") return
-        
+
         const newTotal = adults + newCount
         if (newTotal <= (tourDetails.maximumPerson || Infinity)) {
             setChildren(newCount)
@@ -109,9 +107,10 @@ export default function BookingInfoPage() {
             adultPrice: getAdultPrice(),
             childPrice: tourDetails.childPrice || 0,
             // Store the total price for private tours
-            totalPrice: tourDetails.type === "private" 
-                ? (adults / 8) * (tourDetails.newPrice || 0)
-                : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0),
+            totalPrice:
+                tourDetails.type === "private"
+                    ? (adults / 8) * (tourDetails.newPrice || 0)
+                    : adults * (tourDetails.newPrice || 0) + children * (tourDetails.childPrice || 0),
             pickupLocations: tourDetails.details.pickupLocations || [""],
             packageType: "tour",
         })
@@ -166,16 +165,13 @@ export default function BookingInfoPage() {
                                 ],
                                 value: adults,
                                 onIncrement: () =>
-                                    tourDetails?.type === "private"
-                                        ? updateAdults(adults + 8)
-                                        : updateAdults(adults + 1),
+                                    tourDetails?.type === "private" ? updateAdults(adults + 8) : updateAdults(adults + 1),
                                 onDecrement: () =>
+                                    tourDetails?.type === "private" ? updateAdults(adults - 8) : updateAdults(adults - 1),
+                                disableDecrement:
                                     tourDetails?.type === "private"
-                                        ? updateAdults(adults - 8)
-                                        : updateAdults(adults - 1),
-                                disableDecrement: tourDetails?.type === "private"
-                                    ? adults <= 8
-                                    : adults <= (tourDetails?.minimumPerson || 1),
+                                        ? adults <= 8
+                                        : adults <= (tourDetails?.minimumPerson || 1),
                                 disableIncrement: totalGuests >= (tourDetails?.maximumPerson || Infinity),
                                 price: getAdultPrice(),
                             },
@@ -210,7 +206,10 @@ export default function BookingInfoPage() {
                                 >
                                     <div className="flex-1">
                                         <p className="font-semibold">
-                                            {label} <span className="text-sm text-desc_gray">(RM {price * 8} {label === "Group" && "for 8 persons"})</span>
+                                            {label}{" "}
+                                            <span className="text-sm text-desc_gray">
+                                                (RM {price * 8} {label === "Group" && "for 8 persons"})
+                                            </span>
                                         </p>
                                         <div className="space-y-1 mt-1">
                                             {desc.map((d, index) => (
@@ -249,10 +248,9 @@ export default function BookingInfoPage() {
                                         </div>
 
                                         <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                                            {tourDetails?.type === "private" 
+                                            {tourDetails?.type === "private"
                                                 ? `RM ${(value / 8) * (tourDetails.newPrice || 0)}`
-                                                : `RM ${value * price}`
-                                            }
+                                                : `RM ${value * price}`}
                                         </span>
                                     </div>
                                 </div>

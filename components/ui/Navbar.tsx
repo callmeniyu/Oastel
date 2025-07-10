@@ -52,7 +52,7 @@ export default function Navbar() {
     }, [showProfile])
 
     // Determine if current page should have glass navbar
-    const isGlassPage = pathname === "/" || pathname === "/tours" || pathname === "/tickets"
+    const isGlassPage = pathname === "/" || pathname === "/tours" || pathname === "/transfers"
 
     // Handle scroll detection
     useEffect(() => {

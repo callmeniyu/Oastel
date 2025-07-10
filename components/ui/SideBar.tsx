@@ -132,21 +132,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 }`}
                             >
                                 <Link 
-                                    href="/tickets#van" 
+                                    href="/transfers#van" 
                                     onClick={onClose}
                                     className="block px-3 py-2 text-desc_gray rounded-lg hover:bg-primary_green/5 hover:text-primary_green transition-colors"
                                 >
                                     Van
                                 </Link>
                                 <Link 
-                                    href="/tickets#ferry" 
+                                    href="/transfers#ferry" 
                                     onClick={onClose}
                                     className="block px-3 py-2 text-desc_gray rounded-lg hover:bg-primary_green/5 hover:text-primary_green transition-colors"
                                 >
                                     Van + Ferry
                                 </Link>
                                 <Link 
-                                    href="/tickets#private" 
+                                    href="/transfers#private" 
                                     onClick={onClose}
                                     className="block px-3 py-2 text-desc_gray rounded-lg hover:bg-primary_green/5 hover:text-primary_green transition-colors"
                                 >

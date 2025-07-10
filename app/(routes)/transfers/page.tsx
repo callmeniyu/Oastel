@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import TicketFilterBar from "@/components/ui/TicketFilterBar"
+import TransferFilterBar from "@/components/ui/TransferFilterBar"
 import SearchInput from "@/components/ui/SearchInput"
-import TicketCard from "@/components/ui/TicketCard"
+import TransferCard from "@/components/ui/TransferCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
-import { allTickets } from "@/lib/data"
+import { allTransfers } from "@/lib/data"
 import Image from "next/image"
 
 type FilterState = {
@@ -18,11 +18,11 @@ type FilterState = {
     prices: string[]
 }
 
-export default function Tickets() {
+export default function Transfers() {
     const [searchTerm, setSearchTerm] = useState("")
-    const vanTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "van")
-    const ferryTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "van + ferry")
-    const privateTickets = allTickets.filter((ticket) => ticket.type.toLowerCase() === "private")
+    const vanTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "van")
+    const ferryTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "van + ferry")
+    const privateTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "private")
 
     const [filters, setFilters] = useState<FilterState>({
         from: "",
@@ -32,7 +32,7 @@ export default function Tickets() {
         prices: [],
     })
 
-    const [filteredTickets, setFilteredTickets] = useState(allTickets)
+    const [filteredTransfers, setFilteredTransfers] = useState(allTransfers)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [filtersApplied, setFiltersApplied] = useState(false)
 
@@ -41,58 +41,58 @@ export default function Tickets() {
     }
 
     const handleApply = () => {
-        const result = allTickets.filter((ticket) => {
+        const result = allTransfers.filter((transfer) => {
             const { from, to, transports, durations, prices } = filters
 
             // From filter - exact match or contains
             const matchFrom =
                 !from.trim() ||
-                ticket.from.toLowerCase() === from.trim().toLowerCase() ||
-                ticket.from.toLowerCase().includes(from.trim().toLowerCase())
+                transfer.from.toLowerCase() === from.trim().toLowerCase() ||
+                transfer.from.toLowerCase().includes(from.trim().toLowerCase())
 
             // To filter - exact match or contains
             const matchTo =
                 !to.trim() ||
-                ticket.to.toLowerCase() === to.trim().toLowerCase() ||
-                ticket.to.toLowerCase().includes(to.trim().toLowerCase())
+                transfer.to.toLowerCase() === to.trim().toLowerCase() ||
+                transfer.to.toLowerCase().includes(to.trim().toLowerCase())
 
-            // Transport filter - map filter options to ticket types and tags
+            // Transport filter - map filter options to transfer types and tags
             const matchTransport =
                 transports.length === 0 ||
                 transports.some((t) => {
                     const transportLower = t.toLowerCase()
-                    const ticketTypeLower = ticket.type.toLowerCase()
+                    const transferTypeLower = transfer.type.toLowerCase()
 
                     switch (transportLower) {
                         case "shared mini van":
-                            return ticketTypeLower === "van"
+                            return transferTypeLower === "van"
                         case "shared van + ferry":
-                            return ticketTypeLower === "van + ferry"
+                            return transferTypeLower === "van + ferry"
                         case "private alphard":
                             return (
-                                ticketTypeLower === "private" ||
-                                ticket.tags.some(
+                                transferTypeLower === "private" ||
+                                transfer.tags.some(
                                     (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("alphard")
                                 )
                             )
                         case "private innova":
                             return (
-                                ticketTypeLower === "private" ||
-                                ticket.tags.some(
+                                transferTypeLower === "private" ||
+                                transfer.tags.some(
                                     (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("innova")
                                 )
                             )
                         case "private welfare":
                             return (
-                                ticketTypeLower === "private" ||
-                                ticket.tags.some(
+                                transferTypeLower === "private" ||
+                                transfer.tags.some(
                                     (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("welfare")
                                 )
                             )
                         case "private mini van":
                             return (
-                                ticketTypeLower === "private" ||
-                                ticket.tags.some(
+                                transferTypeLower === "private" ||
+                                transfer.tags.some(
                                     (tag) =>
                                         tag.toLowerCase().includes("private") ||
                                         tag.toLowerCase().includes("mini") ||
@@ -102,8 +102,8 @@ export default function Tickets() {
                         default:
                             // Generic matching for any transport type
                             return (
-                                ticketTypeLower.includes(transportLower) ||
-                                ticket.tags.some((tag) => tag.toLowerCase().includes(transportLower))
+                                transferTypeLower.includes(transportLower) ||
+                                transfer.tags.some((tag) => tag.toLowerCase().includes(transportLower))
                             )
                     }
                 })
@@ -113,14 +113,14 @@ export default function Tickets() {
                 durations.length === 0 ||
                 durations.some((d) => {
                     // Extract number from duration string (e.g., "4 hours" -> 4, "3.5" -> 3.5)
-                    const durationStr = ticket.duration.toString()
-                    const ticketDuration = parseFloat(durationStr.replace(/[^0-9.]/g, ""))
+                    const durationStr = transfer.duration.toString()
+                    const transferDuration = parseFloat(durationStr.replace(/[^0-9.]/g, ""))
 
                     switch (d) {
                         case "2–4 hrs":
-                            return ticketDuration >= 2 && ticketDuration <= 4
+                            return transferDuration >= 2 && transferDuration <= 4
                         case "4–8 hrs":
-                            return ticketDuration > 4 && ticketDuration <= 8
+                            return transferDuration > 4 && transferDuration <= 8
                         default:
                             return false
                     }
@@ -135,22 +135,22 @@ export default function Tickets() {
                         .replace("-", "–") // Handle both dash types
                         .split("–")
                         .map((v) => parseInt(v.trim()))
-                    return ticket.newPrice >= min && ticket.newPrice <= max
+                    return transfer.newPrice >= min && transfer.newPrice <= max
                 })
 
             // Search filter - include tags in search
             const matchSearch =
                 searchTerm.trim() === "" ||
-                ticket.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                ticket.from.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                ticket.to.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                ticket.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim())) ||
-                ticket.desc.toLowerCase().includes(searchTerm.toLowerCase().trim())
+                transfer.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                transfer.from.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                transfer.to.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                transfer.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim())) ||
+                transfer.desc.toLowerCase().includes(searchTerm.toLowerCase().trim())
 
             return matchFrom && matchTo && matchTransport && matchDuration && matchPrice && matchSearch
         })
 
-        setFilteredTickets(result)
+        setFilteredTransfers(result)
 
         // Check if any filters/search are actually active
         const hasActiveFilters =
@@ -174,14 +174,14 @@ export default function Tickets() {
             prices: [],
         })
         setSearchTerm("")
-        setFilteredTickets(allTickets) // Reset to show all tickets
+        setFilteredTransfers(allTransfers) // Reset to show all Transfers
         setFiltersApplied(false)
         setIsFilterOpen(false)
     }
 
     const handleClearSearch = () => {
         setSearchTerm("")
-        setFilteredTickets(allTickets)
+        setFilteredTransfers(allTransfers)
         setFiltersApplied(false)
     }
 
@@ -201,7 +201,7 @@ export default function Tickets() {
             <div className="relative h-96 md:h-[100vh] pt-16 overflow-hidden">
                 {/* Background Image */}
                 <Image
-                    src="/images/ticket-main.jpg"
+                    src="/images/transfer-main.jpg"
                     alt="Van transfers background"
                     fill
                     className="object-cover"
@@ -235,6 +235,7 @@ export default function Tickets() {
                     onChange={setSearchTerm}
                     onSearch={handleApply}
                     onClear={handleClearSearch}
+                    placeholder="Search for transfers"
                 />
                 <button
                     className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
@@ -248,7 +249,7 @@ export default function Tickets() {
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
                 {/* Sidebar */}
                 <div className="hidden sm:block sticky-filter">
-                    <TicketFilterBar
+                    <TransferFilterBar
                         filters={filters}
                         onFilterChange={handleFilterChange}
                         onApply={handleApply}
@@ -266,7 +267,7 @@ export default function Tickets() {
                             >
                                 <IoClose size={24} />
                             </button>
-                            <TicketFilterBar
+                            <TransferFilterBar
                                 filters={filters}
                                 onFilterChange={handleFilterChange}
                                 isSmallScreen={true}
@@ -283,7 +284,7 @@ export default function Tickets() {
                     </div>
                 )}
 
-                {/* Tickets */}
+                {/* Transfers */}
                 <div className="space-y-8 w-full">
                     {filtersApplied ? (
                         // Show filtered results under "Your Results"
@@ -296,21 +297,21 @@ export default function Tickets() {
                                 <hr className="border-b-2 border-primary_green w-full md:flex" />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredTickets.length === 0 ? (
+                                {filteredTransfers.length === 0 ? (
                                     <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
                                         <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
-                                        <p>No tickets match your filters. Try changing the options.</p>
+                                        <p>No transfers match your filters. Try changing the options.</p>
                                     </div>
                                 ) : (
-                                    filteredTickets.map((ticket, i) => <TicketCard key={i} {...ticket} />)
+                                    filteredTransfers.map((transfer, i) => <TransferCard key={i} {...transfer} />)
                                 )}
                             </div>
                         </div>
                     ) : (
-                        // Show categorized tickets when no filters are active
+                        // Show categorized transfers when no filters are active
                         <>
-                            {/* Van Tickets */}
-                            {vanTickets.length > 0 && (
+                            {/* Van Transfers */}
+                            {vanTransfers.length > 0 && (
                                 <div id="van">
                                     <div className="flex items-center gap-2 mb-6">
                                         <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
@@ -320,15 +321,15 @@ export default function Tickets() {
                                         <hr className="border-b-2 border-primary_green w-full md:flex" />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {vanTickets.map((ticket, i) => (
-                                            <TicketCard key={i} {...ticket} />
+                                        {vanTransfers.map((transfer, i) => (
+                                            <TransferCard key={i} {...transfer} />
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Van + Ferry Tickets */}
-                            {ferryTickets.length > 0 && (
+                            {/* Van + Ferry Transfers */}
+                            {ferryTransfers.length > 0 && (
                                 <div id="ferry">
                                     <div className="flex items-center gap-2 mb-6">
                                         <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
@@ -338,15 +339,15 @@ export default function Tickets() {
                                         <hr className="border-b-2 border-primary_green w-full md:flex" />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {ferryTickets.map((ticket, i) => (
-                                            <TicketCard key={i} {...ticket} />
+                                        {ferryTransfers.map((transfer, i) => (
+                                            <TransferCard key={i} {...transfer} />
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Private Tickets */}
-                            {privateTickets.length > 0 && (
+                            {/* Private Transfers */}
+                            {privateTransfers.length > 0 && (
                                 <div id="private">
                                     <div className="flex items-center gap-2 mb-6">
                                         <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
@@ -356,8 +357,8 @@ export default function Tickets() {
                                         <hr className="border-b-2 border-primary_green w-full md:flex" />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {privateTickets.map((ticket, i) => (
-                                            <TicketCard key={i} {...ticket} />
+                                        {privateTransfers.map((transfer, i) => (
+                                            <TransferCard key={i} {...transfer} />
                                         ))}
                                     </div>
                                 </div>

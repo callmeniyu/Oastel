@@ -1,3 +1,24 @@
+
+export interface Address {
+  whatsapp?: string
+  phone?: string
+  pickupAddresses?: string[]
+}
+
+export interface UserType {
+  name: string
+  email: string
+  passwordHash?: string
+  image?: string
+  location?: string
+  bio?: string
+  address?: Address
+  cartId?: string      
+  bookings:string      
+  createdAt: Date
+  updatedAt: Date
+}
+
 export type FAQType = {
     question: string
     answer: string
@@ -29,13 +50,13 @@ export type TourType = {
     minimumPerson: number
     maximumPerson?: number
     time: string[]
-    label?: "Recommended" | "Popular" | "Best Value" | null
+    label?: "Recommended" | "Popular" | "Best Value"
     details: TourDetailsType
     createdAt: Date
     updatedAt: Date
 }
 
-export type TicketDetailsType = {
+export type TransferDetailsType = {
     about: string
     itinerary: string
     pickupLocations: string[]
@@ -43,7 +64,7 @@ export type TicketDetailsType = {
     faq: FAQType[]
 }
 
-export type TicketType = {
+export type TransferType = {
     _id: string
     slug: string
     title: string
@@ -63,7 +84,7 @@ export type TicketType = {
     maximumPerson?: number
     time: string[]
     label?: "Recommended" | "Popular" | "Best Value" | null
-    details: TicketDetailsType
+    details: TransferDetailsType
     createdAt: Date
     updatedAt: Date
 }
@@ -73,7 +94,7 @@ export interface BookingDetailsType {
     slug: string
     date: string
     time: string
-    packageType: "tour" | "ticket"
+    packageType: "tour" | "transfer"
     type: string
     transport?: "Van" | "Van + Ferry" | "Private"
     duration: string
@@ -103,3 +124,4 @@ export type CartItemType = {
     title: string
     slug: string
 }
+
