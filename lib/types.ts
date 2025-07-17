@@ -33,7 +33,7 @@ export type TourDetailsType = {
 }
 
 export type TourType = {
-  id?: string
+    id?: string
     _id: string
     title: string
     slug: string
@@ -43,6 +43,7 @@ export type TourType = {
     type: string
     packageType: string
     duration: string
+    period: "Half-Day" | "Full-Day"
     bookedCount: string | number
     oldPrice: number
     newPrice: number

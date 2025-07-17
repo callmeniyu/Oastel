@@ -124,7 +124,8 @@ export default function TourDetailPage() {
                                 <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                             </div>
                         </div>
-                        <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} customStyles="" />
+
+                        <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} />
                     </div>
 
                     <div className="space-y-6 mt-6">
@@ -210,7 +211,8 @@ export default function TourDetailPage() {
                             <span className="font-semibold">{tourDetails.bookedCount} + Booked</span>
                         </div>
                     </div>
-                    <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} customStyles="" />
+
+                    <GreenBtn text="Book Now" action={`/booking/tour/${tourDetails.slug}`} />
                 </div>
             </div>
 
