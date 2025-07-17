@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
 /**
  * Resolves image URL to full URL if it's a relative path
@@ -6,14 +6,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:30
  * @returns Full URL for the image
  */
 export const resolveImageUrl = (imagePath: string): string => {
-    if (!imagePath) return ""
+    if (!imagePath) return "/images/placeholder-tour.jpg"
 
-    // If it's already a full URL (http/https), return as is
+    // If it's already a full URL (Cloudinary, external, etc.), return as is
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
         return imagePath
     }
 
-    // If it's a relative path starting with /uploads/, prepend API base URL
+    // If it's a data URL, return as is
+    if (imagePath.startsWith("data:")) {
+        return imagePath
+    }
+
+    // For local development with relative paths (/uploads/)
     if (imagePath.startsWith("/uploads/")) {
         return `${API_BASE_URL}${imagePath}`
     }

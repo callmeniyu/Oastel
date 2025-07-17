@@ -17,12 +17,17 @@ const nextConfig: NextConfig = {
             {
                 protocol: "http",
                 hostname: "localhost",
-                port: "3001",
+                port: "3002",
                 pathname: "/uploads/**",
             },
             {
                 protocol: "https",
-                hostname: "https://oastel.vercel.app/",
+                hostname: "res.cloudinary.com",
+                pathname: "/**",
+            },
+            {
+                protocol: "http",
+                hostname: "localhost",
                 pathname: "/***",
             },
         ],

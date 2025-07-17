@@ -65,6 +65,13 @@ export default function TourCard({
                 width={400}
                 height={400}
                 className="h-48 w-full object-cover rounded-t-lg"
+                onError={(e) => {
+                    console.error("Image failed to load:", {
+                        originalPath: image,
+                        resolvedUrl: resolveImageUrl(image),
+                        title: title,
+                    })
+                }}
             />
             <div className="p-4 flex flex-col justify-between gap-2 self-start">
                 <h3 className="text-primary_green font-semibold font-poppins text-base">{title}</h3>

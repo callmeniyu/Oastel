@@ -41,6 +41,8 @@ export default function ToursPage() {
                 setIsLoading(true)
                 setError(null)
                 const response = await tourApi.getTours({ limit: 100 }) // Get all tours
+                console.log("API Response:", response.data)
+                console.log("First tour image:", response.data[0]?.image)
                 setAllTours(response.data)
                 setFilteredTours(response.data)
             } catch (err) {
@@ -218,10 +220,7 @@ export default function ToursPage() {
                         </div>
                     ) : (
                         filteredTours.map((tour: TourType, i: number) => (
-                            <TourCard
-                                key={tour._id || tour.slug || i}
-                                {...tour}
-                            />
+                            <TourCard key={tour._id || tour.slug || i} {...tour} />
                         ))
                     )}
                 </div>
