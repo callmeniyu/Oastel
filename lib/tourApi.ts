@@ -1,6 +1,6 @@
 import { TourType } from "./types"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 export interface ToursResponse {
     success: boolean

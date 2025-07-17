@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
             },
             {
                 protocol: "https",
-                hostname: "localhost",
+                hostname: "https://oastel.vercel.app/",
                 pathname: "/***",
             },
         ],
