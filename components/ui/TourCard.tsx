@@ -3,14 +3,15 @@ import { MdAccessTimeFilled } from "react-icons/md"
 import { FaBookmark } from "react-icons/fa"
 import Tag from "./Tag"
 import GreenBtn from "./GreenBtn"
+import { resolveImageUrl } from "@/lib/imageUtils"
 
 type TourCardProps = {
-    id: number
+    _id: string
     slug: string
     image: string
     title: string
     tags: string[]
-    desc: string
+    description: string
     duration: string
     bookedCount: string | number
     oldPrice: number
@@ -20,11 +21,11 @@ type TourCardProps = {
 }
 
 export default function TourCard({
-    id,
+    _id,
     slug,
     image,
     title,
-    desc,
+    description,
     duration,
     tags,
     bookedCount,
@@ -58,7 +59,13 @@ export default function TourCard({
                     {label}
                 </div>
             )}
-            <Image src={image} alt={title} width={400} height={400} className="h-48 w-full object-cover rounded-t-lg" />
+            <Image
+                src={resolveImageUrl(image)}
+                alt={title}
+                width={400}
+                height={400}
+                className="h-48 w-full object-cover rounded-t-lg"
+            />
             <div className="p-4 flex flex-col justify-between gap-2 self-start">
                 <h3 className="text-primary_green font-semibold font-poppins text-base">{title}</h3>
                 <div className="flex gap-2">
@@ -66,7 +73,7 @@ export default function TourCard({
                         <Tag key={i} tag={tag} />
                     ))}
                 </div>
-                <p className="text-desc_gray text-sm font-poppins">{desc}</p>
+                <p className="text-desc_gray text-sm font-poppins">{description}</p>
                 <div className="flex justify-between gap-2">
                     <div className="flex gap-2 items-center font-semibold">
                         <MdAccessTimeFilled width={30} className="text-primary_green text-lg" />

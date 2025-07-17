@@ -1,29 +1,89 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import Image from "next/image"
 import Tag from "@/components/ui/Tag"
 import TourCard from "@/components/ui/TourCard"
 import FAQSection from "@/components/sections/FAQSection"
 import GreenBtn from "@/components/ui/GreenBtn"
+import Loader from "@/components/ui/Loader"
 import { FaBookmark } from "react-icons/fa"
 import { BsInfoCircleFill } from "react-icons/bs"
 import { FaClock } from "react-icons/fa6"
 import { RiRouteFill } from "react-icons/ri"
 import { RiMapPinLine } from "react-icons/ri"
 import { IoWarningOutline } from "react-icons/io5"
-import { getOtherTours, getTourBySlug } from "@/lib/utils"
+import { tourApi } from "@/lib/tourApi"
+import { TourType } from "@/lib/types"
+import { resolveImageUrl } from "@/lib/imageUtils"
 
-type TourDetailPageProps = {
-    params: { slug: string }
-}
+export default function TourDetailPage() {
+    const params = useParams()
+    const slug = params.slug as string
 
-export default async function TourDetailPage({ params }: TourDetailPageProps) {
-    const { slug } = params
-    const tourDetails = await getTourBySlug(slug)
-    const otherTours = await getOtherTours(slug)
+    const [tourDetails, setTourDetails] = useState<TourType | null>(null)
+    const [otherTours, setOtherTours] = useState<TourType[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        const fetchTourData = async () => {
+            try {
+                setIsLoading(true)
+                setError(null)
+
+                // Fetch current tour by slug
+                const currentTourResponse = await tourApi.getTourBySlug(slug)
+                setTourDetails(currentTourResponse.data)
+
+                // Fetch other tours for recommendations
+                const allToursResponse = await tourApi.getTours({ limit: 100 })
+                const otherToursData = allToursResponse.data.filter((tour) => tour.slug !== slug)
+                setOtherTours(otherToursData.slice(0, 4))
+            } catch (err) {
+                console.error("Error fetching tour data:", err)
+                setError("Failed to load tour details. Please try again later.")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        if (slug) {
+            fetchTourData()
+        }
+    }, [slug])
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <Loader />
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-10">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-primary_green text-white rounded-lg hover:bg-green-700"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        )
+    }
 
     if (!tourDetails) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-10">
-                <h1 className="text-2xl font-bold text-red-600">Tour not found</h1>
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-red-600">Tour not found</h1>
+                </div>
             </div>
         )
     }
@@ -33,7 +93,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
             <div className="flex flex-col lg:flex-row gap-8 md:px-8 lg:px-16">
                 <div className="flex-1 space-y-6">
                     <Image
-                        src={tourDetails.image}
+                        src={resolveImageUrl(tourDetails.image)}
                         alt={tourDetails.title}
                         width={700}
                         height={500}
@@ -43,7 +103,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                         <h1 className="text-2xl md:text-3xl font-extrabold sm:font-bold text-primary_green">
                             {tourDetails.title}
                         </h1>
-                        <p className="text-desc_gray mt-2">{tourDetails.desc}</p>
+                        <p className="text-desc_gray mt-2">{tourDetails.description}</p>
                         <div className="flex flex-wrap gap-2 mt-4">
                             {tourDetails.tags.map((tag, i) => (
                                 <Tag key={i} tag={tag} />
@@ -73,9 +133,10 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <BsInfoCircleFill className="text-xl text-primary_green" />
                                 <h5 className="font-semibold text-primary_green">About this tour</h5>
                             </div>
-                            <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                                <p>{tourDetails.details.about}</p>
-                            </ul>
+                            <div
+                                className="prose max-w-none text-sm text-desc_gray mt-2"
+                                dangerouslySetInnerHTML={{ __html: tourDetails.details.about }}
+                            />
                         </div>
 
                         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -84,7 +145,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 <h5 className="font-semibold text-primary_green">Departure Times</h5>
                             </div>
                             <ul className="mt-2 space-y-1">
-                                {tourDetails.time.map((time, index) => (
+                                {tourDetails.departureTimes.map((time, index) => (
                                     <li key={index} className="text-sm text-desc_gray ml-5">
                                         {time}
                                     </li>
@@ -99,9 +160,10 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
                             </div>
-                            <ul className="ml-5 text-sm text-desc_gray space-y-1">
-                                <p>{tourDetails.details.itinerary}</p>
-                            </ul>
+                            <div
+                                className="prose max-w-none text-sm text-desc_gray"
+                                dangerouslySetInnerHTML={{ __html: tourDetails.details.itinerary }}
+                            />
                         </div>
 
                         <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -111,14 +173,10 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Pickup Location</h5>
                             </div>
-                            <p className="text-sm text-desc_gray mb-2">
-                                We’ll pick you up from the gates of your hostels or guest houses anywhere around the
-                                following places.
-                            </p>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1">
-                                {tourDetails.details.pickupLocations.map((item, index) => (
-                                    <li key={index}>{item}</li>
-                                ))}
+                                {tourDetails.details.pickupLocation && (
+                                    <li dangerouslySetInnerHTML={{ __html: tourDetails.details.pickupLocation }} />
+                                )}
                             </ul>
                         </div>
 
@@ -129,7 +187,12 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                                 </div>
                                 <h5 className="font-semibold text-primary_green">Note</h5>
                             </div>
-                            <p className="text-sm text-desc_gray">{tourDetails.details.note}</p>
+                            {tourDetails.details.note && (
+                                <p
+                                    className="text-sm text-desc_gray space-y-1"
+                                    dangerouslySetInnerHTML={{ __html: tourDetails.details.note }}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>

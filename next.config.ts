@@ -14,9 +14,19 @@ const nextConfig: NextConfig = {
                 hostname: "lh3.googleusercontent.com",
                 pathname: "/***",
             },
-            
+            {
+                protocol: "http",
+                hostname: "localhost",
+                port: "3001",
+                pathname: "/uploads/**",
+            },
+            {
+                protocol: "https",
+                hostname: "localhost",
+                pathname: "/***",
+            },
         ],
-    }
+    },
     /* config options here */
 }
 

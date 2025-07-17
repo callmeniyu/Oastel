@@ -7,7 +7,8 @@ import TourCard from "@/components/ui/TourCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
-import { allTours } from "@/lib/data"
+import { tourApi } from "@/lib/tourApi"
+import { TourType } from "@/lib/types"
 import Loader from "@/components/ui/Loader"
 import Image from "next/image"
 
@@ -19,6 +20,10 @@ type FilterState = {
 
 export default function ToursPage() {
     const [searchTerm, setSearchTerm] = useState("")
+    const [allTours, setAllTours] = useState<TourType[]>([])
+    const [filteredTours, setFilteredTours] = useState<TourType[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     const [filters, setFilters] = useState<FilterState>({
         type: "All",
@@ -26,19 +31,38 @@ export default function ToursPage() {
         durations: [],
     })
 
-    const [filteredTours, setFilteredTours] = useState(allTours)
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [filtersApplied, setFiltersApplied] = useState(false)
+
+    // Fetch tours from API
+    useEffect(() => {
+        const fetchTours = async () => {
+            try {
+                setIsLoading(true)
+                setError(null)
+                const response = await tourApi.getTours({ limit: 100 }) // Get all tours
+                setAllTours(response.data)
+                setFilteredTours(response.data)
+            } catch (err) {
+                console.error("Error fetching tours:", err)
+                setError("Failed to load tours. Please try again later.")
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchTours()
+    }, [])
 
     const handleFilterChange = (field: keyof FilterState, value: any) => {
         setFilters((prev) => ({ ...prev, [field]: value }))
     }
 
     const handleApply = () => {
-        const result = allTours.filter((tour) => {
+        const result = allTours.filter((tour: TourType) => {
             const { type, prices, durations } = filters
 
-            const matchType = type === "All" || tour.tags.some((tag) => tag.toLowerCase() === type.toLowerCase())
+            const matchType = type === "All" || tour.tags.some((tag: string) => tag.toLowerCase() === type.toLowerCase())
 
             const matchPrice =
                 prices.length === 0 ||
@@ -49,13 +73,13 @@ export default function ToursPage() {
 
             const matchDuration =
                 durations.length === 0 ||
-                durations.some((dur) => tour.tags.some((tag) => tag.toLowerCase().includes(dur.toLowerCase())))
+                durations.some((dur) => tour.tags.some((tag: string) => tag.toLowerCase().includes(dur.toLowerCase())))
 
             const matchSearch =
                 searchTerm.trim() === "" ||
                 tour.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                tour.desc.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                tour.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim()))
+                tour.description.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                tour.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim()))
 
             return matchType && matchPrice && matchDuration && matchSearch
         })
@@ -173,13 +197,32 @@ export default function ToursPage() {
                 )}
 
                 <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredTours.length === 0 ? (
+                    {isLoading ? (
+                        <div className="col-span-full flex justify-center items-center py-20">
+                            <Loader />
+                        </div>
+                    ) : error ? (
+                        <div className="col-span-full text-center text-red-500 mt-4">
+                            <p>{error}</p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="mt-2 px-4 py-2 bg-primary_green text-white rounded-md hover:bg-primary_green/80"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : filteredTours.length === 0 ? (
                         <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
                             <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
                             <p>No tours match your filters. Try changing the options.</p>
                         </div>
                     ) : (
-                        filteredTours.map((tour, i) => <TourCard key={i} {...tour} />)
+                        filteredTours.map((tour: TourType, i: number) => (
+                            <TourCard
+                                key={tour._id || tour.slug || i}
+                                {...tour}
+                            />
+                        ))
                     )}
                 </div>
             </div>
