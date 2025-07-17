@@ -12,7 +12,13 @@ const nextConfig: NextConfig = {
             {
                 protocol: "https",
                 hostname: "lh3.googleusercontent.com",
-                pathname: "/***",
+                pathname: "/**",
+            },
+            {
+                protocol: "http",
+                hostname: "localhost",
+                port: "3001",
+                pathname: "/uploads/**",
             },
             {
                 protocol: "http",
@@ -25,12 +31,10 @@ const nextConfig: NextConfig = {
                 hostname: "res.cloudinary.com",
                 pathname: "/**",
             },
-            {
-                protocol: "http",
-                hostname: "localhost",
-                pathname: "/***",
-            },
         ],
+        // Allow blob URLs for image previews
+        dangerouslyAllowSVG: true,
+        contentDispositionType: "attachment",
     },
     /* config options here */
 }
