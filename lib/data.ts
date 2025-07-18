@@ -1038,7 +1038,8 @@ export const allTransfers: TransferType[] = [
         childPrice: 50,
         minimumPerson: 1,
         maximumPerson: 8,
-        time: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        times: ["09:00 AM", "01:00 PM", "05:00 PM"],
+        status: "active",
         createdAt: new Date("2025-06-01"),
         updatedAt: new Date("2025-06-01"),
         details: {

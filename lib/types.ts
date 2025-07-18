@@ -59,13 +59,15 @@ export type TourType = {
 
 export interface TransferDetails {
     about: string
-    itinerary: string[]
-    pickupLocations: string[]
+    itinerary: string
+    pickupOption: "admin" | "user"
+    pickupLocations: string
     note?: string
     faq: FAQType[]
 }
 
 export interface TransferType {
+    _id?: string
     slug: string
     title: string
     image: string
@@ -76,7 +78,7 @@ export interface TransferType {
     type: "Van" | "Van + Ferry" | "Private"
     packageType: "transfer"
     duration: string
-    bookedCount: number
+    bookedCount: number | string
     oldPrice: number
     newPrice: number
     childPrice: number
@@ -84,6 +86,7 @@ export interface TransferType {
     maximumPerson?: number
     times: string[]
     label?: "Recommended" | "Popular" | "Best Value"
+    status: "active" | "sold"
     details: TransferDetails
     createdAt: Date
     updatedAt: Date
