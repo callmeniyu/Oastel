@@ -7,7 +7,8 @@ import TransferCard from "@/components/ui/TransferCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
-import { allTransfers } from "@/lib/data"
+import { transferAPI } from "@/lib/api"
+import { TransferType } from "@/lib/types"
 import Image from "next/image"
 
 type FilterState = {
@@ -20,6 +21,11 @@ type FilterState = {
 
 export default function Transfers() {
     const [searchTerm, setSearchTerm] = useState("")
+    const [allTransfers, setAllTransfers] = useState<TransferType[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Filter transfers by type
     const vanTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "van")
     const ferryTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "van + ferry")
     const privateTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "private")
@@ -32,9 +38,29 @@ export default function Transfers() {
         prices: [],
     })
 
-    const [filteredTransfers, setFilteredTransfers] = useState(allTransfers)
+    const [filteredTransfers, setFilteredTransfers] = useState<TransferType[]>([])
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [filtersApplied, setFiltersApplied] = useState(false)
+
+    // Fetch transfers data on component mount
+    useEffect(() => {
+        const fetchTransfers = async () => {
+            try {
+                setLoading(true)
+                const transfers = await transferAPI.getAllTransfers()
+                setAllTransfers(transfers)
+                setFilteredTransfers(transfers)
+                setError(null)
+            } catch (err) {
+                console.error("Error fetching transfers:", err)
+                setError("Failed to load transfers. Please try again later.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchTransfers()
+    }, [])
 
     const handleFilterChange = (field: keyof FilterState, value: string | string[]) => {
         setFilters((prev) => ({ ...prev, [field]: value }))
@@ -174,14 +200,14 @@ export default function Transfers() {
             prices: [],
         })
         setSearchTerm("")
-        setFilteredTransfers(allTransfers) // Reset to show all Transfers
+        setFilteredTransfers(allTransfers) // Reset to show all current transfers
         setFiltersApplied(false)
         setIsFilterOpen(false)
     }
 
     const handleClearSearch = () => {
         setSearchTerm("")
-        setFilteredTransfers(allTransfers)
+        setFilteredTransfers(allTransfers) // Reset to show all current transfers
         setFiltersApplied(false)
     }
 
@@ -226,147 +252,200 @@ export default function Transfers() {
                 </div>
             </div>
 
-            {/* Search & Filter Toggle */}
-            <div className="flex gap-3 items-center justify-between px-5 mt-8">
-                <hr className="border-b-2 border-primary_green w-full hidden md:flex" />
-                <SearchInput
-                    customeStyles=""
-                    value={searchTerm}
-                    onChange={setSearchTerm}
-                    onSearch={handleApply}
-                    onClear={handleClearSearch}
-                    placeholder="Search for transfers"
-                />
-                <button
-                    className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
-                    onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
-                >
-                    {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
-                </button>
-            </div>
-
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
-                {/* Sidebar */}
-                <div className="hidden sm:block sticky-filter">
-                    <TransferFilterBar
-                        filters={filters}
-                        onFilterChange={handleFilterChange}
-                        onApply={handleApply}
-                        onClear={handleClearFilters}
-                    />
+            {/* Loading State */}
+            {loading && (
+                <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading transfers...</p>
                 </div>
+            )}
 
-                {/* Mobile Filter */}
-                {isFilterOpen && (
-                    <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center px-4 sm:hidden">
-                        <div className="bg-white rounded-lg w-full max-w-sm p-4 relative animate-fadeInUp shadow-lg">
-                            <button
-                                onClick={() => setIsFilterOpen(false)}
-                                className="absolute top-3 right-3 text-gray-600 hover:text-black"
-                            >
-                                <IoClose size={24} />
-                            </button>
+            {/* Error State */}
+            {error && !loading && (
+                <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+                    <div className="text-red-500 mb-4">
+                        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <p className="text-lg font-semibold">{error}</p>
+                    </div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            )}
+
+            {/* Main Content - only show when not loading and no error */}
+            {!loading && !error && (
+                <>
+                    {/* Search & Filter Toggle */}
+                    <div className="flex gap-3 items-center justify-between px-5 mt-8">
+                        <hr className="border-b-2 border-primary_green w-full hidden md:flex" />
+                        <SearchInput
+                            customeStyles=""
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            onSearch={handleApply}
+                            onClear={handleClearSearch}
+                            placeholder="Search for transfers"
+                        />
+                        <button
+                            className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
+                            onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
+                        >
+                            {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
+                        </button>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
+                        {/* Sidebar */}
+                        <div className="hidden sm:block sticky-filter">
                             <TransferFilterBar
                                 filters={filters}
                                 onFilterChange={handleFilterChange}
-                                isSmallScreen={true}
-                                onApply={() => {
-                                    handleApply()
-                                    setIsFilterOpen(false)
-                                }}
-                                onClear={() => {
-                                    handleClearFilters()
-                                    setIsFilterOpen(false)
-                                }}
+                                onApply={handleApply}
+                                onClear={handleClearFilters}
                             />
                         </div>
-                    </div>
-                )}
 
-                {/* Transfers */}
-                <div className="space-y-8 w-full">
-                    {filtersApplied ? (
-                        // Show filtered results under "Your Results"
-                        <div>
-                            <div className="flex items-center gap-2 mb-6">
-                                <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                                <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
-                                    Your Results
-                                </h2>
-                                <hr className="border-b-2 border-primary_green w-full md:flex" />
+                        {/* Mobile Filter */}
+                        {isFilterOpen && (
+                            <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center px-4 sm:hidden">
+                                <div className="bg-white rounded-lg w-full max-w-sm p-4 relative animate-fadeInUp shadow-lg">
+                                    <button
+                                        onClick={() => setIsFilterOpen(false)}
+                                        className="absolute top-3 right-3 text-gray-600 hover:text-black"
+                                    >
+                                        <IoClose size={24} />
+                                    </button>
+                                    <TransferFilterBar
+                                        filters={filters}
+                                        onFilterChange={handleFilterChange}
+                                        isSmallScreen={true}
+                                        onApply={() => {
+                                            handleApply()
+                                            setIsFilterOpen(false)
+                                        }}
+                                        onClear={() => {
+                                            handleClearFilters()
+                                            setIsFilterOpen(false)
+                                        }}
+                                    />
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredTransfers.length === 0 ? (
-                                    <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
-                                        <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
-                                        <p>No transfers match your filters. Try changing the options.</p>
+                        )}
+
+                        {/* Transfers */}
+                        <div className="space-y-8 w-full">
+                            {filtersApplied ? (
+                                // Show filtered results under "Your Results"
+                                <div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                            Your Results
+                                        </h2>
+                                        <hr className="border-b-2 border-primary_green w-full md:flex" />
                                     </div>
-                                ) : (
-                                    filteredTransfers.map((transfer, i) => <TransferCard key={i} {...transfer} />)
-                                )}
-                            </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {filteredTransfers.length === 0 ? (
+                                            <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
+                                                <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
+                                                <p>No transfers match your filters. Try changing the options.</p>
+                                            </div>
+                                        ) : (
+                                            filteredTransfers.map((transfer, i) => (
+                                                <TransferCard key={transfer._id || i} {...transfer} />
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                // Show categorized transfers when no filters are active
+                                <>
+                                    {/* Van Transfers */}
+                                    {vanTransfers.length > 0 && (
+                                        <div id="van">
+                                            <div className="flex items-center gap-2 mb-6">
+                                                <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                                <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                                    Van
+                                                </h2>
+                                                <hr className="border-b-2 border-primary_green w-full md:flex" />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {vanTransfers.map((transfer, i) => (
+                                                    <TransferCard key={transfer._id || i} {...transfer} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Van + Ferry Transfers */}
+                                    {ferryTransfers.length > 0 && (
+                                        <div id="ferry">
+                                            <div className="flex items-center gap-2 mb-6">
+                                                <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                                <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                                    Van + Ferry
+                                                </h2>
+                                                <hr className="border-b-2 border-primary_green w-full md:flex" />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {ferryTransfers.map((transfer, i) => (
+                                                    <TransferCard key={transfer._id || i} {...transfer} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Private Transfers */}
+                                    {privateTransfers.length > 0 && (
+                                        <div id="private">
+                                            <div className="flex items-center gap-2 mb-6">
+                                                <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                                <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                                    Private
+                                                </h2>
+                                                <hr className="border-b-2 border-primary_green w-full md:flex" />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {privateTransfers.map((transfer, i) => (
+                                                    <TransferCard key={transfer._id || i} {...transfer} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* No transfers state */}
+                                    {vanTransfers.length === 0 &&
+                                        ferryTransfers.length === 0 &&
+                                        privateTransfers.length === 0 && (
+                                            <div className="col-span-full text-center text-desc_gray mt-8">
+                                                <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
+                                                <p className="text-lg font-semibold text-gray-600 mt-4">
+                                                    No transfers available at the moment
+                                                </p>
+                                                <p className="text-sm text-gray-500 mt-2">
+                                                    Please check back later for new transfers
+                                                </p>
+                                            </div>
+                                        )}
+                                </>
+                            )}
                         </div>
-                    ) : (
-                        // Show categorized transfers when no filters are active
-                        <>
-                            {/* Van Transfers */}
-                            {vanTransfers.length > 0 && (
-                                <div id="van">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
-                                            Van
-                                        </h2>
-                                        <hr className="border-b-2 border-primary_green w-full md:flex" />
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {vanTransfers.map((transfer, i) => (
-                                            <TransferCard key={i} {...transfer} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Van + Ferry Transfers */}
-                            {ferryTransfers.length > 0 && (
-                                <div id="ferry">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
-                                            Van + Ferry
-                                        </h2>
-                                        <hr className="border-b-2 border-primary_green w-full md:flex" />
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {ferryTransfers.map((transfer, i) => (
-                                            <TransferCard key={i} {...transfer} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Private Transfers */}
-                            {privateTransfers.length > 0 && (
-                                <div id="private">
-                                    <div className="flex items-center gap-2 mb-6">
-                                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
-                                            Private
-                                        </h2>
-                                        <hr className="border-b-2 border-primary_green w-full md:flex" />
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {privateTransfers.map((transfer, i) => (
-                                            <TransferCard key={i} {...transfer} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-            </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

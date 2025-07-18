@@ -8,7 +8,7 @@ import Tag from "./Tag"
 import GreenBtn from "./GreenBtn"
 
 type TransferCardProps = {
-    _id: string
+    _id?: string
     slug: string
     image: string
     title: string

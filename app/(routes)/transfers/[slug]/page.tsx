@@ -107,7 +107,7 @@ export default async function TransferDetailPage({ params }: TransferDetailPageP
                                 <h5 className="font-semibold text-primary_green">Departure Times</h5>
                             </div>
                             <ul className="mt-2 space-y-1">
-                                {transferDetails.time.map((time, index) => (
+                                {transferDetails.times.map((time, index) => (
                                     <li key={index} className="text-sm text-desc_gray ml-5">
                                         {time}
                                     </li>
@@ -139,9 +139,18 @@ export default async function TransferDetailPage({ params }: TransferDetailPageP
                                 following places.
                             </p>
                             <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1">
-                                {transferDetails.details.pickupLocations.map((item: string, index: number) => (
-                                    <li key={index}>{item}</li>
-                                ))}
+                                {(() => {
+                                    // Handle both string and array formats for pickupLocations
+                                    const locations =
+                                        typeof transferDetails.details.pickupLocations === "string"
+                                            ? transferDetails.details.pickupLocations
+                                                  .split(",")
+                                                  .map((loc) => loc.trim())
+                                                  .filter(Boolean)
+                                            : transferDetails.details.pickupLocations || []
+
+                                    return locations.map((item: string, index: number) => <li key={index}>{item}</li>)
+                                })()}
                             </ul>
                         </div>
 
