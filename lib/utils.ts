@@ -9,6 +9,40 @@ export const getTourBySlug = async (slug: string) => {
     return allTours.find((tour) => tour.slug === slug)
 }
 
+export const getBlogBySlug = async (slug: string) => {
+    const { blogApi } = await import("./blogApi")
+    try {
+        const response = await blogApi.getBlogBySlug(slug)
+        if (response.success) {
+            // Increment view count
+            await blogApi.incrementViews(response.data._id)
+            return response.data
+        }
+        return null
+    } catch (error) {
+        console.error("Error fetching blog by slug:", error)
+        return null
+    }
+}
+
+export const getOtherBlogs = async (slug: string) => {
+    const { blogApi } = await import("./blogApi")
+    try {
+        const response = await blogApi.getBlogs({
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            limit: 4,
+        })
+        if (response.success) {
+            return response.data.filter((blog) => blog.slug !== slug)
+        }
+        return []
+    } catch (error) {
+        console.error("Error fetching other blogs:", error)
+        return []
+    }
+}
+
 export const getTransferBySlug = async (slug: string) => {
     const { transferApi } = await import("./transferApi")
     try {
