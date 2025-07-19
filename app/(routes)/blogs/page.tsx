@@ -5,6 +5,7 @@ import { BlogType } from "@/lib/types"
 import { blogApi } from "@/lib/blogApi"
 import SearchInput from "@/components/ui/SearchInput"
 import BlogCard from "@/components/ui/BlogCard"
+import Loader from "@/components/ui/Loader"
 import Image from "next/image"
 
 export default function BlogArea() {
@@ -84,14 +85,13 @@ export default function BlogArea() {
             {/* Search */}
             <div className="ml-auto mb-12 flex gap-4 items-center">
                 <hr className="border-b-2 border-primary_green w-full hidden md:flex" />
-                <SearchInput customeStyles="md:w-2/4" value={searchTerm} onChange={setSearchTerm} onSearch={() => {}} />
+                <SearchInput customeStyles="md:w-2/4" value={searchTerm} onChange={setSearchTerm} onSearch={() => {}} placeholder="Search for any blogs or categories"/>
             </div>
 
             {/* Loading State */}
             {loading && (
-                <div className="text-center py-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
-                    <p className="text-desc_gray">Loading blogs...</p>
+                <div className="flex justify-center items-center py-20">
+                    <Loader />
                 </div>
             )}
 
@@ -130,8 +130,8 @@ export default function BlogArea() {
                         Object.entries(groupedBlogs).map(([category, blogs]) => (
                             <div key={category} className="mb-12">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                                    <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                    <hr className="border-b-2 border-primary_green w-32 sm:w-40 md:flex" />
+                                    <h2 className="text-2xl sm:text-3xl font-semibold text-primary_green mb-4 pt-2 min-w-max">
                                         {category}
                                     </h2>
                                     <hr className="border-b-2 border-primary_green w-full md:flex" />

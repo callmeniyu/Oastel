@@ -114,7 +114,7 @@ export type BlogType = {
     image: string
     title: string
     slug: string
-    desc: string
+    description: string
     createdAt: Date
     updatedAt: Date
     category: string
