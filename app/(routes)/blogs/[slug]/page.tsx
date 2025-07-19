@@ -1,10 +1,11 @@
-import { getBlogBySlug, getOtherBlogs } from "@/lib/utils"
+import { blogApi } from "@/lib/blogApi"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import BlogCard from "@/components/ui/BlogCard"
 import { MdOutlineDateRange } from "react-icons/md"
 import { TbCategory } from "react-icons/tb"
-import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { MdOutlineRemoveRedEye } from "react-icons/md"
+import { BlogType } from "@/lib/types"
 
 type Props = {
     params: {
@@ -14,8 +15,34 @@ type Props = {
 
 export default async function BlogDetailsPage({ params }: Props) {
     const { slug } = params
-    const blogDetails = await getBlogBySlug(slug)
-    const otherBlogs = await getOtherBlogs(slug)
+
+    // Fetch blog details
+    let blogDetails: BlogType | null = null
+    try {
+        const response = await blogApi.getBlogBySlug(slug)
+        if (response.success) {
+            blogDetails = response.data
+            // Increment view count
+            await blogApi.incrementViews(blogDetails._id)
+        }
+    } catch (error) {
+        console.error("Error fetching blog by slug:", error)
+    }
+
+    // Fetch other blogs
+    let otherBlogs: BlogType[] = []
+    try {
+        const response = await blogApi.getBlogs({
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            limit: 4,
+        })
+        if (response.success) {
+            otherBlogs = response.data.filter((blog) => blog.slug !== slug)
+        }
+    } catch (error) {
+        console.error("Error fetching other blogs:", error)
+    }
 
     if (!blogDetails) return notFound()
 
@@ -73,8 +100,8 @@ export default async function BlogDetailsPage({ params }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {otherBlogs.map((blog, i) => (
-                        <BlogCard key={i} {...blog} />
+                    {otherBlogs.map((blog) => (
+                        <BlogCard key={blog._id} {...blog} />
                     ))}
                 </div>
             </section>

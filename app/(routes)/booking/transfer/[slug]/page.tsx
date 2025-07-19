@@ -89,7 +89,7 @@ export default function BookingInfoPage() {
             adultPrice: transferDetails.newPrice || 0,
             childPrice: transferDetails.childPrice || 0,
             totalPrice: totalPrice,
-            pickupLocations: transferDetails.details.pickupLocations || [""],
+            pickupLocations: transferDetails.details.pickupLocations || "",
             packageType: "transfer",
         })
         router.push("/booking/user-info")

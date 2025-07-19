@@ -106,7 +106,7 @@ export interface BookingDetailsType {
     adultPrice: number
     childPrice: number
     totalPrice: number
-    pickupLocations: string[]
+    pickupLocations: string
 }
 
 export type BlogType = {

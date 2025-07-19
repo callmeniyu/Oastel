@@ -1,21 +1,49 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { BlogType } from "@/lib/types"
-import { allBlogs } from "@/lib/data"
+import { blogApi } from "@/lib/blogApi"
 import SearchInput from "@/components/ui/SearchInput"
 import BlogCard from "@/components/ui/BlogCard"
 import Image from "next/image"
 
 export default function BlogArea() {
     const [searchTerm, setSearchTerm] = useState("")
+    const [blogs, setBlogs] = useState<BlogType[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch blogs on component mount
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                setLoading(true)
+                const response = await blogApi.getBlogs({
+                    sortBy: "createdAt",
+                    sortOrder: "desc",
+                    limit: 100,
+                })
+
+                if (response.success) {
+                    setBlogs(response.data)
+                } else {
+                    setError("Failed to fetch blogs")
+                }
+            } catch (err) {
+                console.error("Error fetching blogs:", err)
+                setError("Failed to load blogs. Please try again later.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchBlogs()
+    }, [])
 
     const filteredBlogs = useMemo(() => {
         const term = searchTerm.toLowerCase()
-        return allBlogs.filter(
-            (blog) => blog.title.toLowerCase().includes(term) || blog.category.toLowerCase().includes(term)
-        )
-    }, [searchTerm])
+        return blogs.filter((blog) => blog.title.toLowerCase().includes(term) || blog.category.toLowerCase().includes(term))
+    }, [searchTerm, blogs])
 
     const groupedBlogs = useMemo(() => {
         const groups: { [key: string]: BlogType[] } = {}
@@ -55,28 +83,70 @@ export default function BlogArea() {
 
             {/* Search */}
             <div className="ml-auto mb-12 flex gap-4 items-center">
-                <hr className="border-b-2 border-primary_green  w-full hidden md:flex" />
+                <hr className="border-b-2 border-primary_green w-full hidden md:flex" />
                 <SearchInput customeStyles="md:w-2/4" value={searchTerm} onChange={setSearchTerm} onSearch={() => {}} />
             </div>
 
-            {/* Blog Groups by Category */}
-            {Object.entries(groupedBlogs).map(([category, blogs]) => (
-                <div key={category} className="mb-12">
-                    <div className="flex items-center gap-2 mb-3">
-                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
-                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2  min-w-max">
-                            {category}
-                        </h2>
-                        <hr className="border-b-2 border-primary_green  w-full  md:flex" />
-                    </div>
-
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {blogs.map((blog, i) => (
-                            <BlogCard key={i} {...blog} />
-                        ))}
-                    </div>
+            {/* Loading State */}
+            {loading && (
+                <div className="text-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+                    <p className="text-desc_gray">Loading blogs...</p>
                 </div>
-            ))}
+            )}
+
+            {/* Error State */}
+            {error && !loading && (
+                <div className="text-center py-20">
+                    <div className="text-red-500 mb-4">
+                        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <p className="text-lg font-semibold">{error}</p>
+                    </div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            )}
+
+            {/* Blog Groups by Category - only show when not loading and no error */}
+            {!loading && !error && (
+                <>
+                    {Object.keys(groupedBlogs).length === 0 ? (
+                        <div className="text-center py-20">
+                            <p className="text-desc_gray text-lg">No blogs found.</p>
+                            {searchTerm && <p className="text-desc_gray text-sm mt-2">Try adjusting your search terms.</p>}
+                        </div>
+                    ) : (
+                        Object.entries(groupedBlogs).map(([category, blogs]) => (
+                            <div key={category} className="mb-12">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                    <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                        {category}
+                                    </h2>
+                                    <hr className="border-b-2 border-primary_green w-full md:flex" />
+                                </div>
+
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    {blogs.map((blog) => (
+                                        <BlogCard key={blog._id} {...blog} />
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </>
+            )}
         </section>
     )
 }

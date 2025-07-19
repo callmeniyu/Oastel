@@ -7,7 +7,7 @@ import TransferCard from "@/components/ui/TransferCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
 import { IoFilterSharp, IoClose } from "react-icons/io5"
-import { transferAPI } from "@/lib/api"
+import { transferApi } from "@/lib/transferApi"
 import { TransferType } from "@/lib/types"
 import Image from "next/image"
 
@@ -47,9 +47,9 @@ export default function Transfers() {
         const fetchTransfers = async () => {
             try {
                 setLoading(true)
-                const transfers = await transferAPI.getAllTransfers()
-                setAllTransfers(transfers)
-                setFilteredTransfers(transfers)
+                const response = await transferApi.getTransfers({ limit: 100 })
+                setAllTransfers(response.data)
+                setFilteredTransfers(response.data)
                 setError(null)
             } catch (err) {
                 console.error("Error fetching transfers:", err)

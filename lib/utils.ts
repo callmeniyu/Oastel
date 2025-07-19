@@ -1,5 +1,4 @@
 import { allTours } from "./data"
-import { allBlogs } from "./data"
 import { allTransfers } from "./data"
 
 export const getOtherTours = async (slug: string) => {
@@ -10,22 +9,29 @@ export const getTourBySlug = async (slug: string) => {
     return allTours.find((tour) => tour.slug === slug)
 }
 
-export const getBlogBySlug = async (slug: string) => {
-    return allBlogs.find((blog) => blog.slug === slug)
-}
-
-export const getOtherBlogs = async (slug: string) => {
-    return allBlogs.filter((blog) => blog.slug !== slug).slice(0, 4)
-}
-
 export const getTransferBySlug = async (slug: string) => {
-    const { transferAPI } = await import("./api")
-    return transferAPI.getTransferBySlug(slug)
+    const { transferApi } = await import("./transferApi")
+    try {
+        const response = await transferApi.getTransferBySlug(slug)
+        return response.data
+    } catch (error) {
+        console.error("Error fetching transfer by slug:", error)
+        return null
+    }
 }
 
 export const getOtherTransfers = async (slug: string) => {
-    const { transferAPI } = await import("./api")
-    return transferAPI.getOtherTransfers(slug, 4)
+    const { transferApi } = await import("./transferApi")
+    try {
+        const response = await transferApi.getTransfers({ limit: 8 })
+        if (response.success) {
+            return response.data.filter((transfer) => transfer.slug !== slug).slice(0, 4)
+        }
+        return []
+    } catch (error) {
+        console.error("Error fetching other transfers:", error)
+        return []
+    }
 }
 
 export const isTripCompleted = (bookingDate: string, bookingTime: string) => {
