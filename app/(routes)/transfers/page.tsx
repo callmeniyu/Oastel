@@ -15,7 +15,6 @@ type FilterState = {
     from: string
     to: string
     transports: string[]
-    durations: string[]
     prices: string[]
 }
 
@@ -30,17 +29,58 @@ export default function Transfers() {
     const ferryTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "van + ferry")
     const privateTransfers = allTransfers.filter((transfer) => transfer.type.toLowerCase() === "private")
 
+    // Generate dynamic location options from transfer data with proper deduplication
+    const getUniqueLocations = (locations: string[]) => {
+        const seen = new Set<string>()
+        const unique: string[] = []
+
+        locations.forEach((location) => {
+            const normalized = location.trim().toLowerCase()
+            if (normalized && !seen.has(normalized)) {
+                seen.add(normalized)
+                unique.push(location.trim()) // Keep original casing but trimmed
+            }
+        })
+
+        return unique.sort()
+    }
+
+    const locationOptions = {
+        from: getUniqueLocations(allTransfers.map((transfer) => transfer.from)),
+        to: getUniqueLocations(allTransfers.map((transfer) => transfer.to)),
+    }
+
     const [filters, setFilters] = useState<FilterState>({
         from: "",
         to: "",
         transports: [],
-        durations: [],
         prices: [],
     })
 
     const [filteredTransfers, setFilteredTransfers] = useState<TransferType[]>([])
     const [isFilterOpen, setIsFilterOpen] = useState(false)
     const [filtersApplied, setFiltersApplied] = useState(false)
+
+    // Live search effect - trigger on every character input
+    useEffect(() => {
+        if (searchTerm.trim() === "") {
+            setFilteredTransfers(allTransfers)
+            setFiltersApplied(false)
+        } else {
+            const searchResults = allTransfers.filter((transfer) => {
+                const searchLower = searchTerm.toLowerCase().trim()
+                return (
+                    transfer.title.toLowerCase().includes(searchLower) ||
+                    transfer.from.toLowerCase().includes(searchLower) ||
+                    transfer.to.toLowerCase().includes(searchLower) ||
+                    transfer.tags.some((tag) => tag.toLowerCase().includes(searchLower)) ||
+                    transfer.desc.toLowerCase().includes(searchLower)
+                )
+            })
+            setFilteredTransfers(searchResults)
+            setFiltersApplied(true) // Show as "Your Results" when searching
+        }
+    }, [searchTerm, allTransfers])
 
     // Fetch transfers data on component mount
     useEffect(() => {
@@ -67,8 +107,13 @@ export default function Transfers() {
     }
 
     const handleApply = () => {
+        // Only apply filters if there's no active search
+        if (searchTerm.trim() !== "") {
+            return // Don't apply filters when searching
+        }
+
         const result = allTransfers.filter((transfer) => {
-            const { from, to, transports, durations, prices } = filters
+            const { from, to, transports, prices } = filters
 
             // From filter - exact match or contains
             const matchFrom =
@@ -82,7 +127,7 @@ export default function Transfers() {
                 transfer.to.toLowerCase() === to.trim().toLowerCase() ||
                 transfer.to.toLowerCase().includes(to.trim().toLowerCase())
 
-            // Transport filter - map filter options to transfer types and tags
+            // Transport filter - map filter options to transfer types
             const matchTransport =
                 transports.length === 0 ||
                 transports.some((t) => {
@@ -94,59 +139,8 @@ export default function Transfers() {
                             return transferTypeLower === "van"
                         case "shared van + ferry":
                             return transferTypeLower === "van + ferry"
-                        case "private alphard":
-                            return (
-                                transferTypeLower === "private" ||
-                                transfer.tags.some(
-                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("alphard")
-                                )
-                            )
-                        case "private innova":
-                            return (
-                                transferTypeLower === "private" ||
-                                transfer.tags.some(
-                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("innova")
-                                )
-                            )
-                        case "private welfare":
-                            return (
-                                transferTypeLower === "private" ||
-                                transfer.tags.some(
-                                    (tag) => tag.toLowerCase().includes("private") || tag.toLowerCase().includes("welfare")
-                                )
-                            )
-                        case "private mini van":
-                            return (
-                                transferTypeLower === "private" ||
-                                transfer.tags.some(
-                                    (tag) =>
-                                        tag.toLowerCase().includes("private") ||
-                                        tag.toLowerCase().includes("mini") ||
-                                        tag.toLowerCase().includes("van")
-                                )
-                            )
-                        default:
-                            // Generic matching for any transport type
-                            return (
-                                transferTypeLower.includes(transportLower) ||
-                                transfer.tags.some((tag) => tag.toLowerCase().includes(transportLower))
-                            )
-                    }
-                })
-
-            // Duration filter - check the duration field
-            const matchDuration =
-                durations.length === 0 ||
-                durations.some((d) => {
-                    // Extract number from duration string (e.g., "4 hours" -> 4, "3.5" -> 3.5)
-                    const durationStr = transfer.duration.toString()
-                    const transferDuration = parseFloat(durationStr.replace(/[^0-9.]/g, ""))
-
-                    switch (d) {
-                        case "2–4 hrs":
-                            return transferDuration >= 2 && transferDuration <= 4
-                        case "4–8 hrs":
-                            return transferDuration > 4 && transferDuration <= 8
+                        case "private":
+                            return transferTypeLower === "private"
                         default:
                             return false
                     }
@@ -164,28 +158,14 @@ export default function Transfers() {
                     return transfer.newPrice >= min && transfer.newPrice <= max
                 })
 
-            // Search filter - include tags in search
-            const matchSearch =
-                searchTerm.trim() === "" ||
-                transfer.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                transfer.from.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                transfer.to.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-                transfer.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim())) ||
-                transfer.desc.toLowerCase().includes(searchTerm.toLowerCase().trim())
-
-            return matchFrom && matchTo && matchTransport && matchDuration && matchPrice && matchSearch
+            return matchFrom && matchTo && matchTransport && matchPrice
         })
 
         setFilteredTransfers(result)
 
-        // Check if any filters/search are actually active
+        // Check if any filters are actually active
         const hasActiveFilters =
-            searchTerm.trim() !== "" ||
-            filters.from !== "" ||
-            filters.to !== "" ||
-            filters.transports.length > 0 ||
-            filters.durations.length > 0 ||
-            filters.prices.length > 0
+            filters.from !== "" || filters.to !== "" || filters.transports.length > 0 || filters.prices.length > 0
 
         setFiltersApplied(hasActiveFilters)
         setIsFilterOpen(false)
@@ -196,19 +176,12 @@ export default function Transfers() {
             from: "",
             to: "",
             transports: [],
-            durations: [],
             prices: [],
         })
         setSearchTerm("")
         setFilteredTransfers(allTransfers) // Reset to show all current transfers
         setFiltersApplied(false)
         setIsFilterOpen(false)
-    }
-
-    const handleClearSearch = () => {
-        setSearchTerm("")
-        setFilteredTransfers(allTransfers) // Reset to show all current transfers
-        setFiltersApplied(false)
     }
 
     useEffect(() => {
@@ -293,8 +266,6 @@ export default function Transfers() {
                             customeStyles=""
                             value={searchTerm}
                             onChange={setSearchTerm}
-                            onSearch={handleApply}
-                            onClear={handleClearSearch}
                             placeholder="Search for transfers"
                         />
                         <button
@@ -314,6 +285,7 @@ export default function Transfers() {
                                 onFilterChange={handleFilterChange}
                                 onApply={handleApply}
                                 onClear={handleClearFilters}
+                                locationOptions={locationOptions}
                             />
                         </div>
 
@@ -331,6 +303,7 @@ export default function Transfers() {
                                         filters={filters}
                                         onFilterChange={handleFilterChange}
                                         isSmallScreen={true}
+                                        locationOptions={locationOptions}
                                         onApply={() => {
                                             handleApply()
                                             setIsFilterOpen(false)
@@ -346,7 +319,30 @@ export default function Transfers() {
 
                         {/* Transfers */}
                         <div className="space-y-8 w-full">
-                            {filtersApplied ? (
+                            {searchTerm.trim() !== "" ? (
+                                // Show search results when searching
+                                <div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
+                                        <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
+                                            Search Results
+                                        </h2>
+                                        <hr className="border-b-2 border-primary_green w-full md:flex" />
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {filteredTransfers.length === 0 ? (
+                                            <div className="col-span-full text-center text-desc_gray mt-4 text-sm">
+                                                <Lottie loop animationData={NotFound} className="w-40 h-40 mx-auto" />
+                                                <p>No transfers found for "{searchTerm}". Try different keywords.</p>
+                                            </div>
+                                        ) : (
+                                            filteredTransfers.map((transfer, i) => (
+                                                <TransferCard key={transfer._id || i} {...transfer} />
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            ) : filtersApplied ? (
                                 // Show filtered results under "Your Results"
                                 <div>
                                     <div className="flex items-center gap-2 mb-6">

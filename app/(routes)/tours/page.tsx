@@ -60,22 +60,65 @@ export default function ToursPage() {
         setFilters((prev) => ({ ...prev, [field]: value }))
     }
 
+    // Apply filters and search in real-time
+    useEffect(() => {
+        // Only apply search in real-time, not filters
+        if (allTours.length === 0) return
+
+        const applySearch = () => {
+            console.log("Applying search:", { searchTerm, tourCount: allTours.length })
+
+            const result = allTours.filter((tour: TourType) => {
+                const matchSearch =
+                    searchTerm.trim() === "" ||
+                    tour.title.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                    tour.description.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
+                    tour.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase().trim()))
+
+                return matchSearch
+            })
+
+            setFilteredTours(result)
+            console.log("Search results:", result.length, "tours match the search criteria")
+
+            // Check if search is active
+            const hasActiveSearch = searchTerm.trim() !== ""
+            setFiltersApplied(
+                hasActiveSearch || filters.type !== "All" || filters.prices.length > 0 || filters.durations.length > 0
+            )
+        }
+
+        applySearch()
+    }, [allTours, searchTerm])
+
     const handleApply = () => {
+        console.log("Applying filters:", { searchTerm, filters, tourCount: allTours.length })
+
         const result = allTours.filter((tour: TourType) => {
             const { type, prices, durations } = filters
 
-            const matchType = type === "All" || tour.tags.some((tag: string) => tag.toLowerCase() === type.toLowerCase())
+            const matchType =
+                type === "All" ||
+                tour.type.toLowerCase() === type.toLowerCase() ||
+                tour.packageType.toLowerCase() === type.toLowerCase() ||
+                tour.tags.some((tag: string) => tag.toLowerCase() === type.toLowerCase())
 
             const matchPrice =
                 prices.length === 0 ||
                 prices.some((range) => {
                     const [min, max] = range.split("-").map(Number)
+                    if (isNaN(min) || isNaN(max)) return false
                     return tour.newPrice >= min && tour.newPrice <= max
                 })
 
             const matchDuration =
                 durations.length === 0 ||
-                durations.some((dur) => tour.tags.some((tag: string) => tag.toLowerCase().includes(dur.toLowerCase())))
+                durations.some((dur) => {
+                    // Check both the period field and tags for duration matching
+                    const periodMatch = tour.period && tour.period.toLowerCase().includes(dur.toLowerCase())
+                    const tagMatch = tour.tags.some((tag: string) => tag.toLowerCase().includes(dur.toLowerCase()))
+                    return periodMatch || tagMatch
+                })
 
             const matchSearch =
                 searchTerm.trim() === "" ||
@@ -87,6 +130,7 @@ export default function ToursPage() {
         })
 
         setFilteredTours(result)
+        console.log("Filtered results:", result.length, "tours match the criteria")
 
         // Check if any filters/search are actually active
         const hasActiveFilters =

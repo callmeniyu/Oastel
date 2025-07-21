@@ -1556,7 +1556,7 @@ export const allTransfers: TransferType[] = [
         details: {
             about: "Experience luxury and comfort with our private transfer service from Kuala Lumpur to Cameron Highlands.",
             itinerary:
-                "Direct transfer with optional scenic stops along the way. Personalized service with experienced driver.",
+                "",
             pickupLocations: ["KLIA", "KL Sentral", "Any KL Hotel"],
             note: "Driver will contact you 30 minutes before pickup time.",
             faq: [

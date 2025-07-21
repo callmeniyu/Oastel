@@ -1,4 +1,4 @@
-import { getBlogBySlug, getOtherBlogs } from "@/lib/utils"
+import { blogApi } from "@/lib/blogApi"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import BlogCard from "@/components/ui/BlogCard"
@@ -14,8 +14,32 @@ type Props = {
 
 export default async function BlogDetailsPage({ params }: Props) {
     const { slug } = params
-    const blogDetails = await getBlogBySlug(slug)
-    const otherBlogs = await getOtherBlogs(slug)
+    let blogDetails = null
+    try {
+        const response = await blogApi.getBlogBySlug(slug)
+        if (response.success) {
+            // Increment view count
+            await blogApi.incrementViews(response.data._id)
+            blogDetails = response.data
+        }
+    } catch (error) {
+        console.error("Error fetching blog by slug:", error)
+    }
+
+    // Get other blogs (exclude current one)
+    let otherBlogs: any[] = []
+    try {
+        const response = await blogApi.getBlogs({
+            sortBy: "createdAt",
+            sortOrder: "desc",
+            limit: 4,
+        })
+        if (response.success) {
+            otherBlogs = response.data.filter((blog) => blog.slug !== slug)
+        }
+    } catch (error) {
+        console.error("Error fetching other blogs:", error)
+    }
 
     if (!blogDetails) return notFound()
 
@@ -24,7 +48,7 @@ export default async function BlogDetailsPage({ params }: Props) {
             {/* Title + Meta */}
             <div className="bg-primary_green text-white p-3 md:p-6 rounded-lg text-center space-y-3 mb-6">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-snug">{blogDetails.title}</h1>
-                <p className="text-lg text-gray-100">{blogDetails.desc}</p>
+                <p className="text-lg text-gray-100">{blogDetails.description}</p>
                 <div className="flex flex-wrap justify-center items-center gap-4 text-sm text-white/90">
                     <div className="flex gap-2">
                         <TbCategory className="text-lg" /> <p>{blogDetails.category}</p>

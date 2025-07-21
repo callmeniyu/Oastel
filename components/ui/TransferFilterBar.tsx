@@ -7,7 +7,6 @@ type FilterState = {
     from: string
     to: string
     transports: string[]
-    durations: string[]
     prices: string[]
 }
 
@@ -17,15 +16,40 @@ type Props = {
     onApply: () => void
     onClear?: () => void
     isSmallScreen?: boolean
+    locationOptions?: {
+        from: string[]
+        to: string[]
+    }
 }
 
-export default function TransferFilterBar({ filters, onFilterChange, onApply, onClear, isSmallScreen }: Props) {
+export default function TransferFilterBar({
+    filters,
+    onFilterChange,
+    onApply,
+    onClear,
+    isSmallScreen,
+    locationOptions,
+}: Props) {
     const [fromDropdownOpen, setFromDropdownOpen] = useState(false)
     const [toDropdownOpen, setToDropdownOpen] = useState(false)
     const fromDropdownRef = useRef<HTMLDivElement>(null)
     const toDropdownRef = useRef<HTMLDivElement>(null)
 
-    const locationOptions = ["Cameron Highlands", "Taman Negara", "Kuala Besut Jetty", "Perhentian Islands", "Kuala Lumpur"]
+    // Use dynamic options or fallback to static ones
+    const fromOptions = locationOptions?.from || [
+        "Cameron Highlands",
+        "Taman Negara",
+        "Kuala Besut Jetty",
+        "Perhentian Islands",
+        "Kuala Lumpur",
+    ]
+    const toOptions = locationOptions?.to || [
+        "Cameron Highlands",
+        "Taman Negara",
+        "Kuala Besut Jetty",
+        "Perhentian Islands",
+        "Kuala Lumpur",
+    ]
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -41,7 +65,7 @@ export default function TransferFilterBar({ filters, onFilterChange, onApply, on
         return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
-    const handleCheckboxChange = (field: "transports" | "durations" | "prices", value: string) => {
+    const handleCheckboxChange = (field: "transports" | "prices", value: string) => {
         const updated = filters[field].includes(value)
             ? filters[field].filter((v) => v !== value)
             : [...filters[field], value]
@@ -85,7 +109,7 @@ export default function TransferFilterBar({ filters, onFilterChange, onApply, on
                             </button>
                             {fromDropdownOpen && (
                                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-10">
-                                    {locationOptions.map((location) => (
+                                    {fromOptions.map((location) => (
                                         <button
                                             key={location}
                                             type="button"
@@ -118,7 +142,7 @@ export default function TransferFilterBar({ filters, onFilterChange, onApply, on
                             </button>
                             {toDropdownOpen && (
                                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-10">
-                                    {locationOptions.map((location) => (
+                                    {toOptions.map((location) => (
                                         <button
                                             key={location}
                                             type="button"
@@ -139,39 +163,13 @@ export default function TransferFilterBar({ filters, onFilterChange, onApply, on
             <div className="border-t pt-4 mb-4">
                 <h4 className="font-semibold text-title_black mb-2 text-sm">Type of transport</h4>
                 <ul className="space-y-1 text-desc_gray text-sm">
-                    {[
-                        "Shared Mini Van",
-                        "Shared Van + Ferry",
-                        "Private Alphard",
-                        "Private Innova",
-                        "Private Welfare",
-                        "Private Mini Van",
-                    ].map((val) => (
+                    {["Shared Mini Van", "Shared Van + Ferry", "Private"].map((val) => (
                         <li key={val}>
                             <label className="flex items-center gap-2">
                                 <input
                                     type="checkbox"
                                     checked={filters.transports.includes(val)}
                                     onChange={() => handleCheckboxChange("transports", val)}
-                                />
-                                {val}
-                            </label>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            {/* Duration */}
-            <div className="border-t pt-4 mb-4">
-                <h4 className="font-semibold text-title_black mb-2 text-sm">Duration</h4>
-                <ul className="space-y-1 text-desc_gray text-sm">
-                    {["2–4 hrs", "4–8 hrs"].map((val) => (
-                        <li key={val}>
-                            <label className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={filters.durations.includes(val)}
-                                    onChange={() => handleCheckboxChange("durations", val)}
                                 />
                                 {val}
                             </label>
