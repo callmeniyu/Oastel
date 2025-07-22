@@ -97,13 +97,19 @@ export const blogApi = {
             })
 
             if (!response.ok) {
+                // If endpoint doesn't exist (404), return success to avoid breaking the page
+                if (response.status === 404) {
+                    console.warn("View increment endpoint not implemented yet")
+                    return { success: true, message: "View increment endpoint not available" }
+                }
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
 
             return await response.json()
         } catch (error) {
             console.error("Error incrementing views:", error)
-            throw error
+            // Return success to avoid breaking the page
+            return { success: false, message: "Failed to increment views" }
         }
     },
 }

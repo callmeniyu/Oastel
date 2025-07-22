@@ -11,10 +11,6 @@ type GreenBtnProps = {
 const GreenBtn = ({ customStyles, action, text, onClick }: GreenBtnProps) => {
     const router = useRouter()
 
-    const goToTerms = () => {
-        window.history.pushState({ fromBookingPage: true }, "", "/privacy-policy")
-        router.push("/privacy-policy")
-    }
 
     const handleClick = () => {
         if (onClick) {
