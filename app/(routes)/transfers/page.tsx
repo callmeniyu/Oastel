@@ -266,6 +266,7 @@ export default function Transfers() {
                             customeStyles=""
                             value={searchTerm}
                             onChange={setSearchTerm}
+                            onSearch={() => {}}
                             placeholder="Search for transfers"
                         />
                         <button
