@@ -6,7 +6,7 @@ import SearchInput from "@/components/ui/SearchInput"
 import TransferCard from "@/components/ui/TransferCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
-import { IoFilterSharp, IoClose } from "react-icons/io5"
+import { IoFilterSharp, IoClose, IoRefresh } from "react-icons/io5"
 import { transferApi } from "@/lib/transferApi"
 import { TransferType } from "@/lib/types"
 import Image from "next/image"
@@ -184,6 +184,30 @@ export default function Transfers() {
         setIsFilterOpen(false)
     }
 
+    const handleRefresh = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const response = await transferApi.getTransfers({ limit: 100 })
+            setAllTransfers(response.data)
+            setFilteredTransfers(response.data)
+            // Reset filters and search when refreshing
+            setFilters({
+                from: "",
+                to: "",
+                transports: [],
+                prices: [],
+            })
+            setSearchTerm("")
+            setFiltersApplied(false)
+        } catch (err) {
+            console.error("Error refreshing transfers:", err)
+            setError("Failed to refresh transfers. Please try again later.")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
         document.body.style.overflow = isFilterOpen ? "hidden" : "unset"
         // Add smooth scrolling behavior
@@ -269,12 +293,34 @@ export default function Transfers() {
                             onSearch={() => {}}
                             placeholder="Search for transfers"
                         />
+
+                        {/* Desktop refresh button */}
                         <button
-                            className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
-                            onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
+                            className="hidden sm:flex items-center gap-2 text-sm bg-primary_green text-white px-4 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
+                            onClick={handleRefresh}
+                            disabled={loading}
                         >
-                            {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
+                            <IoRefresh className={loading ? "animate-spin" : ""} />
+                            {loading ? "Refreshing..." : "Refresh"}
                         </button>
+
+                        {/* Mobile buttons */}
+                        <div className="sm:hidden flex gap-2">
+                            <button
+                                className="flex items-center justify-center w-10 h-10 bg-primary_green text-white rounded-md hover:bg-primary_green/80 transition-colors"
+                                onClick={handleRefresh}
+                                disabled={loading}
+                                title="Refresh transfers"
+                            >
+                                <IoRefresh className={loading ? "animate-spin" : ""} />
+                            </button>
+                            <button
+                                className="flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
+                                onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
+                            >
+                                {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Main Content */}

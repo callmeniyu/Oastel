@@ -93,6 +93,7 @@ export interface TransferType {
 }
 
 export interface BookingDetailsType {
+    packageId: string
     title: string
     slug: string
     date: string
@@ -106,6 +107,8 @@ export interface BookingDetailsType {
     adultPrice: number
     childPrice: number
     totalPrice: number
+    total: number
+    image?: string
     pickupLocations: string
 }
 

@@ -6,6 +6,7 @@ import { blogApi } from "@/lib/blogApi"
 import SearchInput from "@/components/ui/SearchInput"
 import BlogCard from "@/components/ui/BlogCard"
 import Image from "next/image"
+import { IoRefresh } from "react-icons/io5"
 
 export default function BlogArea() {
     const [searchTerm, setSearchTerm] = useState("")
@@ -39,6 +40,31 @@ export default function BlogArea() {
 
         fetchBlogs()
     }, [])
+
+    const handleRefresh = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const response = await blogApi.getBlogs({
+                sortBy: "createdAt",
+                sortOrder: "desc",
+                limit: 100,
+            })
+
+            if (response.success) {
+                setBlogs(response.data)
+                // Reset search when refreshing
+                setSearchTerm("")
+            } else {
+                setError("Failed to fetch blogs")
+            }
+        } catch (err) {
+            console.error("Error refreshing blogs:", err)
+            setError("Failed to refresh blogs. Please try again later.")
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const filteredBlogs = useMemo(() => {
         const term = searchTerm.toLowerCase()

@@ -6,7 +6,7 @@ import SearchInput from "@/components/ui/SearchInput"
 import TourCard from "@/components/ui/TourCard"
 import Lottie from "lottie-react"
 import NotFound from "@/public/images/notfound.json"
-import { IoFilterSharp, IoClose } from "react-icons/io5"
+import { IoFilterSharp, IoClose, IoRefresh } from "react-icons/io5"
 import { tourApi } from "@/lib/tourApi"
 import { TourType } from "@/lib/types"
 import Loader from "@/components/ui/Loader"
@@ -158,6 +158,29 @@ export default function ToursPage() {
         setFiltersApplied(false)
     }
 
+    const handleRefresh = async () => {
+        try {
+            setIsLoading(true)
+            setError(null)
+            const response = await tourApi.getTours({ limit: 100 })
+            setAllTours(response.data)
+            setFilteredTours(response.data)
+            // Reset filters and search when refreshing
+            setFilters({
+                type: "All",
+                prices: [],
+                durations: [],
+            })
+            setSearchTerm("")
+            setFiltersApplied(false)
+        } catch (err) {
+            console.error("Error refreshing tours:", err)
+            setError("Failed to refresh tours. Please try again later.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     useEffect(() => {
         document.body.style.overflow = isFilterOpen ? "hidden" : "unset"
         // Add smooth scrolling behavior
@@ -198,12 +221,34 @@ export default function ToursPage() {
                     onSearch={handleApply}
                     onClear={handleClearSearch}
                 />
+
+                {/* Desktop refresh button */}
                 <button
-                    className="sm:hidden ml-2 flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md"
-                    onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
+                    className="hidden sm:flex items-center gap-2 text-sm bg-primary_green text-white px-4 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
+                    onClick={handleRefresh}
+                    disabled={isLoading}
                 >
-                    {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
+                    <IoRefresh className={isLoading ? "animate-spin" : ""} />
+                    {isLoading ? "Refreshing..." : "Refresh"}
                 </button>
+
+                {/* Mobile buttons */}
+                <div className="sm:hidden flex gap-2">
+                    <button
+                        className="flex items-center justify-center w-10 h-10 bg-primary_green text-white rounded-md hover:bg-primary_green/80 transition-colors"
+                        onClick={handleRefresh}
+                        disabled={isLoading}
+                        title="Refresh tours"
+                    >
+                        <IoRefresh className={isLoading ? "animate-spin" : ""} />
+                    </button>
+                    <button
+                        className="flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
+                        onClick={() => (filtersApplied ? handleClearFilters() : setIsFilterOpen(true))}
+                    >
+                        {filtersApplied ? <IoClose /> : <IoFilterSharp />} {filtersApplied ? "Clear" : "Filters"}
+                    </button>
+                </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
