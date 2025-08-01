@@ -13,6 +13,8 @@ type TimeSlot = {
   isAvailable: boolean;
   bookedCount: number;
   capacity: number;
+  minimumPerson: number; // Database stored value - changes after first booking
+  currentMinimum: number; // Effective minimum for validation - use this for UI logic
 };
 
 export default function BookingInfoPage() {
@@ -142,6 +144,17 @@ export default function BookingInfoPage() {
       if (data.success) {
         // The backend now returns the slots directly as an array
         const slots = Array.isArray(data.data) ? data.data : [];
+
+        // Debug: Log slot data to verify minimumPerson values being used for validation
+        slots.forEach((slot) => {
+          console.log(
+            `🎯 Frontend Slot ${slot.time}: bookedCount=${slot.bookedCount}, minimumPerson=${slot.minimumPerson}, currentMinimum=${slot.currentMinimum}`
+          );
+          console.log(
+            `   ✅ Using minimumPerson (${slot.minimumPerson}) for validation logic`
+          );
+        });
+
         setTimeSlots(slots);
         setSelectedTime(""); // Reset selected time when date changes
       } else {
@@ -183,6 +196,32 @@ export default function BookingInfoPage() {
     return () => clearInterval(autoRefreshInterval);
   }, [selectedDate, tourDetails?._id, showToast]);
 
+  // Update adults count when slot is selected to meet minimum requirement
+  useEffect(() => {
+    if (selectedTime && timeSlots.length > 0 && tourDetails) {
+      const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+      if (selectedSlot && tourDetails.type !== "private") {
+        const slotMinimum = selectedSlot.minimumPerson;
+        const currentTotal = adults + children;
+
+        console.log(
+          `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
+        );
+
+        // Always reset adults to slot minimum when slot changes (unless user has manually set more)
+        // This ensures adults start at the correct value for each slot
+        if (adults !== slotMinimum) {
+          const newAdults = Math.max(slotMinimum, 1);
+          console.log(
+            `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
+          );
+          setAdults(newAdults);
+          setTotalGuests(newAdults + children);
+        }
+      }
+    }
+  }, [selectedTime, timeSlots, tourDetails]); // Removed children dependency to reset properly
+
   // Calculate price per person for private tours (newPrice / 8)
   const getAdultPrice = () => {
     if (!tourDetails) return 0;
@@ -207,6 +246,12 @@ export default function BookingInfoPage() {
     // Get available capacity from selected time slot
     const availableCapacity = getAvailableCapacity();
 
+    // Get minimum person requirement for selected time slot
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    const minimumRequired = selectedSlot
+      ? selectedSlot.minimumPerson // Use slot's minimumPerson directly
+      : tourDetails.minimumPerson || 1;
+
     if (tourDetails.type === "private") {
       // Only allow increments of 8 for private tours
       if (
@@ -221,7 +266,7 @@ export default function BookingInfoPage() {
     } else {
       const newTotal = newCount + children;
       if (
-        newCount >= (tourDetails.minimumPerson || 1) &&
+        newCount >= Math.max(1, minimumRequired - children) && // Ensure adults + children meets minimum
         newTotal <= (tourDetails.maximumPerson || Infinity) &&
         newTotal <= availableCapacity
       ) {
@@ -236,9 +281,17 @@ export default function BookingInfoPage() {
 
     // Get available capacity from selected time slot
     const availableCapacity = getAvailableCapacity();
+
+    // Get minimum person requirement for selected time slot
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    const minimumRequired = selectedSlot
+      ? selectedSlot.minimumPerson // Use slot's minimumPerson directly
+      : tourDetails.minimumPerson || 1;
+
     const newTotal = adults + newCount;
 
     if (
+      newTotal >= minimumRequired && // Ensure total meets minimum requirement
       newTotal <= (tourDetails.maximumPerson || Infinity) &&
       newTotal <= availableCapacity
     ) {
@@ -290,6 +343,20 @@ export default function BookingInfoPage() {
     }
 
     const totalGuests = adults + children;
+
+    // Check minimum person requirement for this specific slot - USE minimumPerson
+    if (totalGuests < selectedSlot.minimumPerson) {
+      const isFirstBooking = selectedSlot.bookedCount === 0;
+      showToast({
+        type: "error",
+        title: "Minimum guests required",
+        message: `Minimum ${selectedSlot.minimumPerson} person${
+          selectedSlot.minimumPerson > 1 ? "s" : ""
+        } required for this ${isFirstBooking ? "first booking" : "booking"}`,
+      });
+      return;
+    }
+
     if (totalGuests > selectedSlot.capacity - selectedSlot.bookedCount) {
       showToast({
         type: "error",
@@ -414,129 +481,197 @@ export default function BookingInfoPage() {
           </div>
         </div>
 
-        <div className="rounded-lg shadow-md p-4 bg-white">
-          <h3 className="text-primary_green text-xl font-bold mb-2">
-            No. of Guests
-          </h3>
+        {/* Show guest selection only when a time slot is selected */}
+        {selectedTime && (
+          <div className="rounded-lg shadow-md p-4 bg-white">
+            <h3 className="text-primary_green text-xl font-bold mb-2">
+              No. of Guests
+            </h3>
 
-          <div className="space-y-6 border p-3 rounded-lg my-4">
-            {[
-              {
-                label: tourDetails?.type === "private" ? "Group" : "Adults",
-                desc: [
-                  tourDetails?.type === "private"
-                    ? "Maximum: 8 persons per group. Increments by 8."
-                    : `Minimum: ${tourDetails?.minimumPerson} person per group.`,
-                ],
-                value: adults,
-                onIncrement: () =>
-                  tourDetails?.type === "private"
-                    ? updateAdults(adults + 8)
-                    : updateAdults(adults + 1),
-                onDecrement: () =>
-                  tourDetails?.type === "private"
-                    ? updateAdults(adults - 8)
-                    : updateAdults(adults - 1),
-                disableDecrement:
-                  tourDetails?.type === "private"
-                    ? adults <= 8
-                    : adults <= (tourDetails?.minimumPerson || 1),
-                disableIncrement:
-                  totalGuests >= (tourDetails?.maximumPerson || Infinity) ||
-                  totalGuests >= getAvailableCapacity() ||
-                  (tourDetails?.type === "private" &&
-                    adults + 8 > getAvailableCapacity()),
-                price: getAdultPrice(),
-              },
-              ...(tourDetails?.type !== "private"
-                ? [
-                    {
-                      label: "Child",
-                      desc: ["Age between 3 to 7 years"],
-                      value: children,
-                      onIncrement: () => updateChildren(children + 1),
-                      onDecrement: () => updateChildren(children - 1),
-                      disableDecrement: children <= 0,
-                      disableIncrement:
-                        totalGuests >=
-                          (tourDetails?.maximumPerson || Infinity) ||
-                        totalGuests >= getAvailableCapacity(),
-                      price: tourDetails?.childPrice || 0,
-                    },
-                  ]
-                : []),
-            ].map(
-              ({
-                label,
-                value,
-                price,
-                desc,
-                onIncrement,
-                onDecrement,
-                disableIncrement,
-                disableDecrement,
-              }) => (
-                <div
-                  key={label}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold">
-                      {label}{" "}
-                      <span className="text-sm text-desc_gray">
-                        (RM {price} {label === "Group" && "for 8 persons"})
-                      </span>
+            {/* Show minimum requirement for selected slot */}
+            {(() => {
+              const selectedSlot = timeSlots.find(
+                (slot) => slot.time === selectedTime
+              );
+              if (selectedSlot) {
+                const isFirstBooking = selectedSlot.bookedCount === 0;
+                return (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700">
+                      <span className="font-medium">Selected Time:</span>{" "}
+                      {selectedTime} |
+                      <span className="font-medium"> Minimum Required:</span>{" "}
+                      {selectedSlot.minimumPerson} person
+                      {selectedSlot.minimumPerson > 1 ? "s" : ""} |
+                      <span className="font-medium"> Available:</span>{" "}
+                      {selectedSlot.capacity - selectedSlot.bookedCount} seats
                     </p>
-                    <div className="space-y-1 mt-1">
-                      {desc.map((d, index) => (
-                        <p
-                          key={index}
-                          className="text-xs text-desc_gray font-light"
+                    <p className="text-xs text-green-600 mt-1">
+                      {isFirstBooking
+                        ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
+                        : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <div className="space-y-6 border p-3 rounded-lg my-4">
+              {[
+                {
+                  label: tourDetails?.type === "private" ? "Group" : "Adults",
+                  desc: [
+                    tourDetails?.type === "private"
+                      ? "Maximum: 8 persons per group. Increments by 8."
+                      : (() => {
+                          const selectedSlot = timeSlots.find(
+                            (slot) => slot.time === selectedTime
+                          );
+                          const slotMinimum =
+                            selectedSlot?.minimumPerson ||
+                            tourDetails?.minimumPerson ||
+                            1;
+                          return `Minimum: ${slotMinimum} person${
+                            slotMinimum > 1 ? "s" : ""
+                          } for selected time slot.`;
+                        })(),
+                  ],
+                  value: adults,
+                  onIncrement: () =>
+                    tourDetails?.type === "private"
+                      ? updateAdults(adults + 8)
+                      : updateAdults(adults + 1),
+                  onDecrement: () =>
+                    tourDetails?.type === "private"
+                      ? updateAdults(adults - 8)
+                      : updateAdults(adults - 1),
+                  disableDecrement:
+                    tourDetails?.type === "private"
+                      ? adults <= 8
+                      : (() => {
+                          const selectedSlot = timeSlots.find(
+                            (slot) => slot.time === selectedTime
+                          );
+                          const slotMinimum = selectedSlot?.minimumPerson || 1;
+                          return adults <= Math.max(1, slotMinimum - children);
+                        })(),
+                  disableIncrement:
+                    totalGuests >= (tourDetails?.maximumPerson || Infinity) ||
+                    totalGuests >= getAvailableCapacity() ||
+                    (tourDetails?.type === "private" &&
+                      adults + 8 > getAvailableCapacity()),
+                  price: getAdultPrice(),
+                },
+                ...(tourDetails?.type !== "private"
+                  ? [
+                      {
+                        label: "Child",
+                        desc: ["Age between 3 to 7 years"],
+                        value: children,
+                        onIncrement: () => updateChildren(children + 1),
+                        onDecrement: () => updateChildren(children - 1),
+                        disableDecrement: children <= 0,
+                        disableIncrement:
+                          totalGuests >=
+                            (tourDetails?.maximumPerson || Infinity) ||
+                          totalGuests >= getAvailableCapacity(),
+                        price: tourDetails?.childPrice || 0,
+                      },
+                    ]
+                  : []),
+              ].map(
+                ({
+                  label,
+                  value,
+                  price,
+                  desc,
+                  onIncrement,
+                  onDecrement,
+                  disableIncrement,
+                  disableDecrement,
+                }) => (
+                  <div
+                    key={label}
+                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold">
+                        {label}{" "}
+                        <span className="text-sm text-desc_gray">
+                          (RM {price} {label === "Group" && "for 8 persons"})
+                        </span>
+                      </p>
+                      <div className="space-y-1 mt-1">
+                        {desc.map((d, index) => (
+                          <p
+                            key={index}
+                            className="text-xs text-desc_gray font-light"
+                          >
+                            {d}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
+                      <div className="flex items-center gap-2 border rounded-full">
+                        <button
+                          onClick={onDecrement}
+                          disabled={disableDecrement}
+                          className={`px-3 py-1.5 rounded-l-xl text-lg ${
+                            disableDecrement
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "hover:bg-primary_green hover:text-white"
+                          }`}
                         >
-                          {d}
-                        </p>
-                      ))}
+                          -
+                        </button>
+                        <span className="min-w-[24px] text-center">
+                          {value}
+                        </span>
+                        <button
+                          onClick={onIncrement}
+                          disabled={disableIncrement}
+                          className={`px-3 py-1.5 rounded-r-xl text-lg ${
+                            disableIncrement
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "hover:bg-primary_green hover:text-white"
+                          }`}
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <span className="font-semibold text-primary_green min-w-[80px] text-right">
+                        {tourDetails?.type === "private"
+                          ? `RM ${(value / 8) * (tourDetails.newPrice || 0)}`
+                          : `RM ${value * price}`}
+                      </span>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
-                    <div className="flex items-center gap-2 border rounded-full">
-                      <button
-                        onClick={onDecrement}
-                        disabled={disableDecrement}
-                        className={`px-3 py-1.5 rounded-l-xl text-lg ${
-                          disableDecrement
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                            : "hover:bg-primary_green hover:text-white"
-                        }`}
-                      >
-                        -
-                      </button>
-                      <span className="min-w-[24px] text-center">{value}</span>
-                      <button
-                        onClick={onIncrement}
-                        disabled={disableIncrement}
-                        className={`px-3 py-1.5 rounded-r-xl text-lg ${
-                          disableIncrement
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                            : "hover:bg-primary_green hover:text-white"
-                        }`}
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                      {tourDetails?.type === "private"
-                        ? `RM ${(value / 8) * (tourDetails.newPrice || 0)}`
-                        : `RM ${value * price}`}
-                    </span>
-                  </div>
-                </div>
-              )
-            )}
+                )
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Show message when no slot is selected */}
+        {!selectedTime && (
+          <div className="rounded-lg shadow-md p-4 bg-gray-50 border-2 border-dashed border-gray-300">
+            <h3 className="text-gray-500 text-xl font-bold mb-2">
+              No. of Guests
+            </h3>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                👆 Please select a time slot first
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                Guest selection will appear after choosing your preferred time
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <BookingInfoPanel
