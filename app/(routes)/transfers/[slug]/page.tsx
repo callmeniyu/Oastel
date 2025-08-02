@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Tag from "@/components/ui/Tag";
+import TourCard from "@/components/ui/TourCard";
 import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
@@ -10,6 +11,7 @@ import { RiRouteFill } from "react-icons/ri";
 import { RiMapPinLine } from "react-icons/ri";
 import { IoWarningOutline } from "react-icons/io5";
 import { transferApi } from "@/lib/transferApi";
+import { tourApi } from "@/lib/tourApi";
 import { FaBus, FaWalking } from "react-icons/fa";
 
 type TransferDetailPageProps = {
@@ -28,17 +30,27 @@ export default async function TransferDetailPage({
     console.error("Error fetching transfer by slug:", error);
   }
 
-  // Get other transfers (exclude current one)
-  let othertransfers: any[] = [];
+  // Get other packages (both transfers and tours)
+  let otherPackages: any[] = [];
   try {
-    const response = await transferApi.getTransfers({ limit: 8 });
-    if (response.success) {
-      othertransfers = response.data
-        .filter((transfer) => transfer.slug !== slug)
-        .slice(0, 4);
+    const [transfersResponse, toursResponse] = await Promise.all([
+      transferApi.getTransfers({ limit: 100 }),
+      tourApi.getTours({ limit: 100 }),
+    ]);
+
+    if (transfersResponse.success && toursResponse.success) {
+      // Combine transfers and tours, excluding current transfer
+      const allPackages = [
+        ...transfersResponse.data.filter((transfer) => transfer.slug !== slug),
+        ...toursResponse.data,
+      ];
+
+      // Shuffle and take 4 packages
+      const shuffledPackages = allPackages.sort(() => Math.random() - 0.5);
+      otherPackages = shuffledPackages.slice(0, 4);
     }
   } catch (error) {
-    console.error("Error fetching other transfers:", error);
+    console.error("Error fetching other packages:", error);
   }
 
   if (!transferDetails) {
@@ -261,19 +273,25 @@ export default async function TransferDetailPage({
         />
       </div>
 
-      {/* Other transfers */}
+      {/* Other Packages */}
       <section>
         <div className="flex items-center gap-2">
           <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
           <h2 className="text-2xl font-extrabold sm:font-bold text-primary_green mb-4 pt-2  min-w-max">
-            Other transfers
+            Other Tours/Transfers
           </h2>
           <hr className="border-b-2 border-primary_green  w-full  md:flex" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {othertransfers.map((transfer, i) => (
-            <TransferCard key={i} {...transfer} />
-          ))}
+          {otherPackages.map((pkg, i) => {
+            // Check if the package has tourPackage array - then it's a tour
+            if (pkg.tourPackage && pkg.tourPackage.length > 0) {
+              return <TourCard key={`tour-${i}`} {...pkg} />;
+            } else {
+              // Otherwise it's a transfer
+              return <TransferCard key={`transfer-${i}`} {...pkg} />;
+            }
+          })}
         </div>
       </section>
     </div>

@@ -201,68 +201,7 @@ export default function BookingUserInfoPage() {
     handleConfirmBooking();
   };
 
-  const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      showToast({
-        type: "error",
-        title: "Login Required",
-        message: "Please log in to add items to your cart.",
-      });
-      router.push("/auth");
-      return;
-    }
-    if (!booking) return;
-
-    try {
-      const cartData = {
-        email: user?.email,
-        title: booking.title,
-        packageType: booking.packageType,
-        packageId: booking.packageId,
-        date: booking.date,
-        time: booking.time,
-        adults: booking.adults,
-        children: booking.children || 0,
-        adultPrice: booking.adultPrice,
-        childPrice: booking.childPrice,
-        totalPrice: booking.totalPrice,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/cart`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(cartData),
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        showToast({
-          type: "success",
-          title: "Added to Cart",
-          message: "Item has been added to your cart successfully",
-        });
-      } else {
-        showToast({
-          type: "error",
-          title: "Failed to Add",
-          message: result.error || "Failed to add item to cart",
-        });
-      }
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "An error occurred while adding to cart",
-      });
-    }
-  };
+  // Cart functionality will be implemented separately
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-12 py-6 grid grid-cols-1 md:grid-cols-3 gap-8 font-poppins">

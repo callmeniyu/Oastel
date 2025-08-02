@@ -2,6 +2,7 @@
 import { signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProfileContent from "@/components/profile/ProfileContent";
+import PasswordContent from "@/components/profile/PasswordContent";
 import AddressContent from "@/components/profile/AddressContent";
 import MyBookingsContent from "@/components/profile/MyBookingsContent";
 import Confirmation from "@/components/ui/Confirmation";
@@ -165,6 +166,7 @@ export default function ProfilePage() {
 
   const tabs = [
     { id: "profile", label: "Edit Profile" },
+    { id: "password", label: "Password" },
     { id: "address", label: "Address & Contact" },
     { id: "bookings", label: "My Bookings" },
     { id: "cart", label: "My Cart" },
@@ -185,6 +187,8 @@ export default function ProfilePage() {
             image={user?.image || undefined}
           />
         );
+      case "password":
+        return <PasswordContent />;
       case "address":
         return <AddressContent />;
       case "bookings":

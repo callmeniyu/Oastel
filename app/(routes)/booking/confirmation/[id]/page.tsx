@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface BookingDetails {
   _id: string;
@@ -28,9 +30,63 @@ export default function BookingConfirmationPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const bookingId = params.id as string;
+  const confirmationRef = useRef<HTMLDivElement>(null);
 
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
+  const downloadPDF = async () => {
+    if (!confirmationRef.current || !booking) return;
+
+    try {
+      setIsGeneratingPDF(true);
+
+      const canvas = await html2canvas(confirmationRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`booking-confirmation-${booking._id}.pdf`);
+
+      showToast({
+        type: "success",
+        title: "PDF Downloaded",
+        message: "Your booking confirmation has been downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      showToast({
+        type: "error",
+        title: "Download Failed",
+        message: "Failed to generate PDF. Please try again.",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -115,7 +171,7 @@ export default function BookingConfirmationPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="bg-white rounded-lg shadow-lg p-8" ref={confirmationRef}>
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -213,6 +269,13 @@ export default function BookingConfirmationPage() {
               A confirmation email has been sent to {booking.contactInfo.email}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={downloadPDF}
+                disabled={isGeneratingPDF}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+              </button>
               <button
                 onClick={() => router.push("/profile?tab=mybookings")}
                 className="px-6 py-2 bg-primary_green text-white rounded-lg hover:bg-green-700"

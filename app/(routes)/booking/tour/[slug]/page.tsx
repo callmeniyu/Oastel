@@ -146,7 +146,7 @@ export default function BookingInfoPage() {
         const slots = Array.isArray(data.data) ? data.data : [];
 
         // Debug: Log slot data to verify minimumPerson values being used for validation
-        slots.forEach((slot) => {
+        slots.forEach((slot: TimeSlot) => {
           console.log(
             `🎯 Frontend Slot ${slot.time}: bookedCount=${slot.bookedCount}, minimumPerson=${slot.minimumPerson}, currentMinimum=${slot.currentMinimum}`
           );

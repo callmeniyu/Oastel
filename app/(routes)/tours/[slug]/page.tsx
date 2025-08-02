@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Tag from "@/components/ui/Tag";
 import TourCard from "@/components/ui/TourCard";
+import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
 import Loader from "@/components/ui/Loader";
@@ -15,6 +16,7 @@ import { RiRouteFill } from "react-icons/ri";
 import { RiMapPinLine } from "react-icons/ri";
 import { IoWarningOutline } from "react-icons/io5";
 import { tourApi } from "@/lib/tourApi";
+import { transferApi } from "@/lib/transferApi";
 import { TourType } from "@/lib/types";
 import { resolveImageUrl } from "@/lib/imageUtils";
 
@@ -23,7 +25,7 @@ export default function TourDetailPage() {
   const slug = params.slug as string;
 
   const [tourDetails, setTourDetails] = useState<TourType | null>(null);
-  const [otherTours, setOtherTours] = useState<TourType[]>([]);
+  const [otherTours, setOtherTours] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,12 +39,21 @@ export default function TourDetailPage() {
         const currentTourResponse = await tourApi.getTourBySlug(slug);
         setTourDetails(currentTourResponse.data);
 
-        // Fetch other tours for recommendations
-        const allToursResponse = await tourApi.getTours({ limit: 100 });
-        const otherToursData = allToursResponse.data.filter(
-          (tour) => tour.slug !== slug
-        );
-        setOtherTours(otherToursData.slice(0, 4));
+        // Fetch both tours and transfers for recommendations
+        const [allToursResponse, allTransfersResponse] = await Promise.all([
+          tourApi.getTours({ limit: 100 }),
+          transferApi.getTransfers({ limit: 100 }),
+        ]);
+
+        // Combine tours and transfers, excluding current tour
+        const allPackages = [
+          ...allToursResponse.data.filter((tour) => tour.slug !== slug),
+          ...allTransfersResponse.data,
+        ];
+
+        // Shuffle and take 4 packages
+        const shuffledPackages = allPackages.sort(() => Math.random() - 0.5);
+        setOtherTours(shuffledPackages.slice(0, 4));
       } catch (err) {
         console.error("Error fetching tour data:", err);
         setError("Failed to load tour details. Please try again later.");
@@ -223,28 +234,32 @@ export default function TourDetailPage() {
 
         {/* ✅ Booking Panel for large screens */}
         <div className="w-full lg:w-80 shrink-0 hidden lg:block">
-          <div className="mb-6">
-            <p className="text-lg text-gray-400 line-through">
-              RM {tourDetails.oldPrice}
-            </p>
-            <h2 className="text-lg">
-              <span className="text-3xl font-bold">
-                RM {tourDetails.newPrice}
-              </span>{" "}
-              {tourDetails.type === "private" ? " / group" : " / person"}
-            </h2>
-            <div className="flex items-center gap-2">
-              <FaBookmark className="text-primary_green inline-block mr-1" />
-              <span className="font-semibold">
-                {tourDetails.bookedCount} + Booked
-              </span>
+          <div className="bg-white border-2 border-primary_green rounded-xl shadow-lg p-6 flex flex-col gap-6">
+            <div>
+              <p className="text-lg text-gray-400 line-through mb-1">
+                RM {tourDetails.oldPrice}
+              </p>
+              <h2 className="text-lg mb-2">
+                <span className="text-4xl font-extrabold">
+                  RM {tourDetails.newPrice}
+                </span>{" "}
+                <span className="text-base font-medium text-desc_gray">
+                  {tourDetails.type === "private" ? " / group" : " / person"}
+                </span>
+              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <FaBookmark className="text-primary_green inline-block mr-1" />
+                <span className="font-semibold text-desc_gray">
+                  {tourDetails.bookedCount} Booked
+                </span>
+              </div>
             </div>
+            <GreenBtn
+              text="Book Now"
+              action={`/booking/tour/${tourDetails.slug}`}
+              customStyles="w-full py-4 text-lg font-bold rounded-lg"
+            />
           </div>
-
-          <GreenBtn
-            text="Book Now"
-            action={`/booking/tour/${tourDetails.slug}`}
-          />
         </div>
       </div>
 
@@ -279,6 +294,7 @@ export default function TourDetailPage() {
         <GreenBtn
           text="Book this tour"
           action={`/booking/tour/${tourDetails.slug}`}
+          customStyles="w-72 py-5 text-xl font-medium "
         />
       </div>
 
@@ -287,14 +303,21 @@ export default function TourDetailPage() {
         <div className="flex items-center gap-2">
           <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
           <h2 className="text-2xl font-extrabold sm:font-bold text-primary_green mb-4 pt-2  min-w-max">
-            Other Tours
+            Other Packages
           </h2>
           <hr className="border-b-2 border-primary_green  w-full  md:flex" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {otherTours.map((tour, i) => (
-            <TourCard key={i} {...tour} />
-          ))}
+          {otherTours.map((packageItem, i) =>
+            packageItem.packageType === "transfer" ||
+            packageItem.type === "van" ||
+            packageItem.type === "van + ferry" ||
+            packageItem.type === "private" ? (
+              <TransferCard key={i} {...packageItem} />
+            ) : (
+              <TourCard key={i} {...packageItem} />
+            )
+          )}
         </div>
       </section>
     </div>

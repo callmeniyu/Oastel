@@ -73,8 +73,7 @@ export const authOptions = {
                             phone: "",
                             pickupAddresses: [],
                         },
-                        cartId: "",
-                        bookings: "",
+                        bookings: [],
                         provider: "google",
                         googleId: profile?.sub,
                     })
@@ -85,15 +84,19 @@ export const authOptions = {
 
             return true
         },
-        async jwt({ token, user }: { token: Record<string, any>; user?: Record<string, any> }) {
+        async jwt({ token, user, account }: { token: Record<string, any>; user?: Record<string, any>; account?: any }) {
             if (user) {
                 token.id = user.id
+            }
+            if (account?.provider) {
+                token.provider = account.provider
             }
             return token
         },
         async session({ session, token }: { session: any; token: any }) {
             if (session.user) {
                 session.user.id = token.id as string
+                session.user.provider = token.provider
             }
             return session
         },

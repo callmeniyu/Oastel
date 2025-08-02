@@ -67,17 +67,16 @@ export default function BookingInfoPanel({
       try {
         const cartData = {
           userId: (user as any).id || (user as any)._id || user?.email,
-          title: title,
           packageType,
           packageId,
           date: date.toISOString().split("T")[0],
           time,
           adults,
           children: children || 0,
-          adultPrice,
-          childPrice,
-          totalPrice: total,
+          pickupLocation: "", // Default empty string for pickup location
         };
+
+        console.log("📦 BookingInfoPanel sending cart data:", cartData);
 
         const response = await fetch("/api/cart", {
           method: "POST",

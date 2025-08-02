@@ -1,7 +1,18 @@
 "use client";
 import { signOut } from "next-auth/react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motio  // Don't render content if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }matePresence } from "framer-motion";
 import ProfileContent from "@/components/profile/ProfileContent";
+import PasswordContent from "@/components/profile/PasswordContent";
 import AddressContent from "@/components/profile/AddressContent";
 import MyBookingsContent from "@/components/profile/MyBookingsContent";
 import Confirmation from "@/components/ui/Confirmation";
@@ -12,11 +23,18 @@ import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
 import SessionHook from "@/hooks/SessionHook";
 import { useState, useEffect } from "react";
+import MyCartContent from "@/components/profile/MyCartContent";
+import { useRef } from "react";
+import { useToast } from "@/context/ToastContext";
+import { useRouter } from "next/navigation";
+import SessionHook from "@/hooks/SessionHook";
+import { useState, useEffect } from "react";
 
 export default function ProfilePage() {
   const { user, isAuthenticated } = SessionHook();
   const router = useRouter();
   const { showToast } = useToast();
+  const hasRedirected = useRef(false);
 
   const [userData, setUserData] = useState({
     username: "",
@@ -31,7 +49,7 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Redirect unauthenticated users
+  // Redirect unauthenticated users (after hooks are defined)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!isAuthenticated) {
@@ -51,7 +69,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       const userImage = user.image || null;
-      console.log("👤 User Image URL:", userImage);
+      console.log("👤 User Image URL:", userImage); // Add this
       setProfileImage(userImage);
       setUserData({
         username: user.name || "",
@@ -63,16 +81,11 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Don't render content if not authenticated
+  // ❌ DON’T put `return null` before all hooks run
+  // ✅ DO it here, after all hooks have been declared
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
-          <p className="text-gray-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
+    return console.log("User is not authenticated, redirecting..."); // Redirect or show a loading spinner;
+    // or a loading spinner
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,31 +146,29 @@ export default function ProfilePage() {
         }
       );
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete account");
+      }
+
       const result = await response.json();
 
-      if (result.success) {
-        showToast({
-          type: "success",
-          title: "Success",
-          message: "Account deleted successfully. You will be logged out.",
-        });
+      showToast({
+        type: "success",
+        title: "Success",
+        message: "Account deleted successfully. You will be logged out.",
+      });
 
-        setShowDeleteConfirm(false);
-        signOut({ callbackUrl: "/" });
-      } else {
-        showToast({
-          type: "error",
-          title: "Error",
-          message: result.message || "Failed to delete account",
-        });
-      }
+      setShowDeleteConfirm(false);
+
+      signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Error deleting account:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to delete account. Please try again.",
-      });
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete account. Please try again."
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -165,6 +176,7 @@ export default function ProfilePage() {
 
   const tabs = [
     { id: "profile", label: "Edit Profile" },
+    { id: "password", label: "Password" },
     { id: "address", label: "Address & Contact" },
     { id: "bookings", label: "My Bookings" },
     { id: "cart", label: "My Cart" },
@@ -185,6 +197,8 @@ export default function ProfilePage() {
             image={user?.image || undefined}
           />
         );
+      case "password":
+        return <PasswordContent />;
       case "address":
         return <AddressContent />;
       case "bookings":
