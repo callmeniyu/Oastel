@@ -170,7 +170,7 @@ export default function BookingConfirmationPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10 font-poppins">
       <div className="bg-white rounded-lg shadow-lg p-8" ref={confirmationRef}>
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -268,29 +268,24 @@ export default function BookingConfirmationPage() {
             <p className="text-gray-600">
               A confirmation email has been sent to {booking.contactInfo.email}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={downloadPDF}
-                disabled={isGeneratingPDF}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
-              </button>
-              <button
-                onClick={() => router.push("/profile?tab=mybookings")}
-                className="px-6 py-2 bg-primary_green text-white rounded-lg hover:bg-green-700"
-              >
-                View My Bookings
-              </button>
-              <button
-                onClick={() => router.push("/tours")}
-                className="px-6 py-2 border border-primary_green text-primary_green rounded-lg hover:bg-primary_green hover:text-white"
-              >
-                Browse More Tours
-              </button>
-            </div>
           </div>
         </div>
+      </div>
+      {/* Buttons OUTSIDE confirmationRef so they are NOT included in PDF */}
+      <div className="text-center space-y-4 mt-6">
+        <button
+          onClick={downloadPDF}
+          disabled={isGeneratingPDF}
+          className="px-6 py-2 mr-3 bg-primary_green text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
+        >
+          {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+        </button>
+        <button
+          onClick={() => router.push("/tours")}
+          className="px-6 py-2 border border-primary_green text-primary_green rounded-lg hover:bg-primary_green hover:text-white font-poppins"
+        >
+          Browse More Tours
+        </button>
       </div>
     </div>
   );
