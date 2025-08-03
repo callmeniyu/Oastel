@@ -2,16 +2,21 @@
 import { useState, useEffect } from "react";
 import BookingCalendar from "@/components/ui/BookingCalendar";
 import BookingInfoPanel from "@/components/ui/BookingInfoPanel";
-import { getTransferBySlug } from "@/lib/utils";
+import { transferApi } from "@/lib/transferApi";
 import { TransferType } from "@/lib/types";
 import { useParams } from "next/navigation";
 import { useBooking } from "@/context/BookingContext";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 
-const defaultTimings: Record<string, string[]> = {
-  "2025-07-03": ["8:00 am", "1:30 pm"],
-};
+interface TimeSlot {
+  time: string;
+  capacity: number;
+  bookedCount: number;
+  isAvailable: boolean;
+  minimumPerson: number;
+  currentMinimum: number;
+}
 
 export default function BookingInfoPage() {
   const params = useParams();
@@ -21,8 +26,9 @@ export default function BookingInfoPage() {
   const { showToast } = useToast();
   const [transferDetails, setTransferDetails] = useState<TransferType>();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedTime, setSelectedTime] = useState("8:00 am");
-  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [selectedTime, setSelectedTime] = useState("");
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
@@ -30,21 +36,81 @@ export default function BookingInfoPage() {
 
   useEffect(() => {
     const getTransferDetails = async () => {
-      const transfer = await getTransferBySlug(slug);
-      if (transfer) {
-        setTransferDetails(transfer);
-        setAdults(1);
-        setTotalGuests(1);
+      try {
+        const response = await transferApi.getTransferBySlug(slug);
+
+        if (response.success && response.data) {
+          setTransferDetails(response.data);
+          // Set initial values based on transfer type
+          if (response.data.type === "Private") {
+            setAdults(response.data.minimumPerson || 1);
+            setTotalGuests(response.data.minimumPerson || 1);
+          } else {
+            setAdults(1);
+            setTotalGuests(1);
+          }
+        } else {
+          showToast({
+            type: "error",
+            title: "Error",
+            message: "Failed to load transfer details",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching transfer:", error);
+        showToast({
+          type: "error",
+          title: "Error",
+          message: "Failed to load transfer details",
+        });
       }
     };
-    getTransferDetails();
-  }, [slug]);
+    if (slug) {
+      getTransferDetails();
+    }
+  }, [slug, showToast]);
+
+  const fetchTimeSlots = async () => {
+    if (!transferDetails?._id) return;
+
+    try {
+      setIsLoading(true);
+      // Format date to ensure consistent timezone handling
+      const dateString =
+        selectedDate.getFullYear() +
+        "-" +
+        String(selectedDate.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(selectedDate.getDate()).padStart(2, "0");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferDetails._id}&date=${dateString}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        const slots = Array.isArray(data.data) ? data.data : [];
+        setTimeSlots(slots);
+
+        // Auto-select first available time if none selected
+        if (slots.length > 0 && !selectedTime) {
+          setSelectedTime(slots[0].time);
+        }
+      } else {
+        setTimeSlots([]);
+        console.error("Failed to fetch time slots:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching time slots:", error);
+      setTimeSlots([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const key = selectedDate.toISOString().split("T")[0];
-    setAvailableTimes(defaultTimings[key] || ["8:00 am"]);
-    setSelectedTime(defaultTimings[key]?.[0] || "8:00 am");
-  }, [selectedDate]);
+    fetchTimeSlots();
+  }, [selectedDate, transferDetails?._id]);
 
   const updateAdults = (newCount: number) => {
     if (!transferDetails) return;
@@ -79,8 +145,66 @@ export default function BookingInfoPage() {
 
   const handleContinue = () => {
     if (!transferDetails) return;
+
+    // Check if date and time are selected
+    if (!selectedDate) {
+      showToast({
+        type: "error",
+        title: "Date Required",
+        message: "Please select a date for your booking",
+      });
+      return;
+    }
+
+    if (!selectedTime) {
+      showToast({
+        type: "error",
+        title: "Time Required",
+        message: "Please select a time slot for your booking",
+      });
+      return;
+    }
+
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    if (!selectedSlot) {
+      showToast({
+        type: "error",
+        title: "Invalid time slot",
+        message: "Please select a valid time slot",
+      });
+      return;
+    }
+
+    const totalGuests = adults + children;
+
+    // Check minimum person requirement for this specific slot
+    if (totalGuests < selectedSlot.currentMinimum) {
+      showToast({
+        type: "error",
+        title: `Minimum ${selectedSlot.currentMinimum} ${
+          selectedSlot.currentMinimum > 1 ? "persons" : "person"
+        } required`,
+        message: `This transfer requires a minimum of ${
+          selectedSlot.currentMinimum
+        } ${selectedSlot.currentMinimum > 1 ? "persons" : "person"}.`,
+      });
+      return;
+    }
+
+    // Check capacity
+    const availableSlots = selectedSlot.capacity - selectedSlot.bookedCount;
+    if (totalGuests > availableSlots) {
+      showToast({
+        type: "error",
+        title: "Not enough capacity",
+        message: `Only ${availableSlots} slots available for this time.`,
+      });
+      return;
+    }
+
     const totalPrice = calculateTotalPrice();
     setBooking({
+      packageId: transferDetails._id || "",
       title: transferDetails.title,
       slug: slug,
       date: selectedDate.toISOString(),
@@ -92,6 +216,7 @@ export default function BookingInfoPage() {
       adultPrice: transferDetails.newPrice || 0,
       childPrice: transferDetails.childPrice || 0,
       totalPrice: totalPrice,
+      total: totalPrice,
       pickupLocations: transferDetails.details.pickupLocations || "",
       packageType: "transfer",
     });
@@ -120,25 +245,61 @@ export default function BookingInfoPage() {
             <h3 className="text-primary_green text-xl font-bold mb-2">
               Select your time
             </h3>
-            <div className="flex flex-col gap-2 ">
-              {transferDetails &&
-                transferDetails.time.map((t) => (
-                  <button
-                    key={t}
-                    className={`px-4 py-2 rounded border ${
-                      selectedTime === t
-                        ? "bg-primary_green text-white"
-                        : "bg-white"
-                    }`}
-                    onClick={() => setSelectedTime(t)}
-                  >
-                    {t}
-                  </button>
-                ))}
-              <p className="text-desc_gray text-sm my-1">
-                No other timings are available for now
+
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin h-6 w-6 border-2 border-primary_green border-t-transparent rounded-full"></div>
+              </div>
+            ) : timeSlots.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No available time slots for this date.</p>
+                <p className="text-sm mt-1">Please select a different date.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {timeSlots.map((slot) => {
+                  const availableSlots = slot.capacity - slot.bookedCount;
+                  const isSlotAvailable =
+                    slot.isAvailable && availableSlots > 0;
+
+                  return (
+                    <button
+                      key={slot.time}
+                      className={`px-4 py-3 rounded border text-left transition-colors ${
+                        selectedTime === slot.time
+                          ? "bg-primary_green text-white border-primary_green"
+                          : isSlotAvailable
+                          ? "bg-white border-gray-200 hover:border-primary_green"
+                          : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        isSlotAvailable && setSelectedTime(slot.time)
+                      }
+                      disabled={!isSlotAvailable}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{slot.time}</span>
+                        <span className="text-sm">
+                          {availableSlots} / {slot.capacity} available
+                        </span>
+                      </div>
+                      {slot.currentMinimum > 1 && (
+                        <div className="text-xs mt-1 opacity-75">
+                          Min. {slot.currentMinimum}{" "}
+                          {slot.currentMinimum > 1 ? "persons" : "person"}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {timeSlots.length > 0 && (
+              <p className="text-desc_gray text-sm mt-3">
+                Times shown are in Malaysia timezone (GMT+8)
               </p>
-            </div>
+            )}
           </div>
         </div>
 
@@ -249,7 +410,7 @@ export default function BookingInfoPage() {
       </div>
 
       <BookingInfoPanel
-        title={transferDetails?.title || "transfer Title"}
+        title={transferDetails?.title || "Transfer Title"}
         date={selectedDate}
         time={selectedTime}
         type={transferDetails?.type || "Private transfer"}
@@ -261,6 +422,8 @@ export default function BookingInfoPage() {
         totalPrice={calculateTotalPrice()}
         onClick={handleContinue}
         packageType="transfer"
+        packageId={transferDetails?._id}
+        disabled={!selectedTime || isLoading}
       />
     </div>
   );
