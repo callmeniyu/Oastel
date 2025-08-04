@@ -34,6 +34,12 @@ export default function BookingInfoPage() {
   const [children, setChildren] = useState(0);
   const [totalGuests, setTotalGuests] = useState(0);
 
+  const [serverDateTime, setServerDateTime] = useState<{
+    date: string;
+    time: string;
+    fullDateTime: Date;
+  } | null>(null);
+
   useEffect(() => {
     const getTransferDetails = async () => {
       try {
@@ -41,14 +47,11 @@ export default function BookingInfoPage() {
 
         if (response.success && response.data) {
           setTransferDetails(response.data);
-          // Set initial values based on transfer type
-          if (response.data.type === "Private") {
-            setAdults(response.data.minimumPerson || 1);
-            setTotalGuests(response.data.minimumPerson || 1);
-          } else {
-            setAdults(1);
-            setTotalGuests(1);
-          }
+          // Set initial values based on minimumPerson requirement
+          const minimumPersons = response.data.minimumPerson || 1;
+          setAdults(minimumPersons);
+          setTotalGuests(minimumPersons);
+          setChildren(0);
         } else {
           showToast({
             type: "error",
@@ -92,12 +95,33 @@ export default function BookingInfoPage() {
         const slots = Array.isArray(data.data) ? data.data : [];
         setTimeSlots(slots);
 
-        // Auto-select first available time if none selected
+        // Auto-select first available time slot only if none selected and slots are available
         if (slots.length > 0 && !selectedTime) {
-          setSelectedTime(slots[0].time);
+          const firstAvailableSlot = slots.find(
+            (slot: any) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
+          if (firstAvailableSlot) {
+            setSelectedTime(firstAvailableSlot.time);
+          }
+        }
+
+        // Clear selected time if it's no longer available
+        if (selectedTime) {
+          const currentSlot = slots.find(
+            (slot: any) => slot.time === selectedTime
+          );
+          if (
+            !currentSlot ||
+            !currentSlot.isAvailable ||
+            currentSlot.capacity - currentSlot.bookedCount <= 0
+          ) {
+            setSelectedTime("");
+          }
         }
       } else {
         setTimeSlots([]);
+        setSelectedTime(""); // Clear selection when no slots available
         console.error("Failed to fetch time slots:", data.message);
       }
     } catch (error) {
@@ -126,8 +150,16 @@ export default function BookingInfoPage() {
   };
 
   const updateChildren = (newCount: number) => {
+    if (!transferDetails) return;
+
     const newTotal = adults + newCount;
-    if (newTotal <= (transferDetails?.maximumPerson || Infinity)) {
+    const minimumRequired = transferDetails.minimumPerson || 1;
+
+    if (
+      newCount >= 0 &&
+      newTotal >= minimumRequired &&
+      newTotal <= (transferDetails.maximumPerson || Infinity)
+    ) {
       setChildren(newCount);
       setTotalGuests(newTotal);
     }
@@ -218,6 +250,7 @@ export default function BookingInfoPage() {
       totalPrice: totalPrice,
       total: totalPrice,
       pickupLocations: transferDetails.details.pickupLocations || "",
+      pickupOption: transferDetails.details.pickupOption || "user", // Include pickup option
       packageType: "transfer",
     });
     router.push("/booking/user-info");
@@ -232,20 +265,58 @@ export default function BookingInfoPage() {
     );
   };
 
+  useEffect(() => {
+    const fetchServerDateTime = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/server-datetime`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setServerDateTime(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching server date/time:", error);
+      }
+    };
+    fetchServerDateTime();
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-6 font-poppins">
+      {/* Server Date/Time Display - green themed, at top */}
+      {serverDateTime && (
+        <div className="col-span-1 md:col-span-3 bg-primary_green/10 border border-primary_green rounded-lg p-3 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm">
+            <span className="text-primary_green font-medium">
+              🕒 Time (Malaysia): {serverDateTime?.time || "-"}
+            </span>
+            <span className="text-primary_green">
+              📅 Current Date:{" "}
+              {new Date(serverDateTime.fullDateTime).toLocaleDateString(
+                "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  timeZone: "Asia/Kuala_Lumpur",
+                }
+              )}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="space-y-6 md:col-span-2">
         <div className="flex flex-col md:flex-row gap-6">
           <BookingCalendar
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
           />
-
           <div className="w-full flex flex-col rounded-lg shadow-md p-4 bg-white">
             <h3 className="text-primary_green text-xl font-bold mb-2">
               Select your time
             </h3>
-
             {isLoading ? (
               <div className="flex justify-center items-center py-8">
                 <div className="animate-spin h-6 w-6 border-2 border-primary_green border-t-transparent rounded-full"></div>
@@ -258,10 +329,16 @@ export default function BookingInfoPage() {
             ) : (
               <div className="flex flex-col gap-2">
                 {timeSlots.map((slot) => {
-                  const availableSlots = slot.capacity - slot.bookedCount;
+                  const availableSeats = slot.capacity - slot.bookedCount;
                   const isSlotAvailable =
-                    slot.isAvailable && availableSlots > 0;
-
+                    slot.isAvailable && availableSeats > 0;
+                  // Format time to 12-hour
+                  const slotTime = new Date(`1970-01-01T${slot.time}`);
+                  const formattedTime = slotTime.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  });
                   return (
                     <button
                       key={slot.time}
@@ -278,27 +355,22 @@ export default function BookingInfoPage() {
                       disabled={!isSlotAvailable}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">{slot.time}</span>
+                        <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
-                          {availableSlots} / {slot.capacity} available
+                          {availableSeats} seats left
                         </span>
                       </div>
-                      {slot.currentMinimum > 1 && (
-                        <div className="text-xs mt-1 opacity-75">
-                          Min. {slot.currentMinimum}{" "}
-                          {slot.currentMinimum > 1 ? "persons" : "person"}
-                        </div>
-                      )}
                     </button>
                   );
                 })}
               </div>
             )}
-
             {timeSlots.length > 0 && (
-              <p className="text-desc_gray text-sm mt-3">
-                Times shown are in Malaysia timezone (GMT+8)
-              </p>
+              <div className="mt-3 space-y-1">
+                <p className="text-desc_gray text-sm">
+                  Times shown are in Malaysia timezone (GMT+8)
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -330,7 +402,10 @@ export default function BookingInfoPage() {
                       value: children,
                       onIncrement: () => updateChildren(children + 1),
                       onDecrement: () => updateChildren(children - 1),
-                      disableDecrement: children <= 0,
+                      disableDecrement:
+                        children <= 0 ||
+                        adults + children <=
+                          (transferDetails?.minimumPerson || 1),
                       disableIncrement:
                         totalGuests >=
                         (transferDetails?.maximumPerson || Infinity),

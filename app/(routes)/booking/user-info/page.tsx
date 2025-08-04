@@ -28,12 +28,21 @@ export default function BookingUserInfoPage() {
 
   // Form validation function
   const isFormValid = () => {
-    return (
+    const basicFieldsValid =
       form.name.trim() !== "" &&
       form.email.trim() !== "" &&
-      form.phone.trim() !== "" &&
-      form.pickupLocation.trim() !== ""
-    );
+      form.phone.trim() !== "";
+
+    // For transfers with admin-defined pickup, don't require user input
+    if (
+      booking?.packageType === "transfer" &&
+      booking?.pickupOption === "admin"
+    ) {
+      return basicFieldsValid;
+    }
+
+    // For all other cases (tours or user-defined pickup), require pickup location
+    return basicFieldsValid && form.pickupLocation.trim() !== "";
   };
 
   useEffect(() => {
@@ -88,11 +97,33 @@ export default function BookingUserInfoPage() {
 
   const handleConfirmBooking = async () => {
     // Validate form
-    if (!form.name || !form.email || !form.phone || !form.pickupLocation) {
+    if (!form.name || !form.email || !form.phone) {
       showToast({
         type: "error",
         title: "Missing Information",
         message: "Please fill in all required fields",
+      });
+      return;
+    }
+
+    // Check pickup location based on transfer type
+    if (
+      booking?.packageType === "transfer" &&
+      booking?.pickupOption === "user"
+    ) {
+      if (!form.pickupLocation) {
+        showToast({
+          type: "error",
+          title: "Missing Information",
+          message: "Please provide your pickup location",
+        });
+        return;
+      }
+    } else if (booking?.packageType !== "transfer" && !form.pickupLocation) {
+      showToast({
+        type: "error",
+        title: "Missing Information",
+        message: "Please provide your pickup location",
       });
       return;
     }
@@ -117,7 +148,12 @@ export default function BookingUserInfoPage() {
         time: booking.time,
         adults: booking.adults,
         children: booking.children,
-        pickupLocation: form.pickupLocation,
+        // For admin-defined pickup, use admin's pickup location; for user-defined, use user's input
+        pickupLocation:
+          booking?.packageType === "transfer" &&
+          booking?.pickupOption === "admin"
+            ? booking.pickupLocations || ""
+            : form.pickupLocation,
         contactInfo: {
           name: form.name,
           email: form.email,
@@ -212,25 +248,56 @@ export default function BookingUserInfoPage() {
         </h2>
 
         <div className="space-y-4">
-          {/* Name, Email, Pickup Location */}
-          {["name", "email", "pickupLocation"].map((field) => (
+          {/* Name and Email */}
+          {["name", "email"].map((field) => (
             <div key={field} className="w-full">
               <input
                 name={field}
                 value={(form as any)[field]}
                 onChange={handleChange}
-                placeholder={
-                  field === "pickupLocation"
-                    ? "Enter your Hostel/Hotel name and address"
-                    : `Enter your ${field === "email" ? "email" : field}`
-                }
+                placeholder={`Enter your ${
+                  field === "email" ? "email" : field
+                }`}
                 className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
               />
-              {field === "pickupLocation" && booking?.pickupLocations && (
+            </div>
+          ))}
+
+          {/* Pickup Location - Conditional Rendering */}
+          {booking?.packageType === "transfer" &&
+          booking?.pickupOption === "admin" ? (
+            // Admin-defined pickup location - show as read-only info
+            <div className="w-full">
+              <div className="p-4 bg-gray-50 border border-primary_green/40 rounded">
+                <h4 className="font-medium text-primary_green mb-2">
+                  Pickup Location:
+                </h4>
+                <div
+                  className="prose max-w-none text-sm text-desc_gray"
+                  dangerouslySetInnerHTML={{
+                    __html: booking.pickupLocations,
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            // User-defined pickup location - show input field
+            <div className="w-full">
+              <input
+                name="pickupLocation"
+                value={form.pickupLocation}
+                onChange={handleChange}
+                placeholder="Enter your Hostel/Hotel name and address"
+                className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
+              />
+              {booking?.pickupLocations && (
                 <div className="mt-2">
-                  <div className="flex flex-col sm:flex-row flex-wrap gap-x-1 text-xs text-gray-500">
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <h5 className="font-medium text-blue-800 mb-1 text-sm">
+                      Pickup Guidelines:
+                    </h5>
                     <div
-                      className="prose max-w-none text-sm text-desc_gray mt-2"
+                      className="prose max-w-none text-sm text-blue-700"
                       dangerouslySetInnerHTML={{
                         __html: booking.pickupLocations,
                       }}
@@ -239,7 +306,7 @@ export default function BookingUserInfoPage() {
                 </div>
               )}
             </div>
-          ))}
+          )}
 
           {/* WhatsApp Number Section */}
           <div>

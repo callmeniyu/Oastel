@@ -449,35 +449,54 @@ export default function BookingInfoPage() {
                   <div className="animate-spin h-8 w-8 border-4 border-primary_green border-t-transparent rounded-full"></div>
                 </div>
               ) : timeSlots.length > 0 ? (
-                timeSlots.map((slot) => (
-                  <button
-                    key={slot.time}
-                    className={`px-4 py-2 rounded border ${
-                      selectedTime === slot.time
-                        ? "bg-primary_green text-white"
-                        : !slot.isAvailable || slot.bookedCount >= slot.capacity
-                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : "bg-white hover:border-primary_green"
-                    }`}
-                    onClick={() => setSelectedTime(slot.time)}
-                    disabled={
-                      !slot.isAvailable || slot.bookedCount >= slot.capacity
-                    }
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{slot.time}</span>
-                      <span className="text-sm ml-2">
-                        ({slot.capacity - slot.bookedCount} seats left)
-                      </span>
-                    </div>
-                  </button>
-                ))
+                timeSlots.map((slot) => {
+                  const availableSeats = slot.capacity - slot.bookedCount;
+                  const isSlotAvailable =
+                    slot.isAvailable && availableSeats > 0;
+                  // Format time to 12-hour
+                  const slotTime = new Date(`1970-01-01T${slot.time}`);
+                  const formattedTime = slotTime.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  });
+                  return (
+                    <button
+                      key={slot.time}
+                      className={`px-4 py-3 rounded border text-left transition-colors ${
+                        selectedTime === slot.time
+                          ? "bg-primary_green text-white border-primary_green"
+                          : isSlotAvailable
+                          ? "bg-white border-gray-200 hover:border-primary_green"
+                          : "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+                      }`}
+                      onClick={() =>
+                        isSlotAvailable && setSelectedTime(slot.time)
+                      }
+                      disabled={!isSlotAvailable}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{formattedTime}</span>
+                        <span className="text-sm">
+                          {availableSeats} seats left
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
               ) : (
                 <p className="text-desc_gray text-sm my-1">
                   No time slots available for this date
                 </p>
               )}
             </div>
+            {timeSlots.length > 0 && (
+              <div className="mt-3 space-y-1">
+                <p className="text-desc_gray text-sm">
+                  Times shown are in Malaysia timezone (GMT+8)
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

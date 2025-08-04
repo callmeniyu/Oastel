@@ -9,7 +9,14 @@ import html2canvas from "html2canvas";
 interface BookingDetails {
   _id: string;
   packageType: string;
-  packageId: string;
+  packageId: {
+    _id: string;
+    title: string;
+    from?: string; // For transfers
+    to?: string; // For transfers
+    image?: string;
+    type?: string;
+  };
   date: string;
   time: string;
   adults: number;
@@ -210,6 +217,31 @@ export default function BookingConfirmationPage() {
                   {booking.packageType}
                 </p>
               </div>
+
+              {/* Package Name */}
+              <div className="md:col-span-2">
+                <p className="text-sm text-gray-600">Package Name</p>
+                <p className="font-semibold text-lg text-primary_green">
+                  {booking.packageId?.title || "N/A"}
+                </p>
+              </div>
+
+              {/* Route Information for Transfers */}
+              {booking.packageType === "transfer" &&
+                booking.packageId?.from &&
+                booking.packageId?.to && (
+                  <>
+                    <div>
+                      <p className="text-sm text-gray-600">From</p>
+                      <p className="font-semibold">{booking.packageId.from}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">To</p>
+                      <p className="font-semibold">{booking.packageId.to}</p>
+                    </div>
+                  </>
+                )}
+
               <div>
                 <p className="text-sm text-gray-600">Date</p>
                 <p className="font-semibold">
