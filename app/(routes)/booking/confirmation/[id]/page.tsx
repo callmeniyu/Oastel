@@ -43,6 +43,13 @@ export default function BookingConfirmationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
+  // Utility function to strip HTML tags from text
+  const stripHtmlTags = (html: string): string => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
   const downloadPDF = async () => {
     if (!confirmationRef.current || !booking) return;
 
@@ -282,7 +289,9 @@ export default function BookingConfirmationPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pickup Location</p>
-                <p className="font-semibold">{booking.pickupLocation}</p>
+                <p className="font-semibold">
+                  {stripHtmlTags(booking.pickupLocation || "")}
+                </p>
               </div>
             </div>
           </div>
@@ -295,14 +304,16 @@ export default function BookingConfirmationPage() {
               </p>
             </div>
           </div>
-
-          <div className="text-center space-y-4">
-            <p className="text-gray-600">
-              A confirmation email has been sent to {booking.contactInfo.email}
-            </p>
-          </div>
         </div>
       </div>
+
+      {/* Email confirmation text OUTSIDE confirmationRef so it's NOT included in PDF */}
+      <div className="text-center space-y-4 mt-6">
+        <p className="text-gray-600">
+          A confirmation email has been sent to {booking.contactInfo.email}
+        </p>
+      </div>
+
       {/* Buttons OUTSIDE confirmationRef so they are NOT included in PDF */}
       <div className="text-center space-y-4 mt-6">
         <button

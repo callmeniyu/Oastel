@@ -3,6 +3,7 @@ import { FiEdit } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { useToast } from "@/context/ToastContext";
+import Image from "next/image";
 
 interface ProfileContentProps {
   profileImage: string | null | undefined;
@@ -30,6 +31,22 @@ export default function ProfileContent({
     bio: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Get the primary image to display (prioritize profileImage, then image from session)
+  const displayImage = profileImage || image;
+
+  // Generate initials for text avatar
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+    return (
+      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+  };
 
   // Update userData when user data is loaded
   useEffect(() => {
@@ -132,39 +149,51 @@ export default function ProfileContent({
       <div className="space-y-4">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative group">
-            <Avatar className="w-20 h-20 rounded-full border-4 border-white/30 overflow-hidden flex items-center justify-center bg-gray-200">
-              {profileImage ? (
-                <AvatarImage
-                  src={profileImage}
+            <div className="w-20 h-20 rounded-full border-4 border-white/30 overflow-hidden flex items-center justify-center bg-gray-200">
+              {displayImage && !imageError ? (
+                <Image
+                  src={displayImage}
                   alt="Profile"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-cover"
+                  onError={() => setImageError(true)}
+                  unoptimized={displayImage.includes("googleusercontent.com")} // For Google images
                 />
               ) : (
-                <AvatarFallback className="w-20 h-20 flex items-center justify-center bg-gray-300 text-gray-600 font-bold text-2xl">
-                  {name ? name.charAt(0).toUpperCase() : "U"}
-                </AvatarFallback>
+                <div className="w-20 h-20 flex items-center justify-center bg-gradient-to-br from-primary_green to-primary_green/80 text-white font-bold text-2xl">
+                  {getInitials(name || "")}
+                </div>
               )}
-            </Avatar>
+            </div>
             <label className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               <FiEdit className="text-white text-xl" />
               <input
                 type="file"
                 accept="image/*"
-                onChange={onImageUpload}
+                onChange={(e) => {
+                  setImageError(false); // Reset error state when new image is selected
+                  onImageUpload(e);
+                }}
                 className="hidden"
               />
             </label>
           </div>
-          {profileImage ? (
+          {displayImage && !imageError ? (
             <button
-              onClick={onDeleteImage}
+              onClick={() => {
+                setImageError(false);
+                onDeleteImage();
+              }}
               className="text-sm text-red-600 hover:text-red-800"
             >
               Remove Photo
             </button>
           ) : (
             <p className="text-sm text-gray-500">
-              Click on the avatar to add a profile image
+              {imageError
+                ? "Image failed to load. Click to upload a new one."
+                : "Click on the avatar to add a profile image"}
             </p>
           )}
         </div>

@@ -110,6 +110,7 @@ export interface BookingDetailsType {
     total: number
     image?: string
     pickupLocations: string
+    pickupDescription?: string // Add pickup description field
     pickupOption?: "admin" | "user" // Add pickupOption for transfers
 }
 

@@ -279,6 +279,17 @@ export default function BookingUserInfoPage() {
                   }}
                 />
               </div>
+              {/* Always show pickup description */}
+              {booking.pickupDescription && (
+                <div className="mt-3">
+                  <div
+                    className="prose max-w-none ttext-sm text-gray-600 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: booking.pickupDescription,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             // User-defined pickup location - show input field
@@ -290,6 +301,14 @@ export default function BookingUserInfoPage() {
                 placeholder="Enter your Hostel/Hotel name and address"
                 className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
               />
+              {/* Always show pickup description */}
+              {booking?.pickupDescription && (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {booking.pickupDescription}
+                  </p>
+                </div>
+              )}
               {booking?.pickupLocations && (
                 <div className="mt-2">
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded">

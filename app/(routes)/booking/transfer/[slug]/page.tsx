@@ -250,6 +250,7 @@ export default function BookingInfoPage() {
       totalPrice: totalPrice,
       total: totalPrice,
       pickupLocations: transferDetails.details.pickupLocations || "",
+      pickupDescription: transferDetails.details.note || "", // Add pickup description
       pickupOption: transferDetails.details.pickupOption || "user", // Include pickup option
       packageType: "transfer",
     });
