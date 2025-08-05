@@ -1,42 +1,45 @@
-import type { Metadata } from "next"
-import "./globals.css"
-import { Poppins } from "next/font/google"
-import Navbar from "@/components/ui/Navbar"
-import Footer from "@/components/ui/Footer"
-import { BookingProvider } from "@/context/BookingContext"
-import { ToastProvider } from "@/context/ToastContext"
-import AuthSessionProvider from "@/components/providers/SessionProvider"
+import type { Metadata } from "next";
+import "./globals.css";
+import { Poppins } from "next/font/google";
+import Navbar from "@/components/ui/Navbar";
+import Footer from "@/components/ui/Footer";
+import { BookingProvider } from "@/context/BookingContext";
+import { ToastProvider } from "@/context/ToastContext";
+import { CartProvider } from "@/context/CartContext";
+import AuthSessionProvider from "@/components/providers/SessionProvider";
 
 const poppins = Poppins({
-    subsets: ["latin"],
-    weight: ["300", "400", "500", "600", "700", "800"],
-    variable: "--font-poppins",
-    display: "swap",
-})
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-    title: "Oastel",
-    description: "Tours, Transfers, stays in Malaysia",
-}
+  title: "Oastel",
+  description: "Tours, Transfers, stays in Malaysia",
+};
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-    return (
-        <html lang="en" suppressHydrationWarning>
-            <body className={`${poppins.variable}`}>
-                <AuthSessionProvider>
-                    <ToastProvider>
-                        <Navbar />
-                        <main>
-                            <BookingProvider>{children}</BookingProvider>
-                        </main>
-                        <Footer />
-                    </ToastProvider>
-                </AuthSessionProvider>
-            </body>
-        </html>
-    )
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${poppins.variable}`}>
+        <AuthSessionProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Navbar />
+              <main>
+                <BookingProvider>{children}</BookingProvider>
+              </main>
+              <Footer />
+            </CartProvider>
+          </ToastProvider>
+        </AuthSessionProvider>
+      </body>
+    </html>
+  );
 }

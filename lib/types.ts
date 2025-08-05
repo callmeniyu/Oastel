@@ -12,7 +12,6 @@ export interface UserType {
     location?: string
     bio?: string
     address?: Address
-    cartId?: string
     bookings: string
     createdAt: Date
     updatedAt: Date
@@ -125,10 +124,4 @@ export type BlogType = {
     category: string
     views: number
     content: string
-}
-
-export type CartItemType = {
-    id: string
-    title: string
-    slug: string
 }

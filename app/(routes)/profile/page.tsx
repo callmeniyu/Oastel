@@ -7,7 +7,6 @@ import MyBookingsContent from "@/components/profile/MyBookingsContent";
 import Confirmation from "@/components/ui/Confirmation";
 import { FiChevronRight } from "react-icons/fi";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import MyCartContent from "@/components/profile/MyCartContent";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
 import SessionHook from "@/hooks/SessionHook";
@@ -167,7 +166,6 @@ export default function ProfilePage() {
     { id: "profile", label: "Edit Profile" },
     { id: "address", label: "Address & Contact" },
     { id: "bookings", label: "My Bookings" },
-    { id: "cart", label: "My Cart" },
     { id: "signout", label: "Signout" },
     { id: "delete", label: "Delete Account" },
   ];
@@ -189,8 +187,6 @@ export default function ProfilePage() {
         return <AddressContent />;
       case "bookings":
         return <MyBookingsContent />;
-      case "cart":
-        return <MyCartContent />;
       default:
         return null;
     }

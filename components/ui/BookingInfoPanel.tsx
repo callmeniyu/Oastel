@@ -1,9 +1,9 @@
-// components/ui/BookingDetails.tsx
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { IoCartOutline } from "react-icons/io5";
 import { IoBagOutline } from "react-icons/io5";
 import { useToast } from "@/context/ToastContext";
+import { useCart } from "@/context/CartContext";
 import SessionHook from "@/hooks/SessionHook";
 
 type Props = {
@@ -47,6 +47,7 @@ export default function BookingInfoPanel({
   const router = useRouter();
   const { showToast } = useToast();
   const { user, isAuthenticated } = SessionHook();
+  const { addToCart, loading: cartLoading } = useCart();
   const total = adults * adultPrice + children * childPrice;
 
   const handleAddToCart = async () => {
@@ -56,60 +57,39 @@ export default function BookingInfoPanel({
         title: "Authentication Required",
         message: "Please log in to add items to cart",
       });
-      router.push("/auth");
+      router.push("/auth/login");
       return;
     }
 
-    if (onAddToCart) {
-      onAddToCart();
-    } else {
-      // Default add to cart functionality
-      try {
-        const cartData = {
-          userId: (user as any).id || (user as any)._id || user?.email,
-          packageType,
-          packageId,
-          date: date.toISOString().split("T")[0],
-          time,
-          adults,
-          children: children || 0,
-          pickupLocation: "", // Default empty string for pickup location
-        };
+    if (!packageId) {
+      showToast({
+        type: "error",
+        title: "Error",
+        message: "Package information is missing",
+      });
+      return;
+    }
 
-        console.log("📦 BookingInfoPanel sending cart data:", cartData);
+    try {
+      const success = await addToCart({
+        packageId,
+        packageType,
+        selectedDate: date.toISOString().split("T")[0],
+        selectedTime: time,
+        adults,
+        children: children || 0,
+      });
 
-        const response = await fetch("/api/cart", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(cartData),
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          showToast({
-            type: "success",
-            title: "Added to Cart",
-            message: "Item has been added to your cart successfully",
-          });
-          router.push("/profile?tab=cart");
-        } else {
-          showToast({
-            type: "error",
-            title: "Failed to Add",
-            message: result.error || "Failed to add item to cart",
-          });
-        }
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-        showToast({
-          type: "error",
-          title: "Error",
-          message: "An error occurred while adding to cart",
-        });
+      if (success) {
+        router.push("/cart/checkout");
       }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showToast({
+        type: "error",
+        title: "Error",
+        message: "Failed to add item to cart",
+      });
     }
   };
 
@@ -207,18 +187,31 @@ export default function BookingInfoPanel({
         className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "flex" : ""}`}
       >
         {userInfo ? (
-          // User info page - show both Add to Cart and Proceed to Payment buttons
+          // User info page - show only Proceed to Payment button
+          <div
+            onClick={disabled ? undefined : onClick}
+            className={`${
+              disabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
+            } text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
+          >
+            <IoBagOutline className="inline mr-2 text-2xl" />
+            <p>Proceed to Payment</p>
+          </div>
+        ) : (
+          // Booking details page - show Add to Cart and Continue buttons
           <>
             <div
               onClick={disabled ? undefined : handleAddToCart}
               className={`${
-                disabled
+                disabled || cartLoading
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "cursor-pointer border border-primary_green text-primary_green hover:bg-primary_green hover:text-white"
               } text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
             >
               <IoCartOutline className="inline mr-2 text-2xl" />
-              <p>Add to Cart</p>
+              <p>{cartLoading ? "Adding..." : "Add to Cart"}</p>
             </div>
             <div
               onClick={disabled ? undefined : onClick}
@@ -228,22 +221,9 @@ export default function BookingInfoPanel({
                   : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
               } text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
             >
-              <IoBagOutline className="inline mr-2 text-2xl" />
-              <p>Proceed to Payment</p>
+              <p>Continue</p>
             </div>
           </>
-        ) : (
-          // Booking details page - show only Continue button
-          <div
-            onClick={disabled ? undefined : onClick}
-            className={`${
-              disabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
-            } text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
-          >
-            <p>Continue</p>
-          </div>
         )}
       </div>
     </div>

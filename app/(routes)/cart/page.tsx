@@ -1,474 +1,317 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
+import { useToast } from "@/context/ToastContext";
+import { useCart } from "@/context/CartContext";
 import {
   FiShoppingCart,
-  FiTrash2,
-  FiPlus,
-  FiMinus,
-  FiCalendar,
   FiClock,
+  FiCalendar,
+  FiUser,
   FiMapPin,
-  FiUsers,
-  FiArrowRight,
+  FiAlertTriangle,
+  FiCreditCard,
+  FiPackage,
   FiArrowLeft,
+  FiTrash2,
 } from "react-icons/fi";
-import { cartApi, Cart, CartItem } from "@/lib/cartApi";
+import { FaRoute, FaCar } from "react-icons/fa";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function CartPage() {
-  const { data: session } = useSession();
-  const { showToast } = useToast();
+  const { data: session, status } = useSession();
   const router = useRouter();
-
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
+  const { showToast } = useToast();
+  const { cart, loading, removeFromCart, clearCart } = useCart();
 
   useEffect(() => {
-    if (!session?.user?.email) {
-      setLoading(false);
+    // Wait for session to load
+    if (status === "loading") return;
+
+    if (status === "unauthenticated" || !session?.user?.email) {
+      router.push("/auth/login");
       return;
     }
+  }, [session, status, router]);
 
-    fetchCart();
-  }, [session?.user?.email]);
-
-  const fetchCart = async () => {
-    if (!session?.user?.email) return;
-
-    try {
-      setLoading(true);
-      const cartData = await cartApi.getCart(session.user.email);
-      setCart(cartData);
-    } catch (error) {
-      console.error("Error fetching cart:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to load cart. Please try again.",
-      });
-    } finally {
-      setLoading(false);
+  const handleRemoveItem = async (itemId: string) => {
+    if (confirm("Are you sure you want to remove this item from your cart?")) {
+      try {
+        await removeFromCart(itemId);
+      } catch (error) {
+        console.error("Error removing item:", error);
+        showToast({
+          type: "error",
+          title: "Error",
+          message: "Failed to remove item. Please try again.",
+        });
+      }
     }
   };
 
-  const updateItemQuantity = async (
-    itemId: string,
-    type: "adults" | "children",
-    change: number
-  ) => {
-    if (!session?.user?.email || !cart) return;
-
-    const item = cart.items.find((item) => item._id === itemId);
-    if (!item) return;
-
-    const newValue = Math.max(0, item[type] + change);
-
-    // Validate
-    if (type === "adults" && (newValue < 1 || newValue > 20)) return;
-    if (type === "children" && (newValue < 0 || newValue > 10)) return;
-
-    setUpdatingItems((prev) => new Set(prev).add(itemId));
-
-    try {
-      const updatedCart = await cartApi.updateCartItem(
-        session.user.email,
-        itemId,
-        { [type]: newValue }
-      );
-      setCart(updatedCart);
-    } catch (error) {
-      console.error("Error updating item:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to update item quantity",
-      });
-    } finally {
-      setUpdatingItems((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        return newSet;
-      });
+  const handleClearCart = async () => {
+    if (confirm("Are you sure you want to clear your entire cart?")) {
+      try {
+        await clearCart();
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        showToast({
+          type: "error",
+          title: "Error",
+          message: "Failed to clear cart. Please try again.",
+        });
+      }
     }
   };
 
-  const removeItem = async (itemId: string) => {
-    if (!session?.user?.email) return;
-
-    setUpdatingItems((prev) => new Set(prev).add(itemId));
-
-    try {
-      const updatedCart = await cartApi.removeFromCart(
-        session.user.email,
-        itemId
-      );
-      setCart(updatedCart);
-      showToast({
-        type: "success",
-        title: "Success",
-        message: "Item removed from cart",
-      });
-    } catch (error) {
-      console.error("Error removing item:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to remove item from cart",
-      });
-    } finally {
-      setUpdatingItems((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        return newSet;
-      });
-    }
+  const isExpired = (dateStr: string) => {
+    const selectedDate = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate < today;
   };
 
-  const clearCart = async () => {
-    if (!session?.user?.email || !cart?.items.length) return;
+  const validItems =
+    cart?.items?.filter((item) => !isExpired(item.selectedDate)) || [];
+  const expiredItems =
+    cart?.items?.filter((item) => isExpired(item.selectedDate)) || [];
+  const subtotal = validItems.reduce(
+    (total, item) => total + item.totalPrice,
+    0
+  );
+  const bankCharge = subtotal * 0.028;
+  const grandTotal = subtotal + bankCharge;
 
-    try {
-      await cartApi.clearCart(session.user.email);
-      setCart(null);
-      showToast({
-        type: "success",
-        title: "Success",
-        message: "Cart cleared successfully",
-      });
-    } catch (error) {
-      console.error("Error clearing cart:", error);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to clear cart",
-      });
-    }
-  };
-
-  // Redirect if not authenticated
-  if (!session) {
+  if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-xl shadow-sm">
-          <FiShoppingCart className="text-4xl text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Sign In Required
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Please sign in to view your cart.
-          </p>
-          <Link
-            href="/auth"
-            className="bg-primary_green text-white px-6 py-2 rounded-lg hover:bg-primary_green/90 transition-colors"
-          >
-            Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your cart...</p>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary_green mx-auto"></div>
+          <p className="mt-4 text-desc_gray">Loading cart...</p>
         </div>
       </div>
     );
   }
 
-  const subtotal = cart?.totalAmount || 0;
-  const serviceFee = subtotal * 0.028; // 2.8% service fee
-  const total = subtotal + serviceFee;
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <FiShoppingCart className="mx-auto text-6xl text-desc_gray mb-4" />
+            <h2 className="text-2xl font-semibold text-title_black mb-2">
+              Your cart is empty
+            </h2>
+            <p className="text-desc_gray mb-6">
+              Add tours or transfers to get started
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Link
+                href="/tours"
+                className="bg-primary_green text-white px-6 py-2 rounded-lg hover:bg-primary_green/90 transition-colors"
+              >
+                Browse Tours
+              </Link>
+              <Link
+                href="/transfers"
+                className="border border-primary_green text-primary_green px-6 py-2 rounded-lg hover:bg-primary_green/5 transition-colors"
+              >
+                View Transfers
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.back()}
-              className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <FiArrowLeft className="text-xl" />
-            </button>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Shopping Cart
-              </h1>
-              <p className="text-gray-600">
-                {cart?.items.length || 0} item
-                {cart?.items.length !== 1 ? "s" : ""} in your cart
-              </p>
-            </div>
-          </div>
-
-          {cart && cart.items.length > 0 && (
-            <button
-              onClick={clearCart}
-              className="text-red-600 hover:text-red-700 font-medium"
-            >
-              Clear Cart
-            </button>
-          )}
+        <div className="flex items-center gap-4 mb-8">
+          <Link
+            href="/"
+            className="text-primary_green hover:text-primary_green/80 flex items-center gap-2"
+          >
+            <FiArrowLeft />
+            Continue Shopping
+          </Link>
+          <h1 className="text-3xl font-bold text-title_black">Shopping Cart</h1>
         </div>
 
-        {!cart?.items.length ? (
-          // Empty Cart
-          <div className="text-center py-16">
-            <div className="bg-white rounded-xl shadow-sm p-12 max-w-md mx-auto">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FiShoppingCart className="text-3xl text-gray-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Your cart is empty
+        {/* Alerts for expired items */}
+        {expiredItems.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 text-yellow-800">
+              <FiAlertTriangle />
+              <h3 className="font-medium">
+                {expiredItems.length} item(s) have expired dates
               </h3>
-              <p className="text-gray-600 mb-8">
-                Discover amazing tours and transfers to add to your cart
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Link
-                  href="/tours"
-                  className="bg-primary_green text-white px-6 py-3 rounded-lg hover:bg-primary_green/90 transition-colors"
-                >
-                  Browse Tours
-                </Link>
-                <Link
-                  href="/transfers"
-                  className="border border-primary_green text-primary_green px-6 py-3 rounded-lg hover:bg-primary_green/5 transition-colors"
-                >
-                  View Transfers
-                </Link>
-              </div>
             </div>
-          </div>
-        ) : (
-          // Cart with Items
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2 space-y-4">
-              {cart.items.map((item: CartItem) => (
-                <div
-                  key={item._id}
-                  className={`bg-white rounded-xl shadow-sm border p-6 transition-all ${
-                    updatingItems.has(item._id) ? "opacity-50" : ""
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Package Image */}
-                    <div className="relative w-full sm:w-48 h-32 bg-gradient-to-br from-primary_green to-green-600 rounded-lg overflow-hidden flex-shrink-0">
-                      {item.packageImage ? (
-                        <Image
-                          src={item.packageImage}
-                          alt={item.packageTitle}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-white">
-                          <FiShoppingCart className="text-3xl" />
-                        </div>
-                      )}
-                      <div className="absolute top-2 left-2">
-                        <span className="bg-black/50 text-white text-xs px-2 py-1 rounded-full uppercase">
-                          {item.packageType}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Item Details */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {item.packageTitle}
-                          </h3>
-                          <p className="text-2xl font-bold text-primary_green">
-                            RM {item.packagePrice}
-                            <span className="text-sm font-normal text-gray-500">
-                              {item.packageType === "tour"
-                                ? " /person"
-                                : " /group"}
-                            </span>
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => removeItem(item._id)}
-                          disabled={updatingItems.has(item._id)}
-                          className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                        >
-                          <FiTrash2 className="text-lg" />
-                        </button>
-                      </div>
-
-                      {/* Booking Details */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <FiCalendar className="text-primary_green" />
-                          <span>
-                            {new Date(item.selectedDate).toLocaleDateString(
-                              "en-US",
-                              {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <FiClock className="text-primary_green" />
-                          <span>{item.selectedTime}</span>
-                        </div>
-                        {item.pickupLocation && (
-                          <div className="flex items-center gap-2 sm:col-span-2">
-                            <FiMapPin className="text-primary_green" />
-                            <span>{item.pickupLocation}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {/* Adults */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
-                              Adults:
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() =>
-                                  updateItemQuantity(item._id, "adults", -1)
-                                }
-                                disabled={
-                                  item.adults <= 1 ||
-                                  updatingItems.has(item._id)
-                                }
-                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <FiMinus className="text-sm" />
-                              </button>
-                              <span className="w-8 text-center font-medium">
-                                {item.adults}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  updateItemQuantity(item._id, "adults", 1)
-                                }
-                                disabled={
-                                  item.adults >= 20 ||
-                                  updatingItems.has(item._id)
-                                }
-                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <FiPlus className="text-sm" />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Children */}
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
-                              Children:
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() =>
-                                  updateItemQuantity(item._id, "children", -1)
-                                }
-                                disabled={
-                                  item.children <= 0 ||
-                                  updatingItems.has(item._id)
-                                }
-                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <FiMinus className="text-sm" />
-                              </button>
-                              <span className="w-8 text-center font-medium">
-                                {item.children}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  updateItemQuantity(item._id, "children", 1)
-                                }
-                                disabled={
-                                  item.children >= 10 ||
-                                  updatingItems.has(item._id)
-                                }
-                                className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <FiPlus className="text-sm" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-gray-900">
-                            RM {item.totalPrice.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                  Order Summary
-                </h2>
-
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>RM {subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Service Fee (2.8%)</span>
-                    <span>RM {serviceFee.toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between text-lg font-semibold text-gray-900">
-                      <span>Total</span>
-                      <span>RM {total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Link
-                  href="/booking/user-info"
-                  className="w-full bg-primary_green text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary_green/90 transition-colors font-medium"
-                >
-                  Proceed to Checkout
-                  <FiArrowRight />
-                </Link>
-
-                <div className="mt-4 text-center">
-                  <Link
-                    href="/tours"
-                    className="text-primary_green hover:underline text-sm"
-                  >
-                    Continue Shopping
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <p className="text-yellow-700 text-sm mt-1">
+              These items cannot be booked as their selected dates have already
+              passed.
+            </p>
           </div>
         )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-title_black">
+                Your Items ({cart.items.length})
+              </h2>
+              {cart.items.length > 0 && (
+                <button
+                  onClick={handleClearCart}
+                  className="text-red-600 hover:text-red-800 flex items-center gap-2 text-sm"
+                >
+                  <FiTrash2 />
+                  Clear Cart
+                </button>
+              )}
+            </div>
+
+            {cart.items.map((item: any) => (
+              <div
+                key={item._id}
+                className={`bg-white rounded-xl shadow-sm border p-4 ${
+                  isExpired(item.selectedDate)
+                    ? "border-red-200 bg-red-50/30"
+                    : "border-gray-100"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Item Image */}
+                  <div className="relative w-full sm:w-24 h-24 flex-shrink-0">
+                    {item.packageImage ? (
+                      <Image
+                        src={item.packageImage}
+                        alt={item.packageTitle}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary_green to-green-600 rounded-lg flex items-center justify-center">
+                        {item.packageType === "tour" ? (
+                          <FaRoute className="text-xl text-white" />
+                        ) : (
+                          <FaCar className="text-xl text-white" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Item Details */}
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <FiPackage className="text-primary_green" />
+                          <span className="text-sm text-primary_green font-medium uppercase">
+                            {item.packageType}
+                          </span>
+                          {isExpired(item.selectedDate) && (
+                            <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
+                              Expired
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="text-lg font-semibold text-title_black">
+                          {item.packageTitle}
+                        </h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-lg font-bold text-primary_green">
+                          RM {item.totalPrice.toFixed(2)}
+                        </div>
+                        <button
+                          onClick={() => handleRemoveItem(item._id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Booking Details */}
+                    <div className="grid grid-cols-2 gap-2 text-sm text-desc_gray">
+                      <div className="flex items-center gap-2">
+                        <FiCalendar />
+                        {new Date(item.selectedDate).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FiClock />
+                        {item.selectedTime}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FiUser />
+                        {item.adults} Adults, {item.children} Children
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Order Summary */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
+            <h2 className="text-xl font-bold text-title_black mb-4">
+              Order Summary
+            </h2>
+
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between">
+                <span className="text-desc_gray">Valid Items</span>
+                <span className="font-medium">{validItems.length}</span>
+              </div>
+              {expiredItems.length > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-desc_gray">Expired Items</span>
+                  <span className="font-medium text-red-600">
+                    {expiredItems.length}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-desc_gray">Subtotal</span>
+                <span className="font-medium">RM {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-desc_gray">Bank Charge (2.8%)</span>
+                <span className="font-medium">RM {bankCharge.toFixed(2)}</span>
+              </div>
+              <hr className="border-gray-200" />
+              <div className="flex justify-between">
+                <span className="font-semibold">Total</span>
+                <span className="text-xl font-bold text-primary_green">
+                  RM {grandTotal.toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <Link
+              href="/booking/user-info"
+              className={`w-full bg-primary_green text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary_green/90 transition-colors ${
+                validItems.length === 0
+                  ? "opacity-50 cursor-not-allowed pointer-events-none"
+                  : ""
+              }`}
+            >
+              <FiCreditCard />
+              Proceed to Checkout ({validItems.length} item(s))
+            </Link>
+
+            <p className="text-xs text-desc_gray mt-3 text-center">
+              Only valid items will be processed. Expired items will be skipped.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

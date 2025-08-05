@@ -240,8 +240,7 @@ export default function Navbar() {
             </ul>
           </div>
         </div>
-      </nav>
-
+      </nav>{" "}
       <Sidebar isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   );

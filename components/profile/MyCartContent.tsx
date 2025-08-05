@@ -14,106 +14,66 @@ import {
 } from "react-icons/fi";
 import { FaRoute, FaCar } from "react-icons/fa";
 import Link from "next/link";
-import { cartApi, CartItem } from "@/lib/cartApi";
-
-type CartItemDisplay = {
-  id: string;
-  type: "tour" | "transfer";
-  title: string;
-  price: number;
-  date: string;
-  time: string;
-  adults: number;
-  children?: number;
-  details: {
-    duration?: string;
-    pickup?: string;
-  };
-};
+import { cartApi, CartItem, Cart } from "@/lib/cartApi";
+import { useCart } from "@/context/CartContext";
+import Image from "next/image";
 
 export default function MyCartContent() {
   const { data: session } = useSession();
-  const [cartItems, setCartItems] = useState<CartItemDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { cart, loading, itemCount, totalAmount, removeFromCart, clearCart } =
+    useCart();
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      if (!session?.user?.email) {
-        setLoading(false);
-        return;
-      }
+  // No need for manual cart refresh - CartContext handles this automatically
 
+  const handleRemoveItem = async (itemId: string) => {
+    if (confirm("Are you sure you want to remove this item from your cart?")) {
       try {
-        setLoading(true);
-        const cart = await cartApi.getCart(session.user.email);
-
-        if (cart && cart.items && cart.items.length > 0) {
-          // Transform API cart items to component format
-          const transformedItems: CartItemDisplay[] = cart.items.map(
-            (item: any, index: number) => {
-              return {
-                id: item.packageId || `cart-${index}`,
-                type: item.packageType,
-                title: `${item.packageType} Package`,
-                price: item.price || 0,
-                date: new Date().toISOString().split("T")[0], // Default date
-                time: "09:00", // Default time
-                adults: item.adults,
-                children: item.children,
-                details: {
-                  pickup: item.pickupLocation || "To be confirmed",
-                  duration: "Full day",
-                },
-              };
-            }
-          );
-          setCartItems(transformedItems);
-        } else {
-          setCartItems([]);
-        }
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching cart items:", err);
-        setError("Failed to load cart items. Please try again later.");
-      } finally {
-        setLoading(false);
+        await removeFromCart(itemId);
+      } catch (error) {
+        console.error("Error removing item:", error);
+        setError("Failed to remove item. Please try again.");
       }
-    };
-
-    fetchCartItems();
-  }, [session?.user?.email]);
-
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
-  const BankCharge = (subtotal * 0.028).toFixed(2); // 2.8% bank charge
-  const total = (subtotal + Number(BankCharge)).toFixed(2);
-
-  const removeFromCart = async (id: string, index: number) => {
-    if (!session?.user?.email) return;
-
-    try {
-      const success = await cartApi.removeFromCart(session.user.email, id);
-      if (success) {
-        setCartItems(cartItems.filter((item) => item.id !== id));
-      } else {
-        setError("Failed to remove item from cart. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error removing from cart:", err);
-      setError("Failed to remove item from cart. Please try again.");
     }
   };
+
+  const handleClearCart = async () => {
+    if (confirm("Are you sure you want to clear your entire cart?")) {
+      try {
+        await clearCart();
+      } catch (error) {
+        console.error("Error clearing cart:", error);
+        setError("Failed to clear cart. Please try again.");
+      }
+    }
+  };
+
+  // Calculate totals
+  const subtotal = totalAmount;
+  const bankCharge = (subtotal * 0.028).toFixed(2); // 2.8% bank charge
+  const total = (subtotal + Number(bankCharge)).toFixed(2);
 
   return (
     <div
       id="mycart"
       className="max-w-6xl mx-auto p-4 md:py-6 md:px-0 font-poppins"
     >
-      <div className="flex items-center gap-3 mb-6">
-        <FiShoppingCart className="text-2xl text-primary_green" />
-        <h1 className="text-2xl md:text-3xl font-bold text-title_black">
-          My Cart
-        </h1>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <FiShoppingCart className="text-2xl text-primary_green" />
+          <h1 className="text-2xl md:text-3xl font-bold text-title_black">
+            My Cart ({itemCount} items)
+          </h1>
+        </div>
+        {cart && cart.items.length > 0 && (
+          <button
+            onClick={handleClearCart}
+            className="text-red-600 hover:text-red-800 text-sm flex items-center gap-2 px-3 py-1 rounded border border-red-200 hover:bg-red-50 transition-colors"
+          >
+            <FiTrash2 className="text-sm" />
+            Clear Cart
+          </button>
+        )}
       </div>
 
       {/* Loading State */}
@@ -160,78 +120,130 @@ export default function MyCartContent() {
       {/* Content - only show if we have session and no errors */}
       {!loading && !error && session && (
         <>
-          {cartItems.length > 0 ? (
+          {cart && cart.items.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
-                {cartItems.map((item, index) => (
+                {cart.items.map((item: CartItem) => (
                   <div
-                    key={item.id}
+                    key={item._id}
                     className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col sm:flex-row gap-4"
                   >
-                    <div className="relative w-full sm:w-32 h-32 flex-shrink-0 bg-gradient-to-br from-primary_green to-green-600 rounded-lg flex items-center justify-center">
-                      {item.type === "tour" ? (
-                        <FaRoute className="text-3xl text-white" />
+                    <div className="relative w-full sm:w-32 h-32 flex-shrink-0">
+                      {item.packageImage ? (
+                        <Image
+                          src={item.packageImage}
+                          alt={item.packageTitle}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
                       ) : (
-                        <FaCar className="text-3xl text-white" />
+                        <div className="w-full h-full bg-gradient-to-br from-primary_green to-green-600 rounded-lg flex items-center justify-center">
+                          {item.packageType === "tour" ? (
+                            <FaRoute className="text-3xl text-white" />
+                          ) : (
+                            <FaCar className="text-3xl text-white" />
+                          )}
+                        </div>
                       )}
+                      <div className="absolute top-2 left-2 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
+                        {item.packageType.charAt(0).toUpperCase() +
+                          item.packageType.slice(1)}
+                      </div>
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex justify-between items-start">
+                      <div className="flex justify-between items-start mb-2">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
                             <FiPackage className="text-primary_green" />
                             <span className="text-sm text-primary_green font-medium uppercase">
-                              {item.type}
+                              {item.packageType}
                             </span>
                           </div>
                           <h3 className="text-lg font-semibold text-title_black">
-                            {item.title}
+                            {item.packageTitle}
                           </h3>
                         </div>
                         <button
-                          onClick={() => removeFromCart(item.id, index)}
-                          className="text-gray-400 hover:text-red-500 transition-colors"
+                          onClick={() => handleRemoveItem(item._id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50"
+                          title="Remove item"
                         >
                           <FiTrash2 />
                         </button>
                       </div>
 
-                      <div className="mt-2 flex flex-wrap gap-2 items-center text-sm text-desc_gray">
+                      {/* Booking Details */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-desc_gray mb-4">
                         <div className="flex items-center gap-2">
                           <FiCalendar />
-                          {new Date(item.date).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(item.selectedDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
                         </div>
-                        <div className="flex items-center text-desc_gray">
-                          <FiClock className="mr-2" />
-                          <span>{item.time}</span>
+                        <div className="flex items-center gap-2">
+                          <FiClock />
+                          {item.selectedTime}
                         </div>
-                        <div className="flex items-center text-desc_gray">
-                          <FiUser className="mr-2" />
-                          <span className="flex flex-col">
-                            {item.adults}{" "}
-                            {item.adults === 1 ? "adult" : "adults"},{" "}
-                            {item.children}{" "}
-                            {item.children === 1 ? "child" : "children"}
-                          </span>
-                        </div>
-
-                        <p className="flex items-center gap-2">
-                          <FiMapPin className="" />
-                          {item.details.pickup}
-                        </p>
+                        {item.pickupLocation && (
+                          <div className="flex items-start gap-2 sm:col-span-2">
+                            <FiMapPin className="mt-1 flex-shrink-0" />
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-desc_gray">
+                                Pickup Location:
+                              </span>
+                              <div
+                                className="text-sm text-title_black mt-1"
+                                dangerouslySetInnerHTML={{
+                                  __html: item.pickupLocation.includes("<")
+                                    ? item.pickupLocation
+                                    : `<p>${item.pickupLocation}</p>`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="flex sm:flex-col justify-between sm:justify-center items-end sm:items-center gap-2">
-                      <p className="text-lg font-bold text-primary_green">
-                        RM {item.price}
-                      </p>
+                      {/* Guest Information */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-6">
+                          {/* Adults */}
+                          <div className="flex items-center gap-2">
+                            <FiUser className="text-desc_gray" />
+                            <span className="text-sm text-desc_gray">
+                              Adults:
+                            </span>
+                            <span className="text-sm font-medium text-title_black">
+                              {item.adults}
+                            </span>
+                          </div>
+
+                          {/* Children */}
+                          <div className="flex items-center gap-2">
+                            <FiUser className="text-desc_gray" />
+                            <span className="text-sm text-desc_gray">
+                              Children:
+                            </span>
+                            <span className="text-sm font-medium text-title_black">
+                              {item.children}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Price */}
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-primary_green">
+                            RM {item.totalPrice.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -246,11 +258,13 @@ export default function MyCartContent() {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-desc_gray">Subtotal</span>
-                    <span className="font-medium">RM {subtotal}</span>
+                    <span className="font-medium">
+                      RM {subtotal.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-desc_gray">Bank Charge</span>
-                    <span className="font-medium">RM {BankCharge}</span>
+                    <span className="font-medium">RM {bankCharge}</span>
                   </div>
                   <div className="border-t border-gray-200 pt-3 flex justify-between">
                     <span className="font-semibold">Total</span>
@@ -261,12 +275,20 @@ export default function MyCartContent() {
                 </div>
 
                 <Link
-                  href="/checkout"
-                  className="w-full bg-primary_green text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary_green/90 transition-colors"
+                  href="/cart/checkout"
+                  className="w-full bg-primary_green text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary_green/90 transition-colors mb-3"
                 >
-                  Checkout
-                  <FiArrowRight />
+                  Proceed to Checkout
+                  <FiCreditCard />
                 </Link>
+
+                <button
+                  onClick={handleClearCart}
+                  className="w-full border border-red-500 text-red-500 py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+                >
+                  Clear Cart
+                  <FiTrash2 />
+                </button>
               </div>
             </div>
           ) : (

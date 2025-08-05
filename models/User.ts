@@ -13,7 +13,6 @@ export interface IUser extends Document {
         phone?: string
         pickupAddresses?: string[]
     }
-    cartId?: string
     bookings: string
     provider?: "credentials" | "google"
     googleId?: string
@@ -37,7 +36,6 @@ const userSchema = new mongoose.Schema<IUser>(
             },
             default: {},
         },
-        cartId: { type: String, default: "" },
         bookings: { type: String, default: "" },
         provider: { type: String, required: true, enum: ["credentials", "google"] },
         googleId: { type: String },
