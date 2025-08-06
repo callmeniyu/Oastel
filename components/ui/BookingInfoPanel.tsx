@@ -81,7 +81,7 @@ export default function BookingInfoPanel({
       });
 
       if (success) {
-        router.push("/cart/checkout");
+        router.push("/cart");
       }
     } catch (error) {
       console.error("Error adding to cart:", error);

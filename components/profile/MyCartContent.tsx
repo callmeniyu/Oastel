@@ -275,7 +275,7 @@ export default function MyCartContent() {
                 </div>
 
                 <Link
-                  href="/cart/checkout"
+                  href="/cart"
                   className="w-full bg-primary_green text-white py-3 px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-primary_green/90 transition-colors mb-3"
                 >
                   Proceed to Checkout

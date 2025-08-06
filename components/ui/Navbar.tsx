@@ -139,39 +139,67 @@ export default function Navbar() {
           Oastel
         </Link>
         <div className="relative" ref={dropdownRef}>
-          <button
-            className={`flex items-center gap-2 rounded-full sm:pr-3 xs:pr-0 transition-all duration-300 ${
-              isGlassPage
-                ? isScrolled
-                  ? "bg-primary_green text-white hover:bg-primary_green/90"
-                  : "bg-white/15 border border-white/20 text-white hover:bg-white/25"
-                : "bg-primary_green text-white hover:bg-primary_green/90"
-            }`}
-            onClick={() => {
-              if (isAuthenticated) {
-                setShowProfile((prev) => !prev);
-              } else {
-                router.push("/auth");
-              }
-            }}
-            aria-expanded={showProfile}
-            aria-haspopup="true"
-          >
-            <div
-              className={`rounded-full p-2 ${
+          <div className="flex items-center gap-2">
+            {/* Cart Icon */}
+            {isAuthenticated && (
+              <Link
+                href="/cart"
+                className={`p-2 rounded-full transition-all duration-300 ${
+                  isGlassPage
+                    ? isScrolled
+                      ? "text-primary_green hover:bg-primary_green/10"
+                      : "text-white hover:bg-white/20"
+                    : "text-primary_green hover:bg-primary_green/10"
+                }`}
+                title="View Cart"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path d="M7 4H3C2.45 4 2 4.45 2 5S2.45 6 3 6H6L7.6 11.59L6.24 14.04C5.52 15.37 6.48 17 8 17H19C19.55 17 20 16.55 20 16S19.55 15 19 15H8L9.1 13H16.55C17.3 13 17.96 12.59 18.3 11.97L21.88 5H9L8.41 3.36C8.25 2.97 7.89 2.75 7.5 2.75H3C2.45 2.75 2 3.2 2 3.75S2.45 4.75 3 4.75H6.54L7 4ZM8 19C6.9 19 6 19.9 6 21S6.9 23 8 23 10 22.1 10 21 9.1 19 8 19ZM19 19C17.9 19 17 19.9 17 21S17.9 23 19 23 21 22.1 21 21 20.1 19 19 19Z" />
+                </svg>
+              </Link>
+            )}
+
+            {/* Profile Button */}
+            <button
+              className={`flex items-center gap-2 rounded-full sm:pr-3 xs:pr-0 transition-all duration-300 ${
                 isGlassPage
                   ? isScrolled
-                    ? "border-r-[1.5px] border-white"
-                    : "border-r-[1.5px] border-white/30"
-                  : "border-r-[1.5px] border-white"
+                    ? "bg-primary_green text-white hover:bg-primary_green/90"
+                    : "bg-white/15 border border-white/20 text-white hover:bg-white/25"
+                  : "bg-primary_green text-white hover:bg-primary_green/90"
               }`}
+              onClick={() => {
+                if (isAuthenticated) {
+                  setShowProfile((prev) => !prev);
+                } else {
+                  router.push("/auth");
+                }
+              }}
+              aria-expanded={showProfile}
+              aria-haspopup="true"
             >
-              <IoPersonOutline size={20} />
-            </div>
-            <span className="text-sm font-medium font-poppins xs:hidden sm:flex">
-              {isAuthenticated ? user?.name?.slice(0, 15) : "Sign In"}
-            </span>
-          </button>
+              <div
+                className={`rounded-full p-2 ${
+                  isGlassPage
+                    ? isScrolled
+                      ? "border-r-[1.5px] border-white"
+                      : "border-r-[1.5px] border-white/30"
+                    : "border-r-[1.5px] border-white"
+                }`}
+              >
+                <IoPersonOutline size={20} />
+              </div>
+              <span className="text-sm font-medium font-poppins xs:hidden sm:flex">
+                {isAuthenticated ? user?.name?.slice(0, 15) : "Sign In"}
+              </span>
+            </button>
+          </div>
 
           {/* Dropdown */}
           <div
