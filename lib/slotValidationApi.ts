@@ -10,6 +10,24 @@ export interface SlotValidationResult {
 }
 
 export class SlotValidationAPI {
+  // Get Malaysian server time
+  private async getMalaysianServerTime(): Promise<Date> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/timeslots/server-datetime`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          return new Date(data.data.fullDateTime);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching server time:', error);
+    }
+    
+    // Fallback to local time if server time fetch fails
+    return new Date();
+  }
+
   // Check if a specific slot is available
   async validateSlot(
     packageType: 'tour' | 'transfer',
@@ -19,8 +37,11 @@ export class SlotValidationAPI {
     guests: number
   ): Promise<SlotValidationResult> {
     try {
-      // Check if date is expired
-      const today = new Date();
+      // Get current Malaysian time from server
+      const nowMYT = await this.getMalaysianServerTime();
+
+      // Check if date is expired (using Malaysian time)
+      const today = new Date(nowMYT);
       today.setHours(0, 0, 0, 0);
       const slotDate = new Date(date);
       slotDate.setHours(0, 0, 0, 0);
@@ -34,23 +55,7 @@ export class SlotValidationAPI {
         };
       }
 
-      // Check the 10-hour cutoff for any future booking
-      const now = new Date();
-      const [hours, minutes] = time.split(':').map(Number);
-      const slotDateTime = new Date(date);
-      slotDateTime.setHours(hours, minutes, 0, 0);
-      
-      const timeDifference = slotDateTime.getTime() - now.getTime();
-      const hoursUntilSlot = timeDifference / (1000 * 60 * 60);
-
-      if (hoursUntilSlot < 10) {
-        return {
-          isValid: false,
-          isExpired: true,
-          isFull: false,
-          message: "Booking closed - less than 10 hours before departure"
-        };
-      }
+      // Skip 10-hour cutoff - only check actual slot availability
 
       // Check slot availability via API
       const response = await fetch(

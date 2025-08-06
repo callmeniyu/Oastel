@@ -128,36 +128,7 @@ export default function CartPage() {
       };
     }
 
-    // 10-hour cutoff logic (MYT timezone)
-    try {
-      const now = new Date();
-      // Malaysia is UTC+8
-      const nowMYT = new Date(
-        now.toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" })
-      );
-      const [hours, minutes] = time.split(":");
-      const slotDate = new Date(
-        selectedDate +
-          "T" +
-          hours.padStart(2, "0") +
-          ":" +
-          minutes.padStart(2, "0") +
-          ":00+08:00"
-      );
-      const diffMs = slotDate.getTime() - nowMYT.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
-      if (diffHours < 10) {
-        return {
-          isValid: false,
-          isExpired: true,
-          isFull: false,
-          message: "Booking closed - less than 10 hours before departure",
-        };
-      }
-    } catch (e) {
-      // fallback to API validation if date parse fails
-    }
-
+    // Only check slot availability, do not apply 10-hour cutoff here
     return await slotValidationApi.validateSlot(
       item.packageType as "tour" | "transfer",
       packageId,
