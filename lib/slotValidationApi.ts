@@ -37,6 +37,17 @@ export class SlotValidationAPI {
     guests: number
   ): Promise<SlotValidationResult> {
     try {
+      // Validate inputs
+      if (!packageType || !packageId || !date || !time || guests < 1) {
+        console.error('Invalid input parameters:', { packageType, packageId, date, time, guests });
+        return {
+          isValid: false,
+          isExpired: false,
+          isFull: false,
+          message: "Invalid input parameters"
+        };
+      }
+
       // Get current Malaysian time from server
       const nowMYT = await this.getMalaysianServerTime();
 
@@ -55,11 +66,33 @@ export class SlotValidationAPI {
         };
       }
 
-      // Skip 10-hour cutoff - only check actual slot availability
+      // Format the date to YYYY-MM-DD format for the API
+      const formattedDate = slotDate.toISOString().split('T')[0];
 
-      // Check slot availability via API
+      // Validate packageId format (should be 24 character ObjectId)
+      if (typeof packageId !== 'string' || packageId.length !== 24) {
+        console.error('Invalid packageId format:', packageId);
+        return {
+          isValid: false,
+          isExpired: false,
+          isFull: false,
+          message: "Invalid package ID format"
+        };
+      }
+
+      console.log('Cart validation request:', {
+        packageType,
+        packageId,
+        originalDate: date,
+        formattedDate,
+        time,
+        guests
+      });
+
+      // Use the existing /available endpoint to get all slots for the date
+      // This gives us the real slot data without 10-hour restriction for cart validation
       const response = await fetch(
-        `${API_BASE_URL}/api/timeslots/availability?packageType=${packageType}&packageId=${packageId}&date=${date}&time=${encodeURIComponent(time)}&persons=${guests}`,
+        `${API_BASE_URL}/api/timeslots/available?packageType=${packageType}&packageId=${packageId}&date=${formattedDate}`,
         {
           method: 'GET',
           headers: {
@@ -69,40 +102,86 @@ export class SlotValidationAPI {
       );
 
       if (!response.ok) {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+        console.error(`URL: ${API_BASE_URL}/api/timeslots/available?packageType=${packageType}&packageId=${packageId}&date=${formattedDate}`);
+        
         return {
           isValid: false,
           isExpired: false,
           isFull: false,
-          message: "Unable to verify availability"
+          message: `Unable to verify availability (${response.status})`
         };
       }
 
       const data = await response.json();
       
-      if (!data.success || !data.data.available) {
+      if (!data.success || !Array.isArray(data.data)) {
+        return {
+          isValid: false,
+          isExpired: false,
+          isFull: false,
+          message: "No slots found for this date"
+        };
+      }
+
+      // Find the specific time slot
+      const slot = data.data.find((s: any) => s.time === time);
+      
+      if (!slot) {
+        return {
+          isValid: false,
+          isExpired: false,
+          isFull: false,
+          message: "Time slot not found"
+        };
+      }
+
+      // For cart validation, we only care if the slot exists and has capacity
+      // We ignore the isAvailable flag which includes 10-hour restriction
+      const availableCapacity = slot.capacity - slot.bookedCount;
+      
+      if (availableCapacity <= 0) {
         return {
           isValid: false,
           isExpired: false,
           isFull: true,
-          message: data.data?.reason || "Time slot is not available",
-          availableSlots: data.data?.availableSlots
+          message: "Time slot is fully booked",
+          availableSlots: 0,
+          totalCapacity: slot.capacity
         };
       }
 
+      // Check if requested guests exceeds available capacity
+      if (guests > availableCapacity) {
+        return {
+          isValid: false,
+          isExpired: false,
+          isFull: true,
+          message: `Only ${availableCapacity} spots available`,
+          availableSlots: availableCapacity,
+          totalCapacity: slot.capacity
+        };
+      }
+
+      // For cart validation, the slot is valid if it exists, has capacity, and date is not expired
       return {
         isValid: true,
         isExpired: false,
         isFull: false,
-        availableSlots: data.data.availableSlots
+        message: "Slot available",
+        availableSlots: availableCapacity,
+        totalCapacity: slot.capacity
       };
 
     } catch (error) {
       console.error('Error validating slot:', error);
+      console.error(`Failed for: packageType=${packageType}, packageId=${packageId}, date=${date}, time=${time}, guests=${guests}`);
+      
       return {
         isValid: false,
         isExpired: false,
         isFull: false,
-        message: "Unable to verify availability"
+        message: `Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }

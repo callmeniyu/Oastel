@@ -128,11 +128,27 @@ export default function CartPage() {
       };
     }
 
+    // Ensure date is in correct format (YYYY-MM-DD)
+    let formattedDate = selectedDate;
+    if (selectedDate.includes("T")) {
+      // If it's an ISO string, extract just the date part
+      formattedDate = selectedDate.split("T")[0];
+    }
+
+    console.log("Cart validation debug:", {
+      packageId,
+      packageType: item.packageType,
+      originalDate: selectedDate,
+      formattedDate,
+      time,
+      guests,
+    });
+
     // Only check slot availability, do not apply 10-hour cutoff here
     return await slotValidationApi.validateSlot(
       item.packageType as "tour" | "transfer",
       packageId,
-      selectedDate,
+      formattedDate,
       time,
       guests
     );
@@ -570,7 +586,11 @@ export default function CartPage() {
                     <p className="font-medium mb-1">Important Notes</p>
                     <ul className="text-xs space-y-1 list-disc list-inside">
                       <li>
-                        Bookings must be made at least 10 hours in advance
+                        Cart items are validated for availability and capacity
+                      </li>
+                      <li>
+                        Final booking confirmation will check timing
+                        requirements
                       </li>
                       <li>All times are in Malaysia timezone (MYT)</li>
                     </ul>

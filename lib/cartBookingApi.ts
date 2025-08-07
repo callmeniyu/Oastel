@@ -68,8 +68,18 @@ export class CartBookingAPI {
         body: JSON.stringify(request),
       });
 
+      console.log('Cart booking response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Cart booking error response:', errorText);
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        } catch (parseError) {
+          throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
       }
 
       const data = await response.json();

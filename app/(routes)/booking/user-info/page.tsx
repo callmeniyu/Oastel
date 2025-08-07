@@ -148,19 +148,26 @@ export default function BookingUserInfoPage() {
     }
 
     if (!user?.email) {
+      console.error("User email not found in session:", user);
       showToast({
         type: "error",
-        title: "Error",
-        message: "User email not found",
+        title: "Authentication Error",
+        message: "User email not found. Please try logging in again.",
       });
       return;
     }
 
+    console.log("User session data:", {
+      email: user.email,
+      name: user.name,
+      hasCart: !!cart,
+      cartItemCount: cart?.items?.length || 0,
+    });
+
     try {
       setIsLoading(true);
 
-      // Book all cart items using cart booking API
-      const result = await cartBookingApi.bookCartItems({
+      const bookingRequest = {
         userEmail: user.email,
         contactInfo: {
           name: form.name,
@@ -168,8 +175,12 @@ export default function BookingUserInfoPage() {
           phone: `${form.countryCode}${form.phone}`,
           whatsapp: `${form.countryCode}${form.phone}`,
         },
-        pickupLocation: form.pickupLocation,
-      });
+      };
+
+      console.log("Cart booking request:", bookingRequest);
+
+      // Book all cart items using cart booking API
+      const result = await cartBookingApi.bookCartItems(bookingRequest);
 
       if (result.success) {
         showToast({
