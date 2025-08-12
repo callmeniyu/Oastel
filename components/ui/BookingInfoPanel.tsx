@@ -4,6 +4,7 @@ import { IoCartOutline } from "react-icons/io5";
 import { IoBagOutline } from "react-icons/io5";
 import { useToast } from "@/context/ToastContext";
 import { useCart } from "@/context/CartContext";
+import { formatDateForServer } from "@/lib/dateUtils";
 import SessionHook from "@/hooks/SessionHook";
 
 type Props = {
@@ -74,7 +75,7 @@ export default function BookingInfoPanel({
       const success = await addToCart({
         packageId,
         packageType,
-        selectedDate: date.toISOString().split("T")[0],
+        selectedDate: formatDateForServer(date), // Use timezone-safe date formatting
         selectedTime: time,
         adults,
         children: children || 0,
