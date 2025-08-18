@@ -134,6 +134,12 @@ export default function BookingInfoPage() {
 
   useEffect(() => {
     fetchTimeSlots();
+
+    const interval = setInterval(() => {
+      if (transferDetails?._id) fetchTimeSlots();
+    }, 60000); // 60 seconds
+
+    return () => clearInterval(interval);
   }, [selectedDate, transferDetails?._id]);
 
   const updateAdults = (newCount: number) => {
@@ -500,6 +506,14 @@ export default function BookingInfoPage() {
         packageType="transfer"
         packageId={transferDetails?._id}
         disabled={!selectedTime || isLoading}
+        transferDetails={
+          transferDetails
+            ? {
+                pickupOption: transferDetails.details.pickupOption || "user",
+                pickupLocations: transferDetails.details.pickupLocations || "",
+              }
+            : undefined
+        }
       />
     </div>
   );

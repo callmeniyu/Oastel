@@ -1,3 +1,5 @@
+"use client";
+
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { IoCartOutline } from "react-icons/io5";
@@ -6,6 +8,8 @@ import { useToast } from "@/context/ToastContext";
 import { useCart } from "@/context/CartContext";
 import { formatDateForServer } from "@/lib/dateUtils";
 import SessionHook from "@/hooks/SessionHook";
+import PickupLocationModal from "./PickupLocationModal";
+import { useState } from "react";
 
 type Props = {
   title: string;
@@ -25,6 +29,10 @@ type Props = {
   packageType: "tour" | "transfer";
   packageId?: string;
   disabled?: boolean;
+  transferDetails?: {
+    pickupOption: "admin" | "user";
+    pickupLocations: string;
+  };
 };
 
 export default function BookingInfoPanel({
@@ -44,21 +52,40 @@ export default function BookingInfoPanel({
   packageType,
   packageId,
   disabled = false,
+  transferDetails,
 }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const { user, isAuthenticated } = SessionHook();
   const { addToCart, loading: cartLoading } = useCart();
   const total = adults * adultPrice + children * childPrice;
+  const [isPickupModalOpen, setIsPickupModalOpen] = useState(false);
+
+  // Utility to strip HTML tags from any input (protect stored pickupLocation)
+  const stripHtmlTags = (html: string) => {
+    if (!html) return "";
+    try {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    } catch (e) {
+      return html;
+    }
+  };
 
   const handleAddToCart = async () => {
+    console.log("BookingInfoPanel: handleAddToCart called", {
+      packageType,
+      packageId,
+      isAuthenticated,
+    });
     if (!isAuthenticated || !user) {
       showToast({
         type: "error",
         title: "Authentication Required",
         message: "Please log in to add items to cart",
       });
-      router.push("/auth/login");
+      router.push("/auth");
       return;
     }
 
@@ -71,14 +98,23 @@ export default function BookingInfoPanel({
       return;
     }
 
+    // Show pickup location modal for both tours and transfers
+    setIsPickupModalOpen(true);
+  };
+
+  const handlePickupLocationConfirm = async (pickupLocation: string) => {
+    setIsPickupModalOpen(false);
+
     try {
+      const cleaned = stripHtmlTags(pickupLocation || "");
       const success = await addToCart({
-        packageId,
+        packageId: packageId!,
         packageType,
         selectedDate: formatDateForServer(date), // Use timezone-safe date formatting
         selectedTime: time,
         adults,
         children: children || 0,
+        pickupLocation: cleaned, // Pass cleaned pickup location
       });
 
       if (success) {
@@ -203,8 +239,10 @@ export default function BookingInfoPanel({
         ) : (
           // Booking details page - show Add to Cart and Continue buttons
           <>
-            <div
-              onClick={disabled ? undefined : handleAddToCart}
+            <button
+              onClick={handleAddToCart}
+              type="button"
+              disabled={disabled || cartLoading}
               className={`${
                 disabled || cartLoading
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
@@ -213,20 +251,30 @@ export default function BookingInfoPanel({
             >
               <IoCartOutline className="inline mr-2 text-2xl" />
               <p>{cartLoading ? "Adding..." : "Add to Cart"}</p>
-            </div>
+            </button>
             <div
               onClick={disabled ? undefined : onClick}
               className={`${
                 disabled
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
-              } text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
+              } text-white text-sm px-4 py-3 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
             >
               <p>Continue</p>
             </div>
           </>
         )}
       </div>
+
+      {/* Pickup Location Modal (used for transfers) */}
+      <PickupLocationModal
+        isOpen={isPickupModalOpen}
+        onClose={() => setIsPickupModalOpen(false)}
+        onConfirm={handlePickupLocationConfirm}
+        packageType={packageType}
+        transferDetails={transferDetails}
+        packageTitle={title}
+      />
     </div>
   );
 }

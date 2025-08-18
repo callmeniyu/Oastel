@@ -71,6 +71,13 @@ export default function CartPage() {
     null
   );
 
+  // Utility function to strip HTML tags from text
+  const stripHtmlTags = (html: string): string => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
   useEffect(() => {
     if (status === "loading") return;
 
@@ -487,7 +494,7 @@ export default function CartPage() {
                                   <FiMapPin className="text-primary_green mt-0.5 flex-shrink-0" />
                                   <span className="text-sm leading-relaxed">
                                     {typeof item.pickupLocation === "string"
-                                      ? item.pickupLocation
+                                      ? stripHtmlTags(item.pickupLocation)
                                       : (
                                           item.pickupLocation as {
                                             name?: string;

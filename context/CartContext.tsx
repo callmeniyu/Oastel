@@ -23,6 +23,7 @@ interface CartContextType {
     selectedTime: string;
     adults: number;
     children: number;
+    pickupLocation?: string;
   }) => Promise<boolean>;
   removeFromCart: (itemId: string) => Promise<boolean>;
   updateCartItem: (
@@ -87,6 +88,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     selectedTime: string;
     adults: number;
     children: number;
+    pickupLocation?: string;
   }): Promise<boolean> => {
     if (!isAuthenticated || !userEmail) {
       showToast({

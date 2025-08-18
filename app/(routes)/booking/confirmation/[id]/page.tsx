@@ -3,8 +3,17 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
+import {
+  FaRegCalendarAlt as Calendar,
+  FaRegClock as Clock,
+  FaUsers as Users,
+  FaRegEnvelope as Mail,
+  FaPhone as Phone,
+  FaMapMarkerAlt as MapPin,
+} from "react-icons/fa";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import SessionHook from "@/hooks/SessionHook";
 
 interface BookingDetails {
   _id: string;
@@ -12,8 +21,8 @@ interface BookingDetails {
   packageId: {
     _id: string;
     title: string;
-    from?: string; // For transfers
-    to?: string; // For transfers
+    from?: string;
+    to?: string;
     image?: string;
     type?: string;
   };
@@ -42,12 +51,28 @@ export default function BookingConfirmationPage() {
   const [booking, setBooking] = useState<BookingDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const { isAuthenticated } = SessionHook();
 
-  // Utility function to strip HTML tags from text
   const stripHtmlTags = (html: string): string => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
     return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
+  const formatDate = (dateString?: string) => {
+    try {
+      if (!dateString) return "Invalid Date";
+      const d = new Date(dateString);
+      if (isNaN(d.getTime())) return "Invalid Date";
+      return d.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "Invalid Date";
+    }
   };
 
   const downloadPDF = async () => {
@@ -64,24 +89,25 @@ export default function BookingConfirmationPage() {
       });
 
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
+      const pdf = new jsPDF("p", "mm", "a4");
 
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 295; // A4 height in mm
 
-      let position = 0;
+      const imgProps = {
+        width: pdfWidth,
+        height: (canvas.height * pdfWidth) / canvas.width,
+      };
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      if (imgProps.height > pdfHeight) {
+        imgProps.width = (canvas.width * pdfHeight) / canvas.height;
+        imgProps.height = pdfHeight;
       }
+
+      const x = (pdfWidth - imgProps.width) / 2;
+      const y = (pdfHeight - imgProps.height) / 2;
+
+      pdf.addImage(imgData, "PNG", x, y, imgProps.width, imgProps.height);
 
       pdf.save(`booking-confirmation-${booking._id}.pdf`);
 
@@ -105,30 +131,18 @@ export default function BookingConfirmationPage() {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        console.log("Fetching booking with ID:", bookingId); // Debug log
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${bookingId}`
         );
         const data = await response.json();
 
-        console.log("Booking API response:", data); // Debug log
-
         if (data.success && data.data) {
           setBooking(data.data);
-        } else if (data.error) {
-          console.error("Booking API error:", data.error);
+        } else {
           showToast({
             type: "error",
             title: "Error",
             message: data.error || "Booking not found",
-          });
-          router.push("/");
-        } else {
-          console.error("Unexpected API response format:", data);
-          showToast({
-            type: "error",
-            title: "Error",
-            message: "Failed to load booking details",
           });
           router.push("/");
         }
@@ -148,7 +162,6 @@ export default function BookingConfirmationPage() {
     if (bookingId && bookingId !== "undefined") {
       fetchBooking();
     } else {
-      console.error("Invalid booking ID:", bookingId);
       setIsLoading(false);
       showToast({
         type: "error",
@@ -186,6 +199,17 @@ export default function BookingConfirmationPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 font-poppins">
       <div className="bg-white rounded-lg shadow-lg p-8" ref={confirmationRef}>
+        {/* Header */}
+        <div className="text-center border-b pb-6 mb-6">
+          <h1 className="text-3xl font-bold text-primary_green">
+            Oastel Ticket Information
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Ticket ID: <span className="font-semibold">{booking._id}</span>
+          </p>
+        </div>
+
+        {/* Confirmation Status */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -202,119 +226,103 @@ export default function BookingConfirmationPage() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-green-600 mb-2">
+          <h2 className="text-2xl font-bold text-green-600">
             Booking Confirmed!
-          </h1>
+          </h2>
           <p className="text-gray-600">
-            Your booking has been successfully created
+            Thank you for choosing Oastel. Your booking is confirmed.
           </p>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Booking Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Booking ID</p>
-                <p className="font-semibold">{booking._id}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Package Type</p>
-                <p className="font-semibold capitalize">
-                  {booking.packageType}
-                </p>
-              </div>
-
-              {/* Package Name */}
-              <div className="md:col-span-2">
-                <p className="text-sm text-gray-600">Package Name</p>
-                <p className="font-semibold text-lg text-primary_green">
-                  {booking.packageId?.title || "N/A"}
-                </p>
-              </div>
-
-              {/* Route Information for Transfers */}
-              {booking.packageType === "transfer" &&
-                booking.packageId?.from &&
-                booking.packageId?.to && (
-                  <>
-                    <div>
-                      <p className="text-sm text-gray-600">From</p>
-                      <p className="font-semibold">{booking.packageId.from}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600">To</p>
-                      <p className="font-semibold">{booking.packageId.to}</p>
-                    </div>
-                  </>
-                )}
-
-              <div>
-                <p className="text-sm text-gray-600">Date</p>
-                <p className="font-semibold">
-                  {new Date(booking.date).toLocaleDateString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Time</p>
-                <p className="font-semibold">{booking.time}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Guests</p>
-                <p className="font-semibold">
-                  {booking.adults} Adults, {booking.children} Children
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Status</p>
-                <p className="font-semibold capitalize">{booking.status}</p>
-              </div>
+        {/* Booking Details */}
+        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-semibold mb-4">Booking Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-2">
+              <Calendar className="w-5 h-5 text-primary_green" />
+              <p className="font-semibold">{formatDate(booking.date)}</p>
             </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Name</p>
-                <p className="font-semibold">{booking.contactInfo.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="font-semibold">{booking.contactInfo.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Phone</p>
-                <p className="font-semibold">{booking.contactInfo.phone}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Pickup Location</p>
-                <p className="font-semibold">
-                  {stripHtmlTags(booking.pickupLocation || "")}
-                </p>
-              </div>
+            <div className="flex items-start gap-2">
+              <Clock className="w-5 h-5 text-primary_green" />
+              <p className="font-semibold">{booking.time}</p>
             </div>
-          </div>
-
-          <div className="bg-primary_green/10 rounded-lg p-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Total Amount</h2>
-              <p className="text-2xl font-bold text-primary_green">
-                RM {booking.total}
+            <div className="flex items-start gap-2">
+              <Users className="w-5 h-5 text-primary_green" />
+              <p className="font-semibold">
+                {booking.adults} Adults, {booking.children} Children
               </p>
             </div>
           </div>
         </div>
+
+        {/* Contact Information */}
+        <div className="bg-gray-50 rounded-lg p-6 mb-6">
+          <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-2">
+              <Mail className="w-5 h-5 text-primary_green" />
+              <p>{booking.contactInfo.email}</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <Phone className="w-5 h-5 text-primary_green" />
+              <p>{booking.contactInfo.phone}</p>
+            </div>
+            <div className="flex items-start gap-2">
+              <MapPin className="w-5 h-5 text-primary_green" />
+              <p>{stripHtmlTags(booking.pickupLocation || "")}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Total */}
+        <div className="bg-primary_green/10 rounded-lg p-6 mb-6 flex justify-between">
+          <h3 className="text-xl font-semibold">Total Amount</h3>
+          <p className="text-2xl font-bold text-primary_green">
+            RM {booking.total.toFixed(2)}
+          </p>
+        </div>
+
+        {/* Important Notes */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6">
+          <h3 className="text-lg font-semibold mb-2">Important Information:</h3>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            <li>Please arrive 15 minutes before each scheduled time</li>
+            <li>
+              Bring a valid ID and this confirmation email for each booking
+            </li>
+            <li>Each booking may have different pickup locations and times</li>
+            <li>For any changes, contact us at least 24 hours in advance</li>
+            <li>Weather conditions may affect outdoor activities</li>
+          </ul>
+        </div>
+
+        {/* Policies */}
+        <div className="bg-gray-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-2">Key Policies</h3>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            <li>Full refund if cancelled at least 72 hours before activity.</li>
+            <li>No refunds or date changes within 72 hours of activity.</li>
+            <li>
+              Pick-up only from Tanah Rata, Golden Hill, Brinchang, and Kea
+              Farm.
+            </li>
+            <li>
+              Not wheelchair/stroller accessible; not recommended for certain
+              medical conditions.
+            </li>
+          </ul>
+        </div>
       </div>
 
-      {/* Email confirmation text OUTSIDE confirmationRef so it's NOT included in PDF */}
-      <div className="text-center space-y-4 mt-6">
-        <p className="text-gray-600">
-          A confirmation email has been sent to {booking.contactInfo.email}
+      {/* Email Confirmation (outside PDF) */}
+      <div className="text-center mt-8 text-gray-700">
+        <p>
+          Hi {booking.contactInfo.name},<br />
+          Thank you for choosing Oastel for your booking. <br />
         </p>
       </div>
 
-      {/* Buttons OUTSIDE confirmationRef so they are NOT included in PDF */}
+      {/* Buttons */}
       <div className="text-center space-y-4 mt-6">
         <button
           onClick={downloadPDF}
@@ -324,10 +332,19 @@ export default function BookingConfirmationPage() {
           {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
         </button>
         <button
-          onClick={() => router.push("/tours")}
-          className="px-6 py-2 border border-primary_green text-primary_green rounded-lg hover:bg-primary_green hover:text-white font-poppins"
+          onClick={() => {
+            // View bookings: profile for authenticated users, else browse relevant listing
+            if (isAuthenticated) {
+              router.push("/profile");
+            } else if (booking.packageType === "tour") {
+              router.push("/tours");
+            } else {
+              router.push("/transfers");
+            }
+          }}
+          className="px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-poppins"
         >
-          Browse More Tours
+          View bookings
         </button>
       </div>
     </div>

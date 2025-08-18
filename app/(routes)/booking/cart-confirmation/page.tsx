@@ -1,18 +1,19 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/context/ToastContext";
 import {
-  FiCheckCircle,
-  FiCalendar,
-  FiClock,
-  FiMapPin,
-  FiUser,
-  FiMail,
-  FiPhone,
-} from "react-icons/fi";
+  FaRegCalendarAlt as Calendar,
+  FaRegClock as Clock,
+  FaUsers as Users,
+  FaRegEnvelope as Mail,
+  FaPhone as Phone,
+  FaMapMarkerAlt as MapPin,
+} from "react-icons/fa";
 import Image from "next/image";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface BookingDetails {
   _id: string;
@@ -39,36 +40,167 @@ export default function CartConfirmationPage() {
   const { showToast } = useToast();
   const [bookings, setBookings] = useState<BookingDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const confirmationRef = useRef<HTMLDivElement>(null);
+
+  const stripHtmlTags = (html: string): string => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
+  const downloadPDF = async () => {
+    if (!confirmationRef.current || bookings.length === 0) return;
+
+    try {
+      setIsGeneratingPDF(true);
+
+      // Temporarily apply a print-friendly wrapper to add margins and font
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "20px"; // padding around content to avoid edge stretching
+      wrapper.style.boxSizing = "border-box";
+      wrapper.style.fontFamily = "Poppins, Arial, Helvetica, sans-serif";
+      // Clone the confirmation node into wrapper to render reliably
+      const clone = confirmationRef.current.cloneNode(true) as HTMLElement;
+      wrapper.appendChild(clone);
+
+      // Append to body, render, then clean up
+      document.body.appendChild(wrapper);
+
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+      });
+
+      // Remove temporary wrapper
+      document.body.removeChild(wrapper);
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 295; // A4 height in mm
+
+      // Convert canvas px to PDF mm ratio based on 96dpi baseline: 1px ~ 0.264583 mm
+      const pxToMm = (px: number) => px * 0.264583;
+
+      // Calculate image width such that horizontal margins are respected (16mm left/right)
+      const horizMargin = 16; // mm
+      const maxImgWidth = pdfWidth - horizMargin * 2;
+
+      const imgProps = {
+        width: Math.min(maxImgWidth, pxToMm(canvas.width)),
+        height:
+          (pxToMm(canvas.height) *
+            Math.min(maxImgWidth, pxToMm(canvas.width))) /
+          pxToMm(canvas.width),
+      };
+
+      // If the content height exceeds one page, scale to fit height instead
+      if (imgProps.height > pdfHeight - 20) {
+        const scale = (pdfHeight - 20) / imgProps.height;
+        imgProps.width = imgProps.width * scale;
+        imgProps.height = imgProps.height * scale;
+      }
+
+      // Top-align content on the page (y offset small) to avoid large vertical gaps when content is short
+      const x = (pdfWidth - imgProps.width) / 2;
+      const y = 12; // 12mm top margin
+
+      pdf.addImage(imgData, "PNG", x, y, imgProps.width, imgProps.height);
+
+      pdf.save(`cart-booking-confirmation.pdf`);
+
+      showToast({
+        type: "success",
+        title: "PDF Downloaded",
+        message: "Your booking confirmation has been downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      showToast({
+        type: "error",
+        title: "Error",
+        message: "Failed to generate PDF",
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   useEffect(() => {
-    const bookingIds = searchParams.get("bookings");
+    const bookingIdsRaw = searchParams.get("bookings");
 
-    if (!bookingIds) {
+    if (!bookingIdsRaw) {
       router.push("/cart");
       return;
     }
 
-    fetchBookingDetails(bookingIds.split(","));
+    const bookingIds = bookingIdsRaw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (bookingIds.length === 0) {
+      router.push("/cart");
+      return;
+    }
+
+    fetchBookingDetails(bookingIds);
   }, [searchParams, router]);
 
   const fetchBookingDetails = async (bookingIds: string[]) => {
     try {
       setLoading(true);
 
-      // Fetch details for each booking
+      // Fetch details for each booking in parallel, but tolerate partial failures
       const bookingPromises = bookingIds.map(async (id) => {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${id}`
-        );
-        const result = await response.json();
-
-        if (result.success) {
-          return result.data;
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${id}`
+          );
+          const result = await response.json();
+          if (!result.success) throw new Error(`Failed to fetch booking ${id}`);
+          const data = result.data;
+          return {
+            _id: data._id,
+            packageTitle:
+              (data.packageDetails && data.packageDetails.title) ||
+              data.packageTitle ||
+              (data.packageId && data.packageId.title) ||
+              "Package",
+            packageType: data.packageType || "tour",
+            packageImage:
+              (data.packageDetails && data.packageDetails.image) ||
+              data.packageImage,
+            selectedDate: data.selectedDate
+              ? data.selectedDate
+              : data.date
+              ? new Date(data.date).toISOString().split("T")[0]
+              : "",
+            selectedTime: data.selectedTime || data.time || "",
+            adults: Number(data.adults) || 1,
+            children: Number(data.children) || 0,
+            totalPrice: Number(data.total) || Number(data.totalPrice) || 0,
+            pickupLocation: data.pickupLocation || "",
+            contactInfo: data.contactInfo || {
+              name: "",
+              email: "",
+              phone: "",
+            },
+            createdAt: data.createdAt,
+          };
+        } catch (err) {
+          console.warn(`Warning: booking ${id} failed to load`, err);
+          return null;
         }
-        throw new Error(`Failed to fetch booking ${id}`);
       });
 
-      const bookingDetails = await Promise.all(bookingPromises);
+      const settled = await Promise.all(bookingPromises);
+      const bookingDetails = settled.filter(
+        (b) => b !== null
+      ) as BookingDetails[];
       setBookings(bookingDetails);
     } catch (error) {
       console.error("Error fetching booking details:", error);
@@ -84,7 +216,9 @@ export default function CartConfirmationPage() {
 
   const formatDate = (dateString: string) => {
     try {
+      if (!dateString) return "Invalid Date";
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid Date";
       return date.toLocaleDateString("en-US", {
         weekday: "long",
         year: "numeric",
@@ -92,15 +226,18 @@ export default function CartConfirmationPage() {
         day: "numeric",
       });
     } catch {
-      return dateString;
+      return "Invalid Date";
     }
   };
 
   const formatTime = (timeString: string) => {
     try {
+      if (!timeString) return "Invalid Time";
       const [hours, minutes] = timeString.split(":");
+      if (!hours || !minutes) return timeString;
       const date = new Date();
       date.setHours(parseInt(hours), parseInt(minutes));
+      if (isNaN(date.getTime())) return timeString;
       return date.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -112,7 +249,10 @@ export default function CartConfirmationPage() {
   };
 
   const getTotalAmount = () => {
-    return bookings.reduce((total, booking) => total + booking.totalPrice, 0);
+    return bookings.reduce(
+      (total, booking) => total + (Number(booking.totalPrice) || 0),
+      0
+    );
   };
 
   if (loading) {
@@ -145,167 +285,193 @@ export default function CartConfirmationPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Success Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <FiCheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Bookings Confirmed!
-          </h1>
-          <p className="text-gray-600">
-            {bookings.length} booking{bookings.length > 1 ? "s have" : " has"}{" "}
-            been successfully created
-          </p>
-        </div>
-
-        {/* Booking Summary */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Booking Summary
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-primary_green">
-                {bookings.length}
-              </p>
-              <p className="text-sm text-gray-600">Total Bookings</p>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-primary_green">
-                {bookings.reduce(
-                  (total, b) => total + b.adults + b.children,
-                  0
-                )}
-              </p>
-              <p className="text-sm text-gray-600">Total Guests</p>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-primary_green">
-                RM {getTotalAmount().toFixed(2)}
-              </p>
-              <p className="text-sm text-gray-600">Total Amount</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Individual Bookings */}
-        <div className="space-y-6">
-          {bookings.map((booking, index) => (
-            <div
-              key={booking._id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-            >
-              <div className="bg-primary_green text-white px-6 py-3">
-                <h3 className="font-semibold">
-                  Booking #{index + 1} - {booking.packageTitle}
-                </h3>
-                <p className="text-sm opacity-90">Booking ID: {booking._id}</p>
+        <div ref={confirmationRef}>
+          {/* Success Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
               </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Bookings Confirmed!
+            </h1>
+            <p className="text-gray-600">
+              {bookings.length} booking{bookings.length > 1 ? "s have" : " has"}{" "}
+              been successfully booked
+            </p>
+          </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Booking Details */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <FiCalendar className="text-primary_green" />
-                      <span className="font-medium">
-                        {formatDate(booking.selectedDate)}
-                      </span>
+          {/* Booking Summary */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Booking Summary
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-primary_green">
+                  {bookings.length}
+                </p>
+                <p className="text-sm text-gray-600">Total Bookings</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-primary_green">
+                  {bookings.reduce(
+                    (total, b) => total + b.adults + b.children,
+                    0
+                  )}
+                </p>
+                <p className="text-sm text-gray-600">Total Guests</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-2xl font-bold text-primary_green">
+                  RM {getTotalAmount().toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600">Total Amount</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Individual Bookings */}
+          <div className="space-y-6">
+            {bookings.map((booking, index) => (
+              <div
+                key={booking._id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+              >
+                <div className="bg-primary_green text-white px-6 py-3">
+                  <h3 className="font-semibold">
+                    Booking #{index + 1} - {booking.packageTitle}
+                  </h3>
+                  <p className="text-sm opacity-90">
+                    Booking ID: {booking._id}
+                  </p>
+                </div>
+
+                <div className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Booking Details */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="text-primary_green" />
+                        <span className="font-medium">
+                          {formatDate(booking.selectedDate)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Clock className="text-primary_green" />
+                        <span className="font-medium">
+                          {formatTime(booking.selectedTime)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Users className="text-primary_green" />
+                        <span className="font-medium">
+                          {booking.adults} adult{booking.adults > 1 ? "s" : ""}
+                          {booking.children > 0 &&
+                            `, ${booking.children} child${
+                              booking.children > 1 ? "ren" : ""
+                            }`}
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <MapPin className="text-primary_green mt-0.5" />
+                        <span className="font-medium">
+                          {stripHtmlTags(booking.pickupLocation || "")}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <FiClock className="text-primary_green" />
-                      <span className="font-medium">
-                        {formatTime(booking.selectedTime)}
-                      </span>
-                    </div>
+                    {/* Contact Info */}
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-gray-900">
+                        Contact Information
+                      </h4>
 
-                    <div className="flex items-center gap-3">
-                      <FiUser className="text-primary_green" />
-                      <span className="font-medium">
-                        {booking.adults} adult{booking.adults > 1 ? "s" : ""}
-                        {booking.children > 0 &&
-                          `, ${booking.children} child${
-                            booking.children > 1 ? "ren" : ""
-                          }`}
-                      </span>
-                    </div>
+                      <div className="flex items-center gap-3">
+                        <Users className="text-primary_green" />
+                        <span>{booking.contactInfo.name}</span>
+                      </div>
 
-                    <div className="flex items-start gap-3">
-                      <FiMapPin className="text-primary_green mt-0.5" />
-                      <span className="font-medium">
-                        {booking.pickupLocation}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <Mail className="text-primary_green" />
+                        <span>{booking.contactInfo.email}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Phone className="text-primary_green" />
+                        <span>{booking.contactInfo.phone}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Contact Info */}
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900">
-                      Contact Information
-                    </h4>
-
-                    <div className="flex items-center gap-3">
-                      <FiUser className="text-primary_green" />
-                      <span>{booking.contactInfo.name}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <FiMail className="text-primary_green" />
-                      <span>{booking.contactInfo.email}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <FiPhone className="text-primary_green" />
-                      <span>{booking.contactInfo.phone}</span>
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold">
+                        Total Amount:
+                      </span>
+                      <span className="text-2xl font-bold text-primary_green">
+                        RM {Number(booking.totalPrice || 0).toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total Amount:</span>
-                    <span className="text-2xl font-bold text-primary_green">
-                      RM {booking.totalPrice.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Contact Information Notice */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-800 mb-2">What's Next?</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• You will receive confirmation emails for each booking</li>
-            <li>
-              • Our team will contact you via WhatsApp to confirm pickup details
-            </li>
-            <li>• Please keep your WhatsApp number accessible</li>
-            <li>• If you have any questions, feel free to contact us</li>
-          </ul>
+          {/* Contact Information Notice */}
+          <div className="mt-8 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-6">
+            <h3 className="font-semibold text-yellow-800 mb-2">
+              Important Information:
+            </h3>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• Please arrive 15 minutes before each scheduled time</li>
+              <li>
+                • Bring a valid ID and this confirmation email for each booking
+              </li>
+              <li>
+                • Each booking may have different pickup locations and times
+              </li>
+              <li>
+                • For any changes, contact us at least 24 hours in advance
+              </li>
+              <li>• Weather conditions may affect outdoor activities</li>
+            </ul>
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="mt-8 text-center space-y-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => router.push("/bookings")}
+              onClick={downloadPDF}
+              disabled={isGeneratingPDF}
+              className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+            </button>
+            <button
+              onClick={() => router.push("/profile")}
               className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors"
             >
               View All Bookings
-            </button>
-            <button
-              onClick={() => router.push("/")}
-              className="px-6 py-3 border border-primary_green text-primary_green rounded-lg hover:bg-primary_green/5 transition-colors"
-            >
-              Continue Shopping
             </button>
           </div>
         </div>

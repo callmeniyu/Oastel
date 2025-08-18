@@ -19,6 +19,7 @@ type TransferCardProps = {
   oldPrice: number;
   newPrice: number;
   type: string;
+  vehicle?: string;
   from: string;
   to: string;
   label?: "Recommended" | "Popular" | "Best Value" | null;
@@ -36,6 +37,7 @@ export default function TransferCard({
   oldPrice,
   newPrice,
   type,
+  vehicle,
   from,
   to,
   label,
@@ -76,10 +78,11 @@ export default function TransferCard({
         <h3 className="text-primary_green font-semibold font-poppins text-base">
           {title}
         </h3>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {tags.map((tag, i) => (
             <Tag key={i} tag={tag} />
           ))}
+          {type.toLowerCase() === "private" && vehicle && <Tag tag={vehicle} />}
         </div>
         <p className="text-desc_gray text-sm font-poppins">{desc}</p>
         <div className="flex justify-between">

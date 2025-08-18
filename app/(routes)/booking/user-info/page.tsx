@@ -5,7 +5,7 @@ import { useCart } from "@/context/CartContext";
 import { cartBookingApi } from "@/lib/cartBookingApi";
 import BookingInfoPanel from "@/components/ui/BookingInfoPanel";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/context/ToastContext";
 import SessionHook from "@/hooks/SessionHook";
 
@@ -32,6 +32,10 @@ export default function BookingUserInfoPage() {
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Used to temporarily suppress the auto-redirect to /cart when we
+  // intentionally clear the cart after navigating to confirmation.
+  const skipCartRedirectRef = useRef(false);
 
   // Form validation function
   const isFormValid = () => {
@@ -61,6 +65,8 @@ export default function BookingUserInfoPage() {
     if (isCartBooking) {
       // For cart bookings, check if cart exists and has items
       if (!cart || cart.items.length === 0) {
+        // If we set the skip flag (we're navigating to confirmation), do not replace
+        if (skipCartRedirectRef.current) return;
         router.replace("/cart");
       }
     } else {
@@ -190,15 +196,37 @@ export default function BookingUserInfoPage() {
         });
 
         // Clear the cart after successful booking
-        await clearCart();
-
-        // Redirect to cart confirmation page or first booking confirmation
+        // Redirect first, then clear the cart to avoid the local useEffect
+        // (which redirects to /cart when the cart becomes empty) from
+        // racing with this navigation.
         if (result.bookingIds.length > 0) {
-          router.push(
-            `/booking/cart-confirmation?bookings=${result.bookingIds.join(",")}`
-          );
+          const target = `/booking/cart-confirmation?bookings=${result.bookingIds.join(
+            ","
+          )}`;
+          // Set skip flag so the useEffect won't redirect to /cart when we clear the cart.
+          skipCartRedirectRef.current = true;
+          // Trigger navigation to the confirmation page.
+          // Note: in Next's app-router push may not be awaitable; we still set the skip flag
+          // to avoid immediate redirect caused by clearing the cart.
+          await router.push(target);
+          try {
+            await clearCart();
+          } catch (err) {
+            console.error("Failed to clear cart after booking:", err);
+          } finally {
+            // Clear the skip flag after a short delay to ensure navigation completed.
+            setTimeout(() => (skipCartRedirectRef.current = false), 1000);
+          }
         } else {
-          router.push("/bookings");
+          skipCartRedirectRef.current = true;
+          await router.push("/bookings");
+          try {
+            await clearCart();
+          } catch (err) {
+            console.error("Failed to clear cart after booking:", err);
+          } finally {
+            setTimeout(() => (skipCartRedirectRef.current = false), 1000);
+          }
         }
       } else {
         showToast({
@@ -375,11 +403,11 @@ export default function BookingUserInfoPage() {
         </h2>
 
         {isCartBooking && cart && cart.items.length > 0 && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">
+          <div className="mb-6 p-4 bg-green-50 border border-primary_green/40 rounded-lg">
+            <h3 className="font-semibold text-primary_green mb-2">
               Booking {getCartItemCount()} item(s) from your cart
             </h3>
-            <p className="text-sm text-blue-700">
+            <p className="text-sm text-gray-700">
               Total Amount: RM {getCartTotal().toFixed(2)}
             </p>
           </div>
@@ -401,43 +429,49 @@ export default function BookingUserInfoPage() {
             </div>
           ))}
 
-          {/* Pickup Location - Show for cart or conditional for single booking */}
-          {isCartBooking ? (
-            <div className="w-full">
-              <input
-                name="pickupLocation"
-                value={form.pickupLocation}
-                onChange={handleChange}
-                placeholder="Enter your Hostel/Hotel name and address (optional - can be specified per item)"
-                className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                This will be used as default pickup location for all items
-                unless specified otherwise
-              </p>
-            </div>
-          ) : (
+          {/* Pickup Location - Hide for cart bookings (handled per item), show conditional for single booking */}
+          {!isCartBooking && (
             <>
               {booking?.packageType === "transfer" &&
               booking?.pickupOption === "admin" ? (
-                // Admin-defined pickup location - show as read-only info
+                // Admin-defined pickup location - render as a select control styled in green
                 <div className="w-full">
-                  <div className="p-4 bg-gray-50 border border-primary_green/40 rounded">
+                  <div className="p-4 bg-green-50 border border-primary_green/40 rounded">
                     <h4 className="font-medium text-primary_green mb-2">
                       Pickup Location:
                     </h4>
-                    <div
-                      className="prose max-w-none text-sm text-desc_gray"
-                      dangerouslySetInnerHTML={{
-                        __html: booking.pickupLocations,
-                      }}
-                    />
+                    {/* Render admin-defined pickup options as a select to match add-to-cart flow */}
+                    {booking.pickupLocations ? (
+                      <select
+                        name="pickupLocation"
+                        value={form.pickupLocation}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-primary_green/40 rounded-md focus:outline-none focus:ring-2 focus:ring-primary_green focus:border-transparent"
+                      >
+                        <option value="">Choose a pickup location...</option>
+                        {booking.pickupLocations
+                          .split(",")
+                          .map((loc: string, i: number) => {
+                            // Strip any HTML tags saved in admin content before showing
+                            const stripped = loc.replace(/<[^>]*>/g, "").trim();
+                            return (
+                              <option key={i} value={stripped}>
+                                {stripped}
+                              </option>
+                            );
+                          })}
+                      </select>
+                    ) : (
+                      <div className="text-sm text-desc_gray">
+                        No pickup locations configured
+                      </div>
+                    )}
                   </div>
                   {/* Always show pickup description */}
                   {booking.pickupDescription && (
                     <div className="mt-3">
                       <div
-                        className="prose max-w-none ttext-sm text-gray-600 leading-relaxed"
+                        className="prose max-w-none text-sm text-gray-600 leading-relaxed"
                         dangerouslySetInnerHTML={{
                           __html: booking.pickupDescription,
                         }}
@@ -465,12 +499,12 @@ export default function BookingUserInfoPage() {
                   )}
                   {booking?.pickupLocations && (
                     <div className="mt-2">
-                      <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-                        <h5 className="font-medium text-blue-800 mb-1 text-sm">
+                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
+                        <h5 className="font-medium text-primary_green mb-1 text-sm">
                           Pickup Guidelines:
                         </h5>
                         <div
-                          className="prose max-w-none text-sm text-blue-700"
+                          className="prose max-w-none text-sm text-gray-700"
                           dangerouslySetInnerHTML={{
                             __html: booking.pickupLocations,
                           }}

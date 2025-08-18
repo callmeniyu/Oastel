@@ -30,6 +30,18 @@ export default async function TransferDetailPage({
     console.error("Error fetching transfer by slug:", error);
   }
 
+  // Utility to strip HTML tags
+  const stripHtmlTags = (html: string) => {
+    if (!html) return "";
+    try {
+      const div = document.createElement("div");
+      div.innerHTML = html;
+      return div.textContent || div.innerText || "";
+    } catch (e) {
+      return html;
+    }
+  };
+
   // Get other packages (both transfers and tours)
   let otherPackages: any[] = [];
   try {
@@ -186,12 +198,9 @@ export default async function TransferDetailPage({
                   Pickup Location
                 </h5>
               </div>
-              <div
-                className="prose max-w-none text-sm text-desc_gray mt-2"
-                dangerouslySetInnerHTML={{
-                  __html: transferDetails.details.pickupLocations,
-                }}
-              />
+              <div className="prose max-w-none text-sm text-desc_gray mt-2">
+                {stripHtmlTags(transferDetails.details.pickupLocations)}
+              </div>
             </div>
 
             <div className="bg-white border rounded-md p-4 shadow-sm">

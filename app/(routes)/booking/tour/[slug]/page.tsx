@@ -190,7 +190,7 @@ export default function BookingInfoPage() {
       if (tourDetails?._id && selectedDate) {
         fetchTimeSlots();
       }
-    }, 30000); // 30 seconds
+    }, 60000); // 60 seconds
 
     // Cleanup interval on component unmount or dependency change
     return () => clearInterval(autoRefreshInterval);
@@ -708,6 +708,10 @@ export default function BookingInfoPage() {
         packageType="tour"
         packageId={tourDetails?._id}
         disabled={!selectedDate || !selectedTime}
+        transferDetails={{
+          pickupOption: "user",
+          pickupLocations: "",
+        }}
       />
     </div>
   );
