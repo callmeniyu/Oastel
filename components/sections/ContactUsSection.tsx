@@ -47,7 +47,7 @@ export default function ContactInfo() {
               <SiGmail className="text-2xl md:text-4xl" />
             </div>
             <h4 className="mt-3 font-semibold text-title_black">Gmail</h4>
-            <p className="text-sm text-desc_gray mt-1">hello@hostel.com</p>
+            <p className="text-sm text-desc_gray mt-1">hello@oastel.com</p>
           </div>
         </div>
       </div>

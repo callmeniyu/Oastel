@@ -62,6 +62,43 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  // Open specific tab based on URL fragment (e.g. #mybookings) or ?tab= query param
+  useEffect(() => {
+    const allowed = ["profile", "address", "bookings", "signout", "delete"];
+
+    const applyFromLocation = () => {
+      if (typeof window === "undefined") return;
+      // Prefer hash (fragment)
+      const hash = window.location.hash || "";
+      if (hash) {
+        const raw = hash.replace("#", "");
+        if (raw === "mybookings") {
+          setActiveTab("bookings");
+          return;
+        }
+        if (allowed.includes(raw)) {
+          setActiveTab(raw);
+          return;
+        }
+      }
+
+      // Fallback to query param ?tab=bookings
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get("tab");
+        if (tab && allowed.includes(tab)) {
+          setActiveTab(tab);
+        }
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    applyFromLocation();
+    window.addEventListener("hashchange", applyFromLocation);
+    return () => window.removeEventListener("hashchange", applyFromLocation);
+  }, []);
+
   // Don't render content if not authenticated
   if (!isAuthenticated) {
     return (

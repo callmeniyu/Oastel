@@ -8,15 +8,16 @@ export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
-
   const getErrorMessage = () => {
     console.log("Authentication Error:", error);
-    
+
     switch (error) {
       case "email-already-in-use":
         return "This email is already registered with email/password. Please login with your password instead.";
       case "access_denied":
         return "You denied access to your Google account.";
+      case "server_error":
+        return "We had a problem creating your account. Please try again later or contact support.";
       case "OAuthAccountNotLinked":
         return "This email is already registered with a different provider.";
       default:
@@ -31,7 +32,7 @@ export default function AuthErrorPage() {
       </h1>
       <p className="mb-4">error:{getErrorMessage()}</p>
       <button
-        onClick={() => router.push("/auth/login")}
+        onClick={() => router.push("/auth")}
         className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
       >
         Back to Login

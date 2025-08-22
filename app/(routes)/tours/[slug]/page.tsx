@@ -19,6 +19,7 @@ import { tourApi } from "@/lib/tourApi";
 import { transferApi } from "@/lib/transferApi";
 import { TourType } from "@/lib/types";
 import { resolveImageUrl } from "@/lib/imageUtils";
+import { formatBookedCount } from "@/lib/utils";
 
 export default function TourDetailPage() {
   const params = useParams();
@@ -45,15 +46,30 @@ export default function TourDetailPage() {
           transferApi.getTransfers({ limit: 100 }),
         ]);
 
-        // Combine tours and transfers, excluding current tour
-        const allPackages = [
-          ...allToursResponse.data.filter((tour) => tour.slug !== slug),
-          ...allTransfersResponse.data,
-        ];
+        // Separate tours and transfers, exclude current tour
+        const availableTours = allToursResponse.data.filter(
+          (tour) => tour.slug !== slug
+        );
+        const availableTransfers = allTransfersResponse.data;
 
-        // Shuffle and take 4 packages
-        const shuffledPackages = allPackages.sort(() => Math.random() - 0.5);
-        setOtherTours(shuffledPackages.slice(0, 4));
+        const shuffle = (arr: any[]) =>
+          [...arr].sort(() => Math.random() - 0.5);
+
+        const selectedTours = shuffle(availableTours).slice(0, 2);
+        const selectedTransfers = shuffle(availableTransfers).slice(0, 2);
+
+        // Interleave selections so UX shows mixed packages
+        const combined: any[] = [];
+        for (
+          let i = 0;
+          i < Math.max(selectedTours.length, selectedTransfers.length);
+          i++
+        ) {
+          if (selectedTours[i]) combined.push(selectedTours[i]);
+          if (selectedTransfers[i]) combined.push(selectedTransfers[i]);
+        }
+
+        setOtherTours(combined);
       } catch (err) {
         console.error("Error fetching tour data:", err);
         setError("Failed to load tour details. Please try again later.");
@@ -139,7 +155,7 @@ export default function TourDetailPage() {
               <div className="flex items-center gap-2">
                 <FaBookmark className="text-primary_green inline-block mr-1" />
                 <span className="font-semibold">
-                  {tourDetails.bookedCount} Booked
+                  {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
             </div>
@@ -250,7 +266,7 @@ export default function TourDetailPage() {
               <div className="flex items-center gap-2 mb-2">
                 <FaBookmark className="text-primary_green inline-block mr-1" />
                 <span className="font-semibold text-desc_gray">
-                  {tourDetails.bookedCount} Booked
+                  {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
             </div>
@@ -309,10 +325,8 @@ export default function TourDetailPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {otherTours.map((packageItem, i) =>
-            packageItem.packageType === "transfer" ||
-            packageItem.type === "van" ||
-            packageItem.type === "van + ferry" ||
-            packageItem.type === "private" ? (
+            // Render using explicit packageType if available
+            packageItem.packageType === "transfer" ? (
               <TransferCard key={i} {...packageItem} />
             ) : (
               <TourCard key={i} {...packageItem} />

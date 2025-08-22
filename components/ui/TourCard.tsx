@@ -1,9 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import { MdAccessTimeFilled } from "react-icons/md";
 import { FaBookmark } from "react-icons/fa";
 import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
 import { resolveImageUrl } from "@/lib/imageUtils";
+import { formatBookedCount } from "@/lib/utils";
 
 type TourCardProps = {
   _id: string;
@@ -93,7 +96,7 @@ export default function TourCard({
           </div>
           <div className="flex gap-2 items-center font-semibold">
             <FaBookmark width={30} className="text-primary_green text-md" />
-            <p className="text-sm">{bookedCount} Booked</p>
+            <p className="text-sm">{formatBookedCount(bookedCount)} Booked</p>
           </div>
         </div>
         <div className="flex justify-between items-center mt-2">

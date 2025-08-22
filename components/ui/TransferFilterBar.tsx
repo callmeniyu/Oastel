@@ -225,20 +225,25 @@ export default function TransferFilterBar({
       <div className="border-t pt-4 mb-5">
         <h4 className="font-semibold text-title_black mb-2 text-sm">Price</h4>
         <ul className="space-y-1 text-desc_gray text-sm">
-          {["50–150 RM", "150–250 RM", "250-400 RM", "400-600 RM"].map(
-            (val) => (
-              <li key={val}>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={filters.prices.includes(val)}
-                    onChange={() => handleCheckboxChange("prices", val)}
-                  />
-                  {val}
-                </label>
-              </li>
-            )
-          )}
+          {[
+            "0–50 RM",
+            "50–150 RM",
+            "150–250 RM",
+            "250-400 RM",
+            "400-600 RM",
+            "600–9999 RM",
+          ].map((val) => (
+            <li key={val}>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={filters.prices.includes(val)}
+                  onChange={() => handleCheckboxChange("prices", val)}
+                />
+                {val}
+              </label>
+            </li>
+          ))}
         </ul>
       </div>
 

@@ -27,6 +27,7 @@ export type TourDetailsType = {
     about: string
     itinerary: string
     pickupLocation: string
+    pickupGuidelines?: string
     note: string
     faq: FAQType[]
 }
@@ -84,6 +85,7 @@ export interface TransferType {
     childPrice: number
     minimumPerson: number
     maximumPerson?: number
+    seatCapacity?: number
     times: string[]
     label?: "Recommended" | "Popular" | "Best Value"
     status: "active" | "sold"
@@ -112,6 +114,9 @@ export interface BookingDetailsType {
     pickupLocations: string
     pickupDescription?: string // Add pickup description field
     pickupOption?: "admin" | "user" // Add pickupOption for transfers
+    // For private transfers
+    isVehicleBooking?: boolean
+    vehicleSeatCapacity?: number
 }
 
 export type BlogType = {

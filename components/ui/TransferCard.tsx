@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { MdAccessTimeFilled } from "react-icons/md";
 import { FaBookmark } from "react-icons/fa";
@@ -6,6 +8,7 @@ import { IoFlagSharp } from "react-icons/io5";
 
 import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
+import { formatBookedCount } from "@/lib/utils";
 
 type TransferCardProps = {
   _id?: string;
@@ -99,7 +102,7 @@ export default function TransferCard({
           <div className="flex flex-col justify-between gap-2">
             <div className="flex gap-2 items-center font-semibold">
               <FaBookmark width={30} className="text-primary_green text-md" />
-              <p className="text-sm">{bookedCount} Booked</p>
+              <p className="text-sm">{formatBookedCount(bookedCount)} Booked</p>
             </div>
             <div className="flex gap-2 items-center font-semibold">
               <MdAccessTimeFilled
@@ -118,7 +121,7 @@ export default function TransferCard({
             <h4 className="font-poppins text-xl font-bold">
               {newPrice} RM{" "}
               <span className="text-sm font-light">
-                {type === "private" ? "/group" : "/person"}
+                {type.toLowerCase() === "private" ? "/vehicle" : "/person"}
               </span>
             </h4>
           </div>

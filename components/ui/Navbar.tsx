@@ -241,7 +241,7 @@ export default function Navbar() {
               </li>
               <li>
                 <Link
-                  href="/booking"
+                  href="/profile#mybookings"
                   onClick={closeDropdown}
                   className="block px-4 py-2 hover:bg-gray-100"
                 >

@@ -51,15 +51,29 @@ export default async function TransferDetailPage({
     ]);
 
     if (transfersResponse.success && toursResponse.success) {
-      // Combine transfers and tours, excluding current transfer
-      const allPackages = [
-        ...transfersResponse.data.filter((transfer) => transfer.slug !== slug),
-        ...toursResponse.data,
-      ];
+      // Separate transfers and tours, exclude current transfer
+      const availableTransfers = transfersResponse.data.filter(
+        (t) => t.slug !== slug
+      );
+      const availableTours = toursResponse.data;
 
-      // Shuffle and take 4 packages
-      const shuffledPackages = allPackages.sort(() => Math.random() - 0.5);
-      otherPackages = shuffledPackages.slice(0, 4);
+      const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
+
+      const selectedTransfers = shuffle(availableTransfers).slice(0, 2);
+      const selectedTours = shuffle(availableTours).slice(0, 2);
+
+      // Interleave selections
+      const combined: any[] = [];
+      for (
+        let i = 0;
+        i < Math.max(selectedTransfers.length, selectedTours.length);
+        i++
+      ) {
+        if (selectedTransfers[i]) combined.push(selectedTransfers[i]);
+        if (selectedTours[i]) combined.push(selectedTours[i]);
+      }
+
+      otherPackages = combined;
     }
   } catch (error) {
     console.error("Error fetching other packages:", error);
@@ -104,7 +118,9 @@ export default async function TransferDetailPage({
               </p>
               <h2 className="text-3xl font-extrabold sm:font-bold">
                 RM {transferDetails.newPrice}
-                <span className="">/person</span>
+                <span className="">
+                  {transferDetails.type === "Private" ? "/vehicle" : "/person"}
+                </span>
               </h2>
               <div className="flex items-center gap-2">
                 <FaBookmark className="text-primary_green inline-block mr-1" />
@@ -222,29 +238,34 @@ export default async function TransferDetailPage({
           </div>
         </div>
 
-        {/* ✅ Booking Panel for large screens */}
+        {/* ✅ Booking Panel for large screens (match tours detail UI) */}
         <div className="w-full lg:w-80 shrink-0 hidden lg:block">
-          <div className="mb-6">
-            <p className="text-lg text-gray-400 line-through">
-              RM {transferDetails.oldPrice}
-            </p>
-            <h2 className="text-lg">
-              <h2 className="text-3xl font-bold">
-                RM {transferDetails.newPrice} <span>/person</span>
+          <div className="bg-white border-2 border-primary_green rounded-xl shadow-lg p-6 flex flex-col gap-6">
+            <div>
+              <p className="text-lg text-gray-400 line-through mb-1">
+                RM {transferDetails.oldPrice}
+              </p>
+              <h2 className="text-lg mb-2">
+                <span className="text-4xl font-extrabold">
+                  RM {transferDetails.newPrice}
+                </span>{" "}
+                <span className="text-base font-medium text-desc_gray">
+                  {transferDetails.type === "Private" ? "/vehicle" : "/person"}
+                </span>
               </h2>
-            </h2>
-            <div className="flex items-center gap-2">
-              <FaBookmark className="text-primary_green inline-block mr-1" />
-              <span className="font-semibold">
-                {transferDetails.bookedCount} Booked
-              </span>
+              <div className="flex items-center gap-2 mb-2">
+                <FaBookmark className="text-primary_green inline-block mr-1" />
+                <span className="font-semibold text-desc_gray">
+                  {transferDetails.bookedCount} Booked
+                </span>
+              </div>
             </div>
+            <GreenBtn
+              text="Book Now"
+              action={`/booking/transfer/${transferDetails.slug}`}
+              customStyles="w-full py-4 text-lg font-bold rounded-lg"
+            />
           </div>
-          <GreenBtn
-            text="Book Now"
-            action={`/booking/transfer/${transferDetails.slug}`}
-            customStyles=""
-          />
         </div>
       </div>
 
@@ -292,15 +313,13 @@ export default async function TransferDetailPage({
           <hr className="border-b-2 border-primary_green  w-full  md:flex" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {otherPackages.map((pkg, i) => {
-            // Check if the package has tourPackage array - then it's a tour
-            if (pkg.tourPackage && pkg.tourPackage.length > 0) {
-              return <TourCard key={`tour-${i}`} {...pkg} />;
-            } else {
-              // Otherwise it's a transfer
-              return <TransferCard key={`transfer-${i}`} {...pkg} />;
-            }
-          })}
+          {otherPackages.map((pkg, i) =>
+            pkg.packageType === "transfer" ? (
+              <TransferCard key={`transfer-${i}`} {...pkg} />
+            ) : (
+              <TourCard key={`tour-${i}`} {...pkg} />
+            )
+          )}
         </div>
       </section>
     </div>

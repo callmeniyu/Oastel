@@ -9,6 +9,7 @@ import {
   SlotValidationResult,
 } from "@/lib/slotValidationApi";
 import Confirmation from "@/components/ui/Confirmation";
+import Loader from "@/components/ui/Loader";
 import {
   FiShoppingCart,
   FiClock,
@@ -295,14 +296,7 @@ export default function CartPage() {
   const total = Math.round((subtotal + tax) * 100) / 100;
 
   if (status === "loading" || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary_green mx-auto"></div>
-          <p className="mt-4 text-desc_gray">Loading cart...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!cart || cart.items.length === 0) {

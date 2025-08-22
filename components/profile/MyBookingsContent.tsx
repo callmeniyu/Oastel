@@ -155,7 +155,10 @@ export default function MyBookingsContent() {
   };
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden">
+    <div
+      id="mybookings"
+      className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 overflow-hidden"
+    >
       <div className="flex flex-col md:flex-row">
         {/* Package Image/Icon */}
         <div className="relative h-48 md:h-auto md:w-56 bg-gradient-to-br from-primary_green to-green-600 flex-shrink-0">

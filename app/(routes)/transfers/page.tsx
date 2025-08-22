@@ -6,7 +6,7 @@ import SearchInput from "@/components/ui/SearchInput";
 import TransferCard from "@/components/ui/TransferCard";
 import Lottie from "lottie-react";
 import NotFound from "@/public/images/notfound.json";
-import { IoFilterSharp, IoClose, IoRefresh } from "react-icons/io5";
+import { IoFilterSharp, IoClose } from "react-icons/io5";
 import { transferApi } from "@/lib/transferApi";
 import { TransferType } from "@/lib/types";
 import Image from "next/image";
@@ -68,6 +68,21 @@ export default function Transfers() {
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
+  const [showFilterTip, setShowFilterTip] = useState(false);
+
+  // Sort helper: labeled items come first, then ascending by newPrice
+  const sortByLabelAndPrice = <
+    T extends { label?: string | null; newPrice?: number }
+  >(
+    items: T[]
+  ) => {
+    return [...items].sort((a, b) => {
+      const aHas = !!a.label;
+      const bHas = !!b.label;
+      if (aHas !== bHas) return aHas ? -1 : 1;
+      return (a.newPrice || 0) - (b.newPrice || 0);
+    });
+  };
 
   // Live search effect - trigger on every character input
   useEffect(() => {
@@ -87,7 +102,7 @@ export default function Transfers() {
           transfer.desc.toLowerCase().includes(searchLower)
         );
       });
-      setFilteredTransfers(searchResults);
+      setFilteredTransfers(sortByLabelAndPrice(searchResults));
       setFiltersApplied(true); // Show as "Your Results" when searching
     }
   }, [searchTerm, allTransfers]);
@@ -98,8 +113,9 @@ export default function Transfers() {
       try {
         setLoading(true);
         const response = await transferApi.getTransfers({ limit: 100 });
-        setAllTransfers(response.data);
-        setFilteredTransfers(response.data);
+        const sorted = sortByLabelAndPrice(response.data);
+        setAllTransfers(sorted);
+        setFilteredTransfers(sorted);
         setError(null);
       } catch (err) {
         console.error("Error fetching transfers:", err);
@@ -180,7 +196,7 @@ export default function Transfers() {
       return matchFrom && matchTo && matchTransport && matchPrice;
     });
 
-    setFilteredTransfers(result);
+    setFilteredTransfers(sortByLabelAndPrice(result));
 
     // Check if any filters are actually active
     const hasActiveFilters =
@@ -201,33 +217,9 @@ export default function Transfers() {
       prices: [],
     });
     setSearchTerm("");
-    setFilteredTransfers(allTransfers); // Reset to show all current transfers
+    setFilteredTransfers(sortByLabelAndPrice(allTransfers)); // Reset to show all current transfers (sorted)
     setFiltersApplied(false);
     setIsFilterOpen(false);
-  };
-
-  const handleRefresh = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await transferApi.getTransfers({ limit: 100 });
-      setAllTransfers(response.data);
-      setFilteredTransfers(response.data);
-      // Reset filters and search when refreshing
-      setFilters({
-        from: "",
-        to: "",
-        transports: [],
-        prices: [],
-      });
-      setSearchTerm("");
-      setFiltersApplied(false);
-    } catch (err) {
-      console.error("Error refreshing transfers:", err);
-      setError("Failed to refresh transfers. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -239,6 +231,33 @@ export default function Transfers() {
       document.documentElement.style.scrollBehavior = "auto";
     };
   }, [isFilterOpen]);
+
+  // show the mobile filter tip once unless dismissed
+  useEffect(() => {
+    try {
+      const dismissed =
+        localStorage.getItem("transferFilterTipDismissed") === "true";
+      setShowFilterTip(!dismissed);
+    } catch (e) {
+      setShowFilterTip(true);
+    }
+  }, []);
+
+  const dismissFilterTip = () => {
+    try {
+      localStorage.setItem("transferFilterTipDismissed", "true");
+    } catch (e) {}
+    setShowFilterTip(false);
+  };
+
+  // auto-hide tip after 30 seconds when visible
+  useEffect(() => {
+    if (!showFilterTip || isFilterOpen) return;
+    const id = window.setTimeout(() => {
+      dismissFilterTip();
+    }, 30000); // 30 seconds
+    return () => window.clearTimeout(id);
+  }, [showFilterTip, isFilterOpen]);
 
   return (
     <div>
@@ -322,26 +341,8 @@ export default function Transfers() {
               placeholder="Search for transfers"
             />
 
-            {/* Desktop refresh button */}
-            <button
-              className="hidden sm:flex items-center gap-2 text-sm bg-primary_green text-white px-4 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
-              onClick={handleRefresh}
-              disabled={loading}
-            >
-              <IoRefresh className={loading ? "animate-spin" : ""} />
-              {loading ? "Refreshing..." : "Refresh"}
-            </button>
-
-            {/* Mobile buttons */}
-            <div className="sm:hidden flex gap-2">
-              <button
-                className="flex items-center justify-center w-10 h-10 bg-primary_green text-white rounded-md hover:bg-primary_green/80 transition-colors"
-                onClick={handleRefresh}
-                disabled={loading}
-                title="Refresh transfers"
-              >
-                <IoRefresh className={loading ? "animate-spin" : ""} />
-              </button>
+            {/* Mobile/Desktop filter button */}
+            <div className="sm:hidden flex gap-2 relative">
               <button
                 className="flex items-center gap-1 text-sm bg-primary_green text-white px-3 py-2 rounded-md hover:bg-primary_green/80 transition-colors"
                 onClick={() =>
@@ -351,6 +352,34 @@ export default function Transfers() {
                 {filtersApplied ? <IoClose /> : <IoFilterSharp />}{" "}
                 {filtersApplied ? "Clear" : "Filters"}
               </button>
+
+              {/* Mobile-only tip dialog pointing to the Filters button */}
+              {showFilterTip && !isFilterOpen && (
+                <div className="absolute right-1 -top-20 z-50 sm:hidden">
+                  <div className="relative">
+                    <div className="bg-primary_green text-white p-3 rounded-lg shadow-xl w-72 transform transition duration-300 ease-out translate-y-2 opacity-100">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="text-sm">
+                          Tip: Choose where you want to go using the Filters for
+                          faster results.
+                        </div>
+                        <button
+                          onClick={dismissFilterTip}
+                          aria-label="Close tip"
+                          className="ml-2 text-white/90 hover:text-white text-sm"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <div className="mt-2 text-xs text-white/90">
+                        Tap the Filters button below.
+                      </div>
+                    </div>
+                    {/* small downward arrow */}
+                    <div className="absolute right-2 transform -translate-x-1/2 -bottom-2 w-3 h-3 rotate-45 bg-primary_green shadow-xl" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -446,8 +475,8 @@ export default function Transfers() {
                           className="w-40 h-40 mx-auto"
                         />
                         <p>
-                          No transfers match your filters. Try changing the
-                          options.
+                          Currently, transfers to this location are not
+                          available. Please select an alternative option.
                         </p>
                       </div>
                     ) : (

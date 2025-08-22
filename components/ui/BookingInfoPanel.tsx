@@ -21,6 +21,8 @@ type Props = {
   children: number;
   adultPrice: number;
   childPrice: number;
+  isVehicleBooking?: boolean;
+  vehicleSeatCapacity?: number;
   action?: string[];
   onClick?: () => void;
   onAddToCart?: () => void;
@@ -53,6 +55,8 @@ export default function BookingInfoPanel({
   packageId,
   disabled = false,
   transferDetails,
+  isVehicleBooking,
+  vehicleSeatCapacity,
 }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -163,7 +167,11 @@ export default function BookingInfoPanel({
         <div className="text-sm mb-4 flex justify-between">
           <h6 className="font-semibold">Persons</h6>
           <div className="text-desc_gray space-y-1 flex flex-col items-end">
-            {type === "private" ? (
+            {isVehicleBooking ? (
+              <div>
+                <p>Vehicle booking • Seats: {vehicleSeatCapacity || "N/A"}</p>
+              </div>
+            ) : type === "private" ? (
               <div>
                 <p>{adults}x Persons</p>
               </div>

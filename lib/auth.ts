@@ -61,22 +61,29 @@ export const authOptions = {
 
                 if (!existingUser) {
                     // Create new user with complete UserType schema
-                    await User.create({
-                        name: profile?.name,
-                        email: profile?.email,
-                        passwordHash: "",
-                        image: profile?.picture || "",
-                        location: "",
-                        bio: "",
-                        address: {
-                            whatsapp: "",
-                            phone: "",
-                            pickupAddresses: [],
-                        },
-                        bookings: [],
-                        provider: "google",
-                        googleId: profile?.sub,
-                    })
+                    try {
+                        await User.create({
+                            name: profile?.name,
+                            email: profile?.email,
+                            passwordHash: "",
+                            image: profile?.picture || "",
+                            location: "",
+                            bio: "",
+                            address: {
+                                whatsapp: "",
+                                phone: "",
+                                pickupAddresses: [],
+                            },
+                            // Schema expects a string for bookings (use empty string as default)
+                            bookings: "",
+                            provider: "google",
+                            googleId: profile?.sub,
+                        })
+                    } catch (err) {
+                        console.error("Failed to create user on Google sign-in:", err)
+                        // Redirect to a clearer error page for server-side failures
+                        return "/auth/error?error=server_error"
+                    }
                 } else if (existingUser.provider !== "google") {
                     return "/auth/error?error=email-already-in-use"
                 }
@@ -108,6 +115,6 @@ export const authOptions = {
     secret: process.env.NEXTAUTH_SECRET,
 }
 
-const handler = NextAuth(authOptions)
+const handler = NextAuth(authOptions as any)
 
 export { handler as GET, handler as POST }

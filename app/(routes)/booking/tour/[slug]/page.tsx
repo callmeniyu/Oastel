@@ -391,7 +391,10 @@ export default function BookingInfoPage() {
       packageType: "tour",
       image: tourDetails.image || "",
       transport: tourDetails.type === "private" ? "Private" : undefined,
-      pickupLocations: tourDetails.details.pickupLocation || "",
+      pickupLocations:
+        tourDetails.details.pickupGuidelines ||
+        tourDetails.details.pickupLocation ||
+        "",
     });
     router.push("/booking/user-info");
   };

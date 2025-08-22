@@ -249,8 +249,9 @@ export default function BookingInfoPage() {
       time: selectedTime,
       type: transferDetails.type || "Private transfer",
       duration: transferDetails.duration || "4-6 hours",
-      adults,
-      children,
+      // For private transfers, booking is per-vehicle. Still store adults/children for reference but set seatsRequested to seatCapacity.
+      adults: transferDetails.type === "Private" ? 0 : adults,
+      children: transferDetails.type === "Private" ? 0 : children,
       adultPrice: transferDetails.newPrice || 0,
       childPrice: transferDetails.childPrice || 0,
       totalPrice: totalPrice,
@@ -259,6 +260,11 @@ export default function BookingInfoPage() {
       pickupDescription: transferDetails.details.note || "", // Add pickup description
       pickupOption: transferDetails.details.pickupOption || "user", // Include pickup option
       packageType: "transfer",
+      isVehicleBooking: transferDetails.type === "Private",
+      vehicleSeatCapacity:
+        transferDetails?.seatCapacity ||
+        transferDetails?.maximumPerson ||
+        undefined,
     });
     router.push("/booking/user-info");
   };
@@ -384,107 +390,127 @@ export default function BookingInfoPage() {
 
         <div className="rounded-lg shadow-md p-4 bg-white">
           <h3 className="text-primary_green text-xl font-bold mb-2">
-            No. of Guests
+            {transferDetails?.type === "Private"
+              ? "Private Vehicle"
+              : "No. of Guests"}
           </h3>
 
           <div className="space-y-6 border p-3 rounded-lg my-4">
-            {[
-              {
-                label: "Adults",
-                desc: `Minimum: ${transferDetails?.minimumPerson} person per group.`,
-                value: adults,
-                onIncrement: () => updateAdults(adults + 1),
-                onDecrement: () => updateAdults(adults - 1),
-                disableDecrement:
-                  adults <= (transferDetails?.minimumPerson || 1),
-                disableIncrement:
-                  totalGuests >= (transferDetails?.maximumPerson || Infinity),
-                price: transferDetails?.newPrice || 0,
-              },
-              ...(transferDetails?.type !== "Private"
-                ? [
-                    {
-                      label: "Children",
-                      desc: "Ages 3-11. Children under 3 travel free.",
-                      value: children,
-                      onIncrement: () => updateChildren(children + 1),
-                      onDecrement: () => updateChildren(children - 1),
-                      disableDecrement:
-                        children <= 0 ||
-                        adults + children <=
-                          (transferDetails?.minimumPerson || 1),
-                      disableIncrement:
-                        totalGuests >=
-                        (transferDetails?.maximumPerson || Infinity),
-                      price: transferDetails?.childPrice || 0,
-                    },
-                  ]
-                : []),
-            ].map(
-              ({
-                label,
-                value,
-                price,
-                desc,
-                onIncrement,
-                onDecrement,
-                disableIncrement,
-                disableDecrement,
-              }) => (
-                <div
-                  key={label}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold">
-                      {label}{" "}
-                      <span className="text-sm text-desc_gray">
-                        (RM {price}{" "}
-                        {transferDetails?.type === "Private"
-                          ? "/group"
-                          : "/person"}
-                        )
-                      </span>
-                    </p>
-                    <div className="space-y-1 mt-1">
-                      <p className="text-xs text-desc_gray font-light">
-                        {desc}
+            {transferDetails?.type === "Private" ? (
+              <div className="flex flex-col gap-2">
+                <p className="font-semibold">Vehicle Seats</p>
+                <p className="text-sm text-desc_gray">
+                  {transferDetails?.seatCapacity ||
+                    transferDetails?.maximumPerson ||
+                    "N/A"}{" "}
+                  seats
+                </p>
+                <p className="text-sm text-desc_gray">
+                  Price shown is for the whole vehicle (per vehicle).
+                </p>
+              </div>
+            ) : (
+              [
+                {
+                  label: "Adults",
+                  desc: `Minimum: ${transferDetails?.minimumPerson} person per group.`,
+                  value: adults,
+                  onIncrement: () => updateAdults(adults + 1),
+                  onDecrement: () => updateAdults(adults - 1),
+                  disableDecrement:
+                    adults <= (transferDetails?.minimumPerson || 1),
+                  disableIncrement:
+                    totalGuests >= (transferDetails?.maximumPerson || Infinity),
+                  price: transferDetails?.newPrice || 0,
+                },
+                ...(transferDetails &&
+                String(transferDetails.type) !== "Private"
+                  ? [
+                      {
+                        label: "Children",
+                        desc: "Ages 3-11. Children under 3 travel free.",
+                        value: children,
+                        onIncrement: () => updateChildren(children + 1),
+                        onDecrement: () => updateChildren(children - 1),
+                        disableDecrement:
+                          children <= 0 ||
+                          adults + children <=
+                            (transferDetails?.minimumPerson || 1),
+                        disableIncrement:
+                          totalGuests >=
+                          (transferDetails?.maximumPerson || Infinity),
+                        price: transferDetails?.childPrice || 0,
+                      },
+                    ]
+                  : []),
+              ].map(
+                ({
+                  label,
+                  value,
+                  price,
+                  desc,
+                  onIncrement,
+                  onDecrement,
+                  disableIncrement,
+                  disableDecrement,
+                }) => (
+                  <div
+                    key={label}
+                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold">
+                        {label}{" "}
+                        <span className="text-sm text-desc_gray">
+                          (RM {price}{" "}
+                          {transferDetails?.type === "Private"
+                            ? "/vehicle"
+                            : "/person"}
+                          )
+                        </span>
                       </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
-                    <div className="flex items-center gap-2 border rounded-full">
-                      <button
-                        onClick={onDecrement}
-                        disabled={disableDecrement}
-                        className={`px-3 py-1.5 rounded-l-xl text-lg ${
-                          disableDecrement
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                            : "hover:bg-primary_green hover:text-white"
-                        }`}
-                      >
-                        -
-                      </button>
-                      <span className="min-w-[24px] text-center">{value}</span>
-                      <button
-                        onClick={onIncrement}
-                        disabled={disableIncrement}
-                        className={`px-3 py-1.5 rounded-r-xl text-lg ${
-                          disableIncrement
-                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                            : "hover:bg-primary_green hover:text-white"
-                        }`}
-                      >
-                        +
-                      </button>
+                      <div className="space-y-1 mt-1">
+                        <p className="text-xs text-desc_gray font-light">
+                          {desc}
+                        </p>
+                      </div>
                     </div>
 
-                    <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                      RM {value * price}
-                    </span>
+                    <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
+                      <div className="flex items-center gap-2 border rounded-full">
+                        <button
+                          onClick={onDecrement}
+                          disabled={disableDecrement}
+                          className={`px-3 py-1.5 rounded-l-xl text-lg ${
+                            disableDecrement
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "hover:bg-primary_green hover:text-white"
+                          }`}
+                        >
+                          -
+                        </button>
+                        <span className="min-w-[24px] text-center">
+                          {value}
+                        </span>
+                        <button
+                          onClick={onIncrement}
+                          disabled={disableIncrement}
+                          className={`px-3 py-1.5 rounded-r-xl text-lg ${
+                            disableIncrement
+                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                              : "hover:bg-primary_green hover:text-white"
+                          }`}
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <span className="font-semibold text-primary_green min-w-[80px] text-right">
+                        RM {value * price}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )
               )
             )}
           </div>
@@ -513,6 +539,10 @@ export default function BookingInfoPage() {
                 pickupLocations: transferDetails.details.pickupLocations || "",
               }
             : undefined
+        }
+        isVehicleBooking={transferDetails?.type === "Private"}
+        vehicleSeatCapacity={
+          transferDetails?.seatCapacity || transferDetails?.maximumPerson
         }
       />
     </div>
