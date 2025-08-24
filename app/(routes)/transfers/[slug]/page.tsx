@@ -33,10 +33,22 @@ export default async function TransferDetailPage({
   // Utility to strip HTML tags
   const stripHtmlTags = (html: string) => {
     if (!html) return "";
+    // If running in a browser, prefer the DOM parser for accuracy
+    if (typeof document !== "undefined") {
+      try {
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        return (div.textContent || div.innerText || "").trim();
+      } catch (e) {
+        // fall through to regex fallback
+      }
+    }
+    // Server-safe fallback: remove tags via regex and collapse whitespace
     try {
-      const div = document.createElement("div");
-      div.innerHTML = html;
-      return div.textContent || div.innerText || "";
+      return html
+        .replace(/<[^>]*>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
     } catch (e) {
       return html;
     }
@@ -218,6 +230,22 @@ export default async function TransferDetailPage({
                 {stripHtmlTags(transferDetails.details.pickupLocations)}
               </div>
             </div>
+
+            {transferDetails.details.dropOffLocations && (
+              <div className="bg-white border rounded-md p-4 shadow-sm">
+                <div className="flex gap-2 items-center mb-2">
+                  <div className="p-0.5 rounded-full bg-primary_green">
+                    <RiMapPinLine className="text-lg text-white" />
+                  </div>
+                  <h5 className="font-semibold text-primary_green">
+                    Drop-off Location
+                  </h5>
+                </div>
+                <div className="prose max-w-none text-sm text-desc_gray mt-2">
+                  {stripHtmlTags(transferDetails.details.dropOffLocations)}
+                </div>
+              </div>
+            )}
 
             <div className="bg-white border rounded-md p-4 shadow-sm">
               <div className="flex gap-2 items-center mb-2">

@@ -32,7 +32,7 @@ export default function TransferFilterBar({
 }: Props) {
   const [fromDropdownOpen, setFromDropdownOpen] = useState(false);
   const [toDropdownOpen, setToDropdownOpen] = useState(false);
-  const [vehicles, setVehicles] = useState<string[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
   const fromDropdownRef = useRef<HTMLDivElement>(null);
   const toDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,16 +52,17 @@ export default function TransferFilterBar({
     "Kuala Lumpur",
   ];
 
-  // Fetch available vehicles for private transfers
+  // Fetch canonical vehicles list (name, seats, units) for private transfers
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/transfers/vehicles`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles`
         );
         const data = await response.json();
         if (data.success) {
-          setVehicles(data.data);
+          // data.data is expected to be an array of vehicle objects
+          setVehicles(data.data || []);
         }
       } catch (error) {
         console.error("Error fetching vehicles:", error);
@@ -94,7 +95,8 @@ export default function TransferFilterBar({
   const transportTypes = [
     "Shared Mini Van",
     "Shared Van + Ferry",
-    ...vehicles.map((vehicle) => `Private - ${vehicle}`),
+    // use vehicle.name when available
+    ...vehicles.map((vehicle) => `Private - ${vehicle.name || vehicle}`),
   ];
 
   const handleCheckboxChange = (

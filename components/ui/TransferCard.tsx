@@ -58,6 +58,14 @@ export default function TransferCard({
         return "bg-gray-500 text-white";
     }
   };
+
+  // Handle image source with fallback
+  const getImageSrc = (imageSrc: string) => {
+    if (!imageSrc || imageSrc.trim() === "") {
+      return "/images/transfer-main.jpg";
+    }
+    return imageSrc;
+  };
   return (
     <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between relative">
       {/* Label Badge */}
@@ -71,11 +79,18 @@ export default function TransferCard({
         </div>
       )}
       <Image
-        src={image}
+        src={getImageSrc(image)}
         alt={title}
         width={400}
         height={400}
         className="h-48 w-full object-cover rounded-t-lg"
+        onError={(e) => {
+          // Fallback to placeholder if image fails to load
+          const target = e.target as HTMLImageElement;
+          if (target.src !== "/images/transfer-main.jpg") {
+            target.src = "/images/transfer-main.jpg";
+          }
+        }}
       />
       <div className="p-4 flex flex-col justify-between gap-2 self-start">
         <h3 className="text-primary_green font-semibold font-poppins text-base">
@@ -85,7 +100,6 @@ export default function TransferCard({
           {tags.map((tag, i) => (
             <Tag key={i} tag={tag} />
           ))}
-          {type.toLowerCase() === "private" && vehicle && <Tag tag={vehicle} />}
         </div>
         <p className="text-desc_gray text-sm font-poppins">{desc}</p>
         <div className="flex justify-between">

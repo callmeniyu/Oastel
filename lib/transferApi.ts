@@ -46,7 +46,35 @@ export const transferApi = {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
 
-            return await response.json()
+            const json = await response.json()
+
+            // Try to normalize transfer.vehicle values using canonical vehicles list
+            try {
+                const vehiclesRes = await fetch(`${API_BASE_URL}/api/vehicles`)
+                if (vehiclesRes.ok) {
+                    const vehiclesJson = await vehiclesRes.json()
+                    const vehicles = vehiclesJson?.data || []
+                    if (Array.isArray(json?.data) && vehicles.length > 0) {
+                        json.data = json.data.map((t: any) => {
+                            if (!t) return t
+                            const v = t.vehicle
+                            if (typeof v === "string") {
+                                // find by _id match
+                                const matched = vehicles.find((veh: any) => veh._id === v)
+                                if (matched && matched.name) {
+                                    return { ...t, vehicle: matched.name }
+                                }
+                            }
+                            return t
+                        })
+                    }
+                }
+            } catch (e) {
+                // ignore and return original data
+                console.error("Error normalizing transfer vehicles:", e)
+            }
+
+            return json
         } catch (error) {
             console.error("Error fetching transfers:", error)
             throw error
@@ -62,7 +90,24 @@ export const transferApi = {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
 
-            return await response.json()
+            const json = await response.json()
+
+            // normalize vehicle if it matches a vehicle _id
+            try {
+                const vehiclesRes = await fetch(`${API_BASE_URL}/api/vehicles`)
+                if (vehiclesRes.ok) {
+                    const vehiclesJson = await vehiclesRes.json()
+                    const vehicles = vehiclesJson?.data || []
+                    if (json?.data && typeof json.data.vehicle === "string") {
+                        const matched = vehicles.find((veh: any) => veh._id === json.data.vehicle)
+                        if (matched && matched.name) json.data.vehicle = matched.name
+                    }
+                }
+            } catch (e) {
+                console.error("Error normalizing transfer vehicle:", e)
+            }
+
+            return json
         } catch (error) {
             console.error("Error fetching transfer:", error)
             throw error
@@ -78,7 +123,24 @@ export const transferApi = {
                 throw new Error(`HTTP error! status: ${response.status}`)
             }
 
-            return await response.json()
+            const json = await response.json()
+
+            // normalize vehicle if it matches a vehicle _id
+            try {
+                const vehiclesRes = await fetch(`${API_BASE_URL}/api/vehicles`)
+                if (vehiclesRes.ok) {
+                    const vehiclesJson = await vehiclesRes.json()
+                    const vehicles = vehiclesJson?.data || []
+                    if (json?.data && typeof json.data.vehicle === "string") {
+                        const matched = vehicles.find((veh: any) => veh._id === json.data.vehicle)
+                        if (matched && matched.name) json.data.vehicle = matched.name
+                    }
+                }
+            } catch (e) {
+                console.error("Error normalizing transfer vehicle:", e)
+            }
+
+            return json
         } catch (error) {
             console.error("Error fetching transfer:", error)
             throw error

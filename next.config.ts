@@ -49,6 +49,11 @@ const nextConfig: NextConfig = {
                 hostname: "res.cloudinary.com",
                 pathname: "/**",
             },
+            {
+                protocol: "https",
+                hostname: "example.com",
+                pathname: "/**",
+            },
         ],
         // Allow blob URLs for image previews
         dangerouslyAllowSVG: true,

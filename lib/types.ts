@@ -62,6 +62,7 @@ export interface TransferDetails {
     itinerary: string
     pickupOption: "admin" | "user"
     pickupLocations: string
+    dropOffLocations?: string
     note?: string
     faq: FAQType[]
 }
