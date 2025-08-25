@@ -210,7 +210,7 @@ export default async function TransferDetailPage({
                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
               </div>
               <div
-                className="prose max-w-none text-sm text-desc_gray mt-2"
+                className="text-sm text-desc_gray leading-6 space-y-1 mt-2"
                 dangerouslySetInnerHTML={{
                   __html: transferDetails.details.itinerary,
                 }}

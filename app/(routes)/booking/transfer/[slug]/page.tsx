@@ -428,7 +428,7 @@ export default function BookingInfoPage() {
                   ? [
                       {
                         label: "Children",
-                        desc: "Ages 3-11. Children under 3 travel free.",
+                        desc: "Age between 3 to 7 years. Child seats are not provided",
                         value: children,
                         onIncrement: () => updateChildren(children + 1),
                         onDecrement: () => updateChildren(children - 1),

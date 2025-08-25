@@ -81,35 +81,147 @@ export default function BookingConfirmationPage() {
     try {
       setIsGeneratingPDF(true);
 
-      const canvas = await html2canvas(confirmationRef.current, {
-        scale: 2,
+      // A4 size in mm
+      const pdfWidthMm = 210;
+      const pdfHeightMm = 297;
+
+      // Choose a baseline DPI for px/mm conversion. 96 is common in browsers.
+      const dpi = 96;
+      const pxPerMm = dpi / 25.4; // px per mm
+
+      // Compute target pixel width for A4 at chosen DPI, minus small page padding
+      const pagePaddingMm = 12; // mm
+      const targetPxWidth = Math.round(
+        (pdfWidthMm - pagePaddingMm * 2) * pxPerMm
+      );
+
+      // Create offscreen wrapper forced to A4 pixel width so html2canvas captures consistent layout
+      const wrapper = document.createElement("div");
+      wrapper.style.width = `${targetPxWidth}px`;
+      wrapper.style.boxSizing = "border-box";
+      wrapper.style.padding = "0";
+      wrapper.style.background = "#ffffff";
+      wrapper.style.fontFamily = "Poppins, Arial, Helvetica, sans-serif";
+      wrapper.style.position = "fixed";
+      wrapper.style.left = `0`;
+      wrapper.style.top = `-99999px`;
+
+      const clone = confirmationRef.current.cloneNode(true) as HTMLElement;
+      // Ensure cloned content stretches to wrapper width
+      clone.style.width = "100%";
+      clone.style.boxSizing = "border-box";
+
+      wrapper.appendChild(clone);
+      document.body.appendChild(wrapper);
+
+      // Compute scale so final canvas width maps cleanly to targetPxWidth at higher resolution
+      // We'll request a canvas that is 2x device px to improve print quality
+      const scale = 2;
+
+      const canvas = await html2canvas(wrapper, {
+        scale,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
       });
 
+      // Cleanup
+      document.body.removeChild(wrapper);
+
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
 
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 295; // A4 height in mm
+      // Convert canvas px to mm at our chosen dpi*scale
+      const pxToMm = (px: number) => (px / (dpi * scale)) * 25.4;
 
-      const imgProps = {
-        width: pdfWidth,
-        height: (canvas.height * pdfWidth) / canvas.width,
-      };
+      const imgWidthMm = pxToMm(canvas.width);
+      const imgHeightMm = pxToMm(canvas.height);
 
-      if (imgProps.height > pdfHeight) {
-        imgProps.width = (canvas.width * pdfHeight) / canvas.height;
-        imgProps.height = pdfHeight;
+      // Try to fit everything on a single page by scaling down if possible
+      const maxImgWidthMm = pdfWidthMm - pagePaddingMm * 2;
+      const fitScaleVert = pdfHeightMm / imgHeightMm;
+      const fitScaleWidth = maxImgWidthMm / imgWidthMm;
+      const fitScale = Math.min(fitScaleVert, fitScaleWidth, 1);
+      const minAllowedScale = 0.6; // don't shrink below this to keep readability
+
+      if (fitScale >= 1 || fitScale >= minAllowedScale) {
+        // Create a scaled canvas to represent the whole page if scaling helps
+        const scaleToUse = Math.min(fitScale, 1);
+        const sCanvas = document.createElement("canvas");
+        sCanvas.width = Math.round(canvas.width * scaleToUse);
+        sCanvas.height = Math.round(canvas.height * scaleToUse);
+        const sCtx = sCanvas.getContext("2d");
+        if (!sCtx) throw new Error("Canvas context not available");
+        sCtx.fillStyle = "#ffffff";
+        sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+        sCtx.drawImage(
+          canvas,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+          0,
+          0,
+          sCanvas.width,
+          sCanvas.height
+        );
+
+        const pageImgData = sCanvas.toDataURL("image/png");
+        const pageImgWidthMm = pxToMm(sCanvas.width);
+        const pageImgHeightMm = pxToMm(sCanvas.height);
+        const x = (pdfWidthMm - pageImgWidthMm) / 2;
+        const y = (pdfHeightMm - pageImgHeightMm) / 2;
+        pdf.addImage(pageImgData, "PNG", x, y, pageImgWidthMm, pageImgHeightMm);
+        pdf.save(`booking-confirmation-${booking._id}.pdf`);
+      } else {
+        // Fallback: paginate into multiple pages as before
+        const pages = Math.ceil(imgHeightMm / pdfHeightMm);
+
+        for (let i = 0; i < pages; i++) {
+          const sY = (i * pdfHeightMm * (dpi * scale)) / 25.4; // source y in px on canvas
+          const pageCanvas = document.createElement("canvas");
+          const pagePxWidth = canvas.width;
+          const pagePxHeight = Math.min(
+            canvas.height - sY,
+            Math.round((pdfHeightMm * (dpi * scale)) / 25.4)
+          );
+          pageCanvas.width = pagePxWidth;
+          pageCanvas.height = pagePxHeight;
+          const ctx = pageCanvas.getContext("2d");
+          if (!ctx) throw new Error("Canvas context not available");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+          ctx.drawImage(
+            canvas,
+            0,
+            sY,
+            pageCanvas.width,
+            pageCanvas.height,
+            0,
+            0,
+            pageCanvas.width,
+            pageCanvas.height
+          );
+
+          const pageImgData = pageCanvas.toDataURL("image/png");
+          const pageImgHeightMm = pxToMm(pageCanvas.height);
+          const pageImgWidthMm = pxToMm(pageCanvas.width);
+          const x = (pdfWidthMm - pageImgWidthMm) / 2;
+          const y = 0;
+
+          pdf.addImage(
+            pageImgData,
+            "PNG",
+            x,
+            y,
+            pageImgWidthMm,
+            pageImgHeightMm
+          );
+          if (i < pages - 1) pdf.addPage();
+        }
+
+        pdf.save(`booking-confirmation-${booking._id}.pdf`);
       }
-
-      const x = (pdfWidth - imgProps.width) / 2;
-      const y = (pdfHeight - imgProps.height) / 2;
-
-      pdf.addImage(imgData, "PNG", x, y, imgProps.width, imgProps.height);
-
-      pdf.save(`booking-confirmation-${booking._id}.pdf`);
 
       showToast({
         type: "success",
@@ -275,24 +387,42 @@ export default function BookingConfirmationPage() {
         </div>
 
         {/* Total */}
-        <div className="bg-primary_green/10 rounded-lg p-6 mb-6 flex justify-between">
-          <h3 className="text-xl font-semibold">Total Amount</h3>
-          <p className="text-2xl font-bold text-primary_green">
-            RM {booking.total.toFixed(2)}
-          </p>
+        <div className="bg-primary_green/10 rounded-lg p-6 mb-6 flex justify-between items-center">
+          <div>
+            <h3 className="text-xl font-semibold">Total Amount</h3>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-primary_green">
+              RM {booking.total.toFixed(2)}
+            </p>
+            <p className="text-xs text-gray-600">Paid online</p>
+          </div>
         </div>
 
         {/* Important Notes */}
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6">
           <h3 className="text-lg font-semibold mb-2">Important Information:</h3>
           <ul className="list-disc list-inside text-gray-700 space-y-1">
-            <li>Please arrive 15 minutes before each scheduled time</li>
             <li>
-              Bring a valid ID and this confirmation email for each booking
+              Be ready at your hotel’s main gate 5 minutes before pick-up.
             </li>
-            <li>Each booking may have different pickup locations and times</li>
-            <li>For any changes, contact us at least 24 hours in advance</li>
-            <li>Weather conditions may affect outdoor activities</li>
+            <li>
+              No child seats are available. Children must always be with an
+              adult.
+            </li>
+            <li>Pick-up times and locations may vary for each booking.</li>
+            <li>
+              Cancellation Policy:
+              <ul className="list-disc list-inside ml-5 text-gray-700 space-y-1 mt-1">
+                <li>Cancel at least 72 hours in advance for a full refund.</li>
+                <li>
+                  No refund, cancellation, or date change within 72 hours.
+                </li>
+              </ul>
+            </li>
+            <li>Bring enough cash for entrance fees and food.</li>
+            <li>Luggage and large backpacks cannot be brought on the tour.</li>
+            <li>Views depend on the weather and cannot be guaranteed.</li>
           </ul>
         </div>
 

@@ -204,7 +204,7 @@ export default function TourDetailPage() {
                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
               </div>
               <div
-                className="prose max-w-none text-sm text-desc_gray"
+                className="text-sm text-desc_gray leading-6 space-y-1"
                 dangerouslySetInnerHTML={{
                   __html: tourDetails.details.itinerary,
                 }}

@@ -323,15 +323,6 @@ export default function BookingInfoPage() {
       return;
     }
 
-    if (!selectedTime) {
-      showToast({
-        type: "error",
-        title: "Time Required",
-        message: "Please select a time slot for your booking",
-      });
-      return;
-    }
-
     const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
     if (!selectedSlot) {
       showToast({
@@ -589,7 +580,9 @@ export default function BookingInfoPage() {
                   ? [
                       {
                         label: "Child",
-                        desc: ["Age between 3 to 7 years"],
+                        desc: [
+                          "Age between 3 to 7 years. Child seats are not provided",
+                        ],
                         value: children,
                         onIncrement: () => updateChildren(children + 1),
                         onDecrement: () => updateChildren(children - 1),
@@ -621,7 +614,9 @@ export default function BookingInfoPage() {
                       <p className="font-semibold">
                         {label}{" "}
                         <span className="text-sm text-desc_gray">
-                          (RM {price} {label === "Group" && "for 8 persons"})
+                          {label === "Group"
+                            ? "Group (Price for entire group (1-8 members))"
+                            : `(RM ${price})`}
                         </span>
                       </p>
                       <div className="space-y-1 mt-1">
