@@ -289,8 +289,11 @@ export default function BookingUserInfoPage() {
         packageId: booking.packageId,
         date: booking.date,
         time: booking.time,
-        adults: booking.adults,
+        // For private (vehicle) bookings, send adults=1 to satisfy older server validation
+        adults: booking.isVehicleBooking ? 1 : booking.adults,
         children: booking.children,
+        // flag to indicate this is a per-vehicle booking (private transfer)
+        isVehicleBooking: booking.isVehicleBooking || false,
         // For admin-defined pickup, use admin's pickup location; for user-defined, use user's input
         pickupLocation:
           booking?.packageType === "transfer" &&
