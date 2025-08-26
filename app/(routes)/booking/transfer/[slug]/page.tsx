@@ -86,10 +86,16 @@ export default function BookingInfoPage() {
         "-" +
         String(selectedDate.getDate()).padStart(2, "0");
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferDetails._id}&date=${dateString}`
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferDetails._id}&date=${dateString}`;
+      console.debug(
+        "[fetchTimeSlots] requesting slots for date:",
+        dateString,
+        "url:",
+        url
       );
+      const response = await fetch(url);
       const data = await response.json();
+      console.debug("[fetchTimeSlots] response for date:", dateString, data);
 
       if (data.success) {
         const slots = Array.isArray(data.data) ? data.data : [];
@@ -241,11 +247,21 @@ export default function BookingInfoPage() {
     }
 
     const totalPrice = calculateTotalPrice();
+
+    // Format selected date as YYYY-MM-DD to send as a date-only string
+    const dateString =
+      selectedDate.getFullYear() +
+      "-" +
+      String(selectedDate.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(selectedDate.getDate()).padStart(2, "0");
+
     setBooking({
       packageId: transferDetails._id || "",
       title: transferDetails.title,
       slug: slug,
-      date: selectedDate.toISOString(),
+      // send date as YYYY-MM-DD so server treats it as local date (no timezone shift)
+      date: dateString,
       time: selectedTime,
       type: transferDetails.type || "Private transfer",
       duration: transferDetails.duration || "4-6 hours",
@@ -370,7 +386,7 @@ export default function BookingInfoPage() {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
-                          {availableSeats} seats left
+                          {availableSeats} units left
                         </span>
                       </div>
                     </button>

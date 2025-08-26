@@ -54,10 +54,25 @@ export class SlotValidationAPI {
       // Check if date is expired (using Malaysian time)
       const today = new Date(nowMYT);
       today.setHours(0, 0, 0, 0);
-      const slotDate = new Date(date);
-      slotDate.setHours(0, 0, 0, 0);
 
-      if (slotDate < today) {
+      // If the incoming date is already a YYYY-MM-DD string, use it directly
+      // for API queries to avoid Date->toISOString() UTC shifts that can
+      // change the day in some timezones. Use a Date object only for comparison.
+      let slotDateObj: Date;
+      let formattedDate: string;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        formattedDate = date;
+        const parts = date.split('-').map(Number);
+        slotDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        slotDateObj.setHours(0, 0, 0, 0);
+      } else {
+        slotDateObj = new Date(date);
+        slotDateObj.setHours(0, 0, 0, 0);
+        formattedDate = slotDateObj.toISOString().split('T')[0];
+      }
+
+      if (slotDateObj < today) {
         return {
           isValid: false,
           isExpired: true,
@@ -65,9 +80,7 @@ export class SlotValidationAPI {
           message: "Date has expired"
         };
       }
-
-      // Format the date to YYYY-MM-DD format for the API
-      const formattedDate = slotDate.toISOString().split('T')[0];
+      // formattedDate is set above (either directly from YYYY-MM-DD input or via UTC-safe conversion)
 
       // Validate packageId format (should be 24 character ObjectId)
       if (typeof packageId !== 'string' || packageId.length !== 24) {

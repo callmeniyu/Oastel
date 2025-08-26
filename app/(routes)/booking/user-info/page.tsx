@@ -348,6 +348,43 @@ export default function BookingUserInfoPage() {
           result.id;
 
         if (bookingId) {
+          // Diagnostic: fetch slots for intended date and previous date to compare booked counts
+          (async () => {
+            try {
+              const bookingDateRaw = booking.date || "";
+              // Normalize bookingDateRaw to YYYY-MM-DD
+              const bookingDateStr = bookingDateRaw.includes("T")
+                ? new Date(bookingDateRaw).toISOString().split("T")[0]
+                : bookingDateRaw;
+
+              const prevDateObj = new Date(bookingDateStr + "T12:00:00.000Z");
+              prevDateObj.setDate(prevDateObj.getDate() - 1);
+              const prevDateStr = prevDateObj.toISOString().split("T")[0];
+
+              const endpoints = [bookingDateStr, prevDateStr];
+              for (const d of endpoints) {
+                const url = `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=${booking.packageType}&packageId=${booking.packageId}&date=${d}`;
+                console.debug("[diagnostic] fetching slots for", d, url);
+                const resp = await fetch(url);
+                const json = await resp.json();
+                console.debug("[diagnostic] slots for", d, json);
+                if (json.success && Array.isArray(json.data)) {
+                  const slot = json.data.find(
+                    (s: any) => s.time === booking.time
+                  );
+                  console.debug(
+                    `[diagnostic] date=${d} time=${booking.time} bookedCount=`,
+                    slot ? slot.bookedCount : "(no slot)"
+                  );
+                }
+              }
+            } catch (err) {
+              console.error(
+                "[diagnostic] failed to fetch diagnostic slots:",
+                err
+              );
+            }
+          })();
           // Redirect to booking confirmation page with the ID
           router.push(`/booking/confirmation/${bookingId}`);
         } else {
