@@ -169,7 +169,11 @@ export default function BookingInfoPanel({
           <div className="text-desc_gray space-y-1 flex flex-col items-end">
             {isVehicleBooking ? (
               <div>
-                <p>Vehicle booking • Seats: {vehicleSeatCapacity || "N/A"}</p>
+                <p>
+                  Vehicle booking •{" "}
+                  {packageType === "transfer" ? "Units" : "Seats"}:{" "}
+                  {vehicleSeatCapacity || "N/A"}
+                </p>
               </div>
             ) : type === "private" ? (
               <div>

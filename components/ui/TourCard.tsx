@@ -7,6 +7,8 @@ import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
 import { resolveImageUrl } from "@/lib/imageUtils";
 import { formatBookedCount } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import type { KeyboardEvent, MouseEvent } from "react";
 
 type TourCardProps = {
   _id: string;
@@ -50,8 +52,22 @@ export default function TourCard({
         return "bg-gray-500 text-white";
     }
   };
+  const router = useRouter();
+
+  const navigate = (e?: MouseEvent | KeyboardEvent) => {
+    // allow callers to pass an event; if it's a keyboard event check for Enter
+    if (e && "key" in e && (e as KeyboardEvent).key !== "Enter") return;
+    router.push(`/tours/${slug}`);
+  };
+
   return (
-    <div className="rounded-xl shadow-lg bg-white flex flex-col justify-between max-h-max relative">
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={(e) => navigate(e)}
+      onKeyDown={(e) => navigate(e)}
+      className="rounded-xl shadow-lg bg-white flex flex-col justify-between max-h-max relative cursor-pointer"
+    >
       {/* Label Badge */}
       {label && (
         <div
@@ -116,6 +132,12 @@ export default function TourCard({
             text="Book"
             customStyles="font-semibold w-24"
             action={`/tours/${slug}`}
+            onClick={(ev) => {
+              // prevent parent navigation when clicking the button
+              ev?.stopPropagation();
+              // still navigate directly from the button
+              router.push(`/tours/${slug}`);
+            }}
           />
         </div>
       </div>

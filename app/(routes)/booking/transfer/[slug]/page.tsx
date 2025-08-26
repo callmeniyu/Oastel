@@ -15,7 +15,6 @@ interface TimeSlot {
   bookedCount: number;
   isAvailable: boolean;
   minimumPerson: number;
-  currentMinimum: number;
 }
 
 export default function BookingInfoPage() {
@@ -26,6 +25,7 @@ export default function BookingInfoPage() {
   const { showToast } = useToast();
   const [transferDetails, setTransferDetails] = useState<TransferType>();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [initialDateSet, setInitialDateSet] = useState(false);
   const [selectedTime, setSelectedTime] = useState("");
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,6 +40,56 @@ export default function BookingInfoPage() {
     fullDateTime: Date;
   } | null>(null);
 
+  // Function to get minimum booking date (tomorrow)
+  const getMinimumBookingDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
+
+  // Function to find next available date with time slots
+  const findNextAvailableDate = async (transferId: string, startDate: Date) => {
+    const maxDaysToCheck = 30; // Check up to 30 days ahead
+    const currentDate = new Date(startDate);
+
+    for (let i = 0; i < maxDaysToCheck; i++) {
+      const dateString =
+        currentDate.getFullYear() +
+        "-" +
+        String(currentDate.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(currentDate.getDate()).padStart(2, "0");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferId}&date=${dateString}`
+        );
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          // Check if any slots are available
+          const hasAvailableSlots = data.data.some(
+            (slot: TimeSlot) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
+
+          if (hasAvailableSlots) {
+            return new Date(currentDate);
+          }
+        }
+      } catch (error) {
+        console.error(`Error checking date ${dateString}:`, error);
+      }
+
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // If no available date found, return the start date
+    return startDate;
+  };
+
   useEffect(() => {
     const getTransferDetails = async () => {
       try {
@@ -52,6 +102,17 @@ export default function BookingInfoPage() {
           setAdults(minimumPersons);
           setTotalGuests(minimumPersons);
           setChildren(0);
+
+          // Set initial date to next available date with slots
+          if (!initialDateSet && response.data._id) {
+            const minDate = getMinimumBookingDate();
+            const nextAvailableDate = await findNextAvailableDate(
+              response.data._id,
+              minDate
+            );
+            setSelectedDate(nextAvailableDate);
+            setInitialDateSet(true);
+          }
         } else {
           showToast({
             type: "error",
@@ -71,7 +132,7 @@ export default function BookingInfoPage() {
     if (slug) {
       getTransferDetails();
     }
-  }, [slug, showToast]);
+  }, [slug, showToast, initialDateSet]);
 
   const fetchTimeSlots = async () => {
     if (!transferDetails?._id) return;
@@ -151,10 +212,20 @@ export default function BookingInfoPage() {
   const updateAdults = (newCount: number) => {
     if (!transferDetails) return;
 
+    // Get available capacity from selected time slot
+    const availableCapacity = getAvailableCapacity();
+
+    // Get minimum person requirement for selected time slot
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    const minimumRequired = selectedSlot
+      ? selectedSlot.minimumPerson // Use slot's minimumPerson directly
+      : transferDetails.minimumPerson || 1;
+
     const newTotal = newCount + children;
     if (
-      newCount >= (transferDetails.minimumPerson || 1) &&
-      newTotal <= (transferDetails.maximumPerson || Infinity)
+      newCount >= Math.max(1, minimumRequired - children) && // Ensure adults + children meets minimum
+      newTotal <= (transferDetails.maximumPerson || Infinity) &&
+      newTotal <= availableCapacity
     ) {
       setAdults(newCount);
       setTotalGuests(newTotal);
@@ -164,13 +235,21 @@ export default function BookingInfoPage() {
   const updateChildren = (newCount: number) => {
     if (!transferDetails) return;
 
+    // Get available capacity from selected time slot
+    const availableCapacity = getAvailableCapacity();
+
+    // Get minimum person requirement for selected time slot
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    const minimumRequired = selectedSlot
+      ? selectedSlot.minimumPerson // Use slot's minimumPerson directly
+      : transferDetails.minimumPerson || 1;
+
     const newTotal = adults + newCount;
-    const minimumRequired = transferDetails.minimumPerson || 1;
 
     if (
-      newCount >= 0 &&
-      newTotal >= minimumRequired &&
-      newTotal <= (transferDetails.maximumPerson || Infinity)
+      newTotal >= minimumRequired && // Ensure total meets minimum requirement
+      newTotal <= (transferDetails.maximumPerson || Infinity) &&
+      newTotal <= availableCapacity
     ) {
       setChildren(newCount);
       setTotalGuests(newTotal);
@@ -186,6 +265,42 @@ export default function BookingInfoPage() {
       });
     }
   }, [adults, children]);
+
+  // Get available capacity for selected time slot
+  const getAvailableCapacity = () => {
+    if (!selectedTime || !selectedDate) return 0;
+
+    const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+    if (!selectedSlot) return 0;
+
+    return selectedSlot.capacity - selectedSlot.bookedCount;
+  };
+
+  // Effect to handle slot selection and reset adults to minimum when slot changes
+  useEffect(() => {
+    if (selectedTime && timeSlots.length > 0 && transferDetails) {
+      const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+      if (selectedSlot) {
+        const slotMinimum = selectedSlot.minimumPerson || 1;
+        const currentTotal = adults + children;
+
+        console.log(
+          `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
+        );
+
+        // Always reset adults to slot minimum when slot changes (unless user has manually set more)
+        // This ensures adults start at the correct value for each slot
+        if (adults !== slotMinimum) {
+          const newAdults = Math.max(slotMinimum, 1);
+          console.log(
+            `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
+          );
+          setAdults(newAdults);
+          setTotalGuests(newAdults + children);
+        }
+      }
+    }
+  }, [selectedTime, timeSlots, transferDetails]); // Removed children dependency to reset properly
 
   const handleContinue = () => {
     if (!transferDetails) return;
@@ -221,16 +336,15 @@ export default function BookingInfoPage() {
 
     const totalGuests = adults + children;
 
-    // Check minimum person requirement for this specific slot
-    if (totalGuests < selectedSlot.currentMinimum) {
+    // Check minimum person requirement for this specific slot - USE minimumPerson
+    if (totalGuests < selectedSlot.minimumPerson) {
+      const isFirstBooking = selectedSlot.bookedCount === 0;
       showToast({
         type: "error",
-        title: `Minimum ${selectedSlot.currentMinimum} ${
-          selectedSlot.currentMinimum > 1 ? "persons" : "person"
-        } required`,
-        message: `This transfer requires a minimum of ${
-          selectedSlot.currentMinimum
-        } ${selectedSlot.currentMinimum > 1 ? "persons" : "person"}.`,
+        title: "Minimum guests required",
+        message: `Minimum ${selectedSlot.minimumPerson} person${
+          selectedSlot.minimumPerson > 1 ? "s" : ""
+        } required for this ${isFirstBooking ? "first booking" : "booking"}`,
       });
       return;
     }
@@ -241,7 +355,9 @@ export default function BookingInfoPage() {
       showToast({
         type: "error",
         title: "Not enough capacity",
-        message: `Only ${availableSlots} slots available for this time.`,
+        message: `Only ${availableSlots} ${
+          transferDetails?.type === "Private" ? "units" : "seats"
+        } available for this time.`,
       });
       return;
     }
@@ -288,10 +404,17 @@ export default function BookingInfoPage() {
   // Calculate total price based on ticket type
   const calculateTotalPrice = () => {
     if (!transferDetails) return 0;
-    return (
-      adults * (transferDetails.newPrice || 0) +
-      children * (transferDetails.childPrice || 0)
-    );
+
+    if (transferDetails.type === "Private") {
+      // For private transfers, price is per vehicle
+      return transferDetails.newPrice || 0;
+    } else {
+      // For shared transfers, calculate based on adults and children
+      return (
+        adults * (transferDetails.newPrice || 0) +
+        children * (transferDetails.childPrice || 0)
+      );
+    }
   };
 
   useEffect(() => {
@@ -386,7 +509,17 @@ export default function BookingInfoPage() {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
-                          {availableSeats} units left
+                          {isSlotAvailable ? (
+                            <>
+                              {availableSeats}{" "}
+                              {transferDetails?.type === "Private"
+                                ? "units"
+                                : "seats"}{" "}
+                              left
+                            </>
+                          ) : (
+                            "Sold out"
+                          )}
                         </span>
                       </div>
                     </button>
@@ -404,133 +537,223 @@ export default function BookingInfoPage() {
           </div>
         </div>
 
-        <div className="rounded-lg shadow-md p-4 bg-white">
-          <h3 className="text-primary_green text-xl font-bold mb-2">
-            {transferDetails?.type === "Private"
-              ? "Private Vehicle"
-              : "No. of Guests"}
-          </h3>
+        {/* Show guest selection only when a time slot is selected */}
+        {selectedTime && (
+          <div className="rounded-lg shadow-md p-4 bg-white">
+            <h3 className="text-primary_green text-xl font-bold mb-2">
+              {transferDetails?.type === "Private"
+                ? "Private Vehicle"
+                : "No. of Guests"}
+            </h3>
 
-          <div className="space-y-6 border p-3 rounded-lg my-4">
-            {transferDetails?.type === "Private" ? (
-              <div className="flex flex-col gap-2">
-                <p className="font-semibold">Vehicle Seats</p>
-                <p className="text-sm text-desc_gray">
-                  {transferDetails?.seatCapacity ||
-                    transferDetails?.maximumPerson ||
-                    "N/A"}{" "}
-                  units
-                </p>
-                <p className="text-sm text-desc_gray">
-                  Price shown is for the whole vehicle (per vehicle).
-                </p>
-              </div>
-            ) : (
-              [
-                {
-                  label: "Adults",
-                  desc: `Minimum: ${transferDetails?.minimumPerson} person per group.`,
-                  value: adults,
-                  onIncrement: () => updateAdults(adults + 1),
-                  onDecrement: () => updateAdults(adults - 1),
-                  disableDecrement:
-                    adults <= (transferDetails?.minimumPerson || 1),
-                  disableIncrement:
-                    totalGuests >= (transferDetails?.maximumPerson || Infinity),
-                  price: transferDetails?.newPrice || 0,
-                },
-                ...(transferDetails &&
-                String(transferDetails.type) !== "Private"
-                  ? [
-                      {
-                        label: "Children",
-                        desc: "Age between 3 to 7 years. Child seats are not provided",
-                        value: children,
-                        onIncrement: () => updateChildren(children + 1),
-                        onDecrement: () => updateChildren(children - 1),
-                        disableDecrement:
-                          children <= 0 ||
-                          adults + children <=
-                            (transferDetails?.minimumPerson || 1),
-                        disableIncrement:
-                          totalGuests >=
-                          (transferDetails?.maximumPerson || Infinity),
-                        price: transferDetails?.childPrice || 0,
-                      },
-                    ]
-                  : []),
-              ].map(
-                ({
-                  label,
-                  value,
-                  price,
-                  desc,
-                  onIncrement,
-                  onDecrement,
-                  disableIncrement,
-                  disableDecrement,
-                }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                  >
-                    <div className="flex-1">
-                      <p className="font-semibold">
-                        {label}{" "}
-                        <span className="text-sm text-desc_gray">
-                          (RM {price}{" "}
-                          {transferDetails?.type === "Private"
-                            ? "/vehicle"
-                            : "/person"}
-                          )
-                        </span>
-                      </p>
-                      <div className="space-y-1 mt-1">
-                        <p className="text-xs text-desc_gray font-light">
-                          {desc}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
-                      <div className="flex items-center gap-2 border rounded-full">
-                        <button
-                          onClick={onDecrement}
-                          disabled={disableDecrement}
-                          className={`px-3 py-1.5 rounded-l-xl text-lg ${
-                            disableDecrement
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "hover:bg-primary_green hover:text-white"
-                          }`}
-                        >
-                          -
-                        </button>
-                        <span className="min-w-[24px] text-center">
-                          {value}
-                        </span>
-                        <button
-                          onClick={onIncrement}
-                          disabled={disableIncrement}
-                          className={`px-3 py-1.5 rounded-r-xl text-lg ${
-                            disableIncrement
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "hover:bg-primary_green hover:text-white"
-                          }`}
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                        RM {value * price}
-                      </span>
-                    </div>
+            {/* Show minimum requirement for selected slot */}
+            {(() => {
+              const selectedSlot = timeSlots.find(
+                (slot) => slot.time === selectedTime
+              );
+              if (selectedSlot) {
+                const isFirstBooking = selectedSlot.bookedCount === 0;
+                return (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700">
+                      <span className="font-medium">Selected Time:</span>{" "}
+                      {selectedTime} |
+                      <span className="font-medium"> Minimum Required:</span>{" "}
+                      {selectedSlot.minimumPerson} person
+                      {selectedSlot.minimumPerson > 1 ? "s" : ""} |
+                      <span className="font-medium"> Available:</span>{" "}
+                      {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
+                      {transferDetails?.type === "Private" ? "units" : "seats"}
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      {isFirstBooking
+                        ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
+                        : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
+                    </p>
                   </div>
+                );
+              }
+              return null;
+            })()}
+
+            <div className="space-y-6 border p-3 rounded-lg my-4">
+              {transferDetails?.type === "Private" ? (
+                <div className="flex flex-col gap-2">
+                  <p className="font-semibold">Vehicle Seats</p>
+                  <p className="text-sm text-desc_gray">
+                    {transferDetails?.seatCapacity ||
+                      transferDetails?.maximumPerson ||
+                      "N/A"}{" "}
+                    units
+                  </p>
+                  <p className="text-sm text-desc_gray">
+                    Price shown is for the whole vehicle (per vehicle).
+                  </p>
+                </div>
+              ) : (
+                [
+                  {
+                    label: "Adults",
+                    desc: [
+                      (() => {
+                        const selectedSlot = timeSlots.find(
+                          (slot) => slot.time === selectedTime
+                        );
+                        const slotMinimum =
+                          selectedSlot?.minimumPerson ||
+                          transferDetails?.minimumPerson ||
+                          1;
+                        return `Minimum: ${slotMinimum} person${
+                          slotMinimum > 1 ? "s" : ""
+                        } for selected time slot.`;
+                      })(),
+                    ],
+                    value: adults,
+                    onIncrement: () => updateAdults(adults + 1),
+                    onDecrement: () => updateAdults(adults - 1),
+                    disableDecrement: (() => {
+                      const selectedSlot = timeSlots.find(
+                        (slot) => slot.time === selectedTime
+                      );
+                      const slotMinimum = selectedSlot?.minimumPerson || 1;
+                      return adults <= Math.max(1, slotMinimum - children);
+                    })(),
+                    disableIncrement:
+                      totalGuests >=
+                      (transferDetails?.maximumPerson || Infinity),
+                    price: transferDetails?.newPrice || 0,
+                  },
+                  ...(transferDetails &&
+                  String(transferDetails.type) !== "Private"
+                    ? [
+                        {
+                          label: "Children",
+                          desc: "Age between 3 to 7 years. Child seats are not provided",
+                          value: children,
+                          onIncrement: () => updateChildren(children + 1),
+                          onDecrement: () => updateChildren(children - 1),
+                          disableDecrement: (() => {
+                            const selectedSlot = timeSlots.find(
+                              (slot) => slot.time === selectedTime
+                            );
+                            const slotMinimum =
+                              selectedSlot?.minimumPerson || 1;
+                            return (
+                              children <= 0 || adults + children <= slotMinimum
+                            );
+                          })(),
+                          disableIncrement:
+                            totalGuests >=
+                            (transferDetails?.maximumPerson || Infinity),
+                          price: transferDetails?.childPrice || 0,
+                        },
+                      ]
+                    : []),
+                ].map(
+                  ({
+                    label,
+                    value,
+                    price,
+                    desc,
+                    onIncrement,
+                    onDecrement,
+                    disableIncrement,
+                    disableDecrement,
+                  }) => (
+                    <div
+                      key={label}
+                      className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                    >
+                      <div className="flex-1">
+                        <p className="font-semibold">
+                          {label}{" "}
+                          <span className="text-sm text-desc_gray">
+                            (RM {price}{" "}
+                            {transferDetails?.type === "Private"
+                              ? "/vehicle"
+                              : "/person"}
+                            )
+                          </span>
+                        </p>
+                        <div className="space-y-1 mt-1">
+                          {Array.isArray(desc) ? (
+                            desc.map((line, index) => (
+                              <p
+                                key={index}
+                                className="text-xs text-desc_gray font-light"
+                              >
+                                {line}
+                              </p>
+                            ))
+                          ) : (
+                            <p className="text-xs text-desc_gray font-light">
+                              {desc}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
+                        <div className="flex items-center gap-2 border rounded-full">
+                          <button
+                            onClick={onDecrement}
+                            disabled={disableDecrement}
+                            className={`px-3 py-1.5 rounded-l-xl text-lg ${
+                              disableDecrement
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "hover:bg-primary_green hover:text-white"
+                            }`}
+                          >
+                            -
+                          </button>
+                          <span className="min-w-[24px] text-center">
+                            {value}
+                          </span>
+                          <button
+                            onClick={onIncrement}
+                            disabled={disableIncrement}
+                            className={`px-3 py-1.5 rounded-r-xl text-lg ${
+                              disableIncrement
+                                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                : "hover:bg-primary_green hover:text-white"
+                            }`}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <span className="font-semibold text-primary_green min-w-[80px] text-right">
+                          RM {value * price}
+                        </span>
+                      </div>
+                    </div>
+                  )
                 )
-              )
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Show message when no slot is selected */}
+        {!selectedTime && (
+          <div className="rounded-lg shadow-md p-4 bg-gray-50 border-2 border-dashed border-gray-300">
+            <h3 className="text-gray-500 text-xl font-bold mb-2">
+              {transferDetails?.type === "Private"
+                ? "Private Vehicle"
+                : "No. of Guests"}
+            </h3>
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-lg">
+                👆 Please select a time slot first
+              </p>
+              <p className="text-gray-400 text-sm mt-2">
+                {transferDetails?.type === "Private"
+                  ? "Vehicle booking details will appear after choosing your preferred time"
+                  : "Guest selection will appear after choosing your preferred time"}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <BookingInfoPanel

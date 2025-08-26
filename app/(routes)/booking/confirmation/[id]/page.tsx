@@ -319,6 +319,7 @@ export default function BookingConfirmationPage() {
           <p className="text-gray-600 mt-2">
             Ticket ID: <span className="font-semibold">{booking._id}</span>
           </p>
+          {/* package name moved into Booking Details section */}
         </div>
 
         {/* Confirmation Status */}
@@ -364,6 +365,15 @@ export default function BookingConfirmationPage() {
                 {booking.adults} Adults, {booking.children} Children
               </p>
             </div>
+            {/* Package row added here so package name appears inside Booking Details */}
+            {booking.packageId && (
+              <div className="flex items-start gap-2">
+                <MapPin className="w-5 h-5 text-primary_green" />
+                <p className="font-semibold">
+                  {booking.packageId.title || booking.packageType}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -371,6 +381,10 @@ export default function BookingConfirmationPage() {
         <div className="bg-gray-50 rounded-lg p-6 mb-6">
           <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-2">
+              <Users className="w-5 h-5 text-primary_green" />
+              <p className="font-semibold">{booking.contactInfo.name}</p>
+            </div>
             <div className="flex items-start gap-2">
               <Mail className="w-5 h-5 text-primary_green" />
               <p>{booking.contactInfo.email}</p>
@@ -426,22 +440,7 @@ export default function BookingConfirmationPage() {
           </ul>
         </div>
 
-        {/* Policies */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-2">Key Policies</h3>
-          <ul className="list-disc list-inside text-gray-700 space-y-1">
-            <li>Full refund if cancelled at least 72 hours before activity.</li>
-            <li>No refunds or date changes within 72 hours of activity.</li>
-            <li>
-              Pick-up only from Tanah Rata, Golden Hill, Brinchang, and Kea
-              Farm.
-            </li>
-            <li>
-              Not wheelchair/stroller accessible; not recommended for certain
-              medical conditions.
-            </li>
-          </ul>
-        </div>
+        {/* Policies removed as requested */}
       </div>
 
       {/* Email Confirmation (outside PDF) */}

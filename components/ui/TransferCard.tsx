@@ -9,6 +9,8 @@ import { IoFlagSharp } from "react-icons/io5";
 import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
 import { formatBookedCount } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import type { KeyboardEvent, MouseEvent } from "react";
 
 type TransferCardProps = {
   _id?: string;
@@ -66,8 +68,21 @@ export default function TransferCard({
     }
     return imageSrc;
   };
+  const router = useRouter();
+
+  const navigate = (e?: MouseEvent | KeyboardEvent) => {
+    if (e && "key" in e && (e as KeyboardEvent).key !== "Enter") return;
+    router.push(`/transfers/${slug}`);
+  };
+
   return (
-    <div className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between relative">
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={(e) => navigate(e)}
+      onKeyDown={(e) => navigate(e)}
+      className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between relative cursor-pointer"
+    >
       {/* Label Badge */}
       {label && (
         <div
@@ -144,6 +159,10 @@ export default function TransferCard({
             text="Book"
             customStyles="font-semibold w-24"
             action={`/transfers/${slug}`}
+            onClick={(ev) => {
+              ev?.stopPropagation();
+              router.push(`/transfers/${slug}`);
+            }}
           />
         </div>
       </div>
