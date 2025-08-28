@@ -582,7 +582,7 @@ export default function BookingInfoPage() {
                     {transferDetails?.seatCapacity ||
                       transferDetails?.maximumPerson ||
                       "N/A"}{" "}
-                    units
+                    seats
                   </p>
                   <p className="text-sm text-desc_gray">
                     Price shown is for the whole vehicle (per vehicle).
