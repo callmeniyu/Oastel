@@ -7,10 +7,41 @@ type Props = {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
   minDate?: Date;
+  serverDateTime?: {
+    date: string;
+    time: string;
+    longDate: string;
+    fullDateTime: Date;
+  } | null;
 };
 
-export default function BookingCalendar({ selectedDate, onDateChange }: Props) {
-  const today = new Date();
+export default function BookingCalendar({
+  selectedDate,
+  onDateChange,
+  minDate,
+  serverDateTime,
+}: Props) {
+  // Calculate today's date - use server time if available, otherwise fallback to Malaysia timezone
+  const getToday = () => {
+    if (serverDateTime) {
+      // Use server-provided date
+      const serverDate = new Date(serverDateTime.fullDateTime);
+      serverDate.setHours(0, 0, 0, 0);
+
+      console.log("Server date time:", serverDate);
+
+      return serverDate;
+    } else {
+      // Fallback to local Malaysia timezone calculation
+      const now = new Date();
+      const malaysiaDateString = now.toLocaleDateString("sv-SE", {
+        timeZone: "Asia/Kuala_Lumpur",
+      });
+      return new Date(malaysiaDateString + "T00:00:00");
+    }
+  };
+
+  const today = getToday();
   const maxDate = addDays(today, 90);
 
   return (
@@ -22,9 +53,10 @@ export default function BookingCalendar({ selectedDate, onDateChange }: Props) {
         mode="single"
         selected={selectedDate}
         onSelect={(date) => date && onDateChange(date)}
-        fromDate={today}
+        fromDate={minDate || today}
+        today={today}
         toDate={maxDate}
-        disabled={{ before: today }}
+        disabled={{ before: minDate || today }}
         animate
         modifiersClassNames={{
           today: "border border-primary_green",

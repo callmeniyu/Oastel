@@ -51,7 +51,7 @@ export type TourType = {
     minimumPerson: number
     maximumPerson?: number
     departureTimes: string[]
-    label?: "Recommended" | "Popular" | "Best Value" | null
+    label?: "Recommended" | "Popular" | "Best Value" | "Best seller" | null
     details: TourDetailsType
     createdAt: Date
     updatedAt: Date
@@ -88,7 +88,7 @@ export interface TransferType {
     maximumPerson?: number
     seatCapacity?: number
     times: string[]
-    label?: "Recommended" | "Popular" | "Best Value"
+    label?: "Recommended" | "Popular" | "Best Value" | "Best seller"
     status: "active" | "sold"
     details: TransferDetails
     createdAt: Date

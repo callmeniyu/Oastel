@@ -474,42 +474,43 @@ export default function BookingUserInfoPage() {
             <>
               {booking?.packageType === "transfer" &&
               booking?.pickupOption === "admin" ? (
-                // Admin-defined pickup location - render as a select control styled in green
+                // Admin-defined pickup location - render as a normal select control
                 <div className="w-full">
-                  <div className="p-4 bg-green-50 border border-primary_green/40 rounded">
-                    <h4 className="font-medium text-primary_green mb-2">
-                      Pickup Location:
-                    </h4>
-                    {/* Render admin-defined pickup options as a select to match add-to-cart flow */}
-                    {booking.pickupLocations ? (
-                      <select
-                        name="pickupLocation"
-                        value={form.pickupLocation}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-primary_green/40 rounded-md focus:outline-none focus:ring-2 focus:ring-primary_green focus:border-transparent"
-                      >
-                        <option value="">Choose a pickup location...</option>
-                        {booking.pickupLocations
-                          .split(",")
-                          .map((loc: string, i: number) => {
-                            // Strip any HTML tags saved in admin content before showing
-                            const stripped = loc.replace(/<[^>]*>/g, "").trim();
-                            return (
-                              <option key={i} value={stripped}>
-                                {stripped}
-                              </option>
-                            );
-                          })}
-                      </select>
-                    ) : (
-                      <div className="text-sm text-desc_gray">
-                        No pickup locations configured
-                      </div>
-                    )}
-                  </div>
-                  {/* Always show pickup description */}
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pickup Location:
+                  </label>
+                  {/* Render admin-defined pickup options as a select to match add-to-cart flow */}
+                  {booking.pickupLocations ? (
+                    <select
+                      name="pickupLocation"
+                      value={form.pickupLocation}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-primary_green/40 rounded-md focus:outline-none focus:ring-2 focus:ring-primary_green focus:border-transparent"
+                    >
+                      <option value="">Choose a pickup location...</option>
+                      {booking.pickupLocations
+                        .split(",")
+                        .map((loc: string, i: number) => {
+                          // Strip any HTML tags saved in admin content before showing
+                          const stripped = loc.replace(/<[^>]*>/g, "").trim();
+                          return (
+                            <option key={i} value={stripped}>
+                              {stripped}
+                            </option>
+                          );
+                        })}
+                    </select>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      No pickup locations configured
+                    </div>
+                  )}
+                  {/* Always show pickup guidelines */}
                   {booking.pickupDescription && (
                     <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Pickup Guidelines:
+                      </label>
                       <div
                         className="prose max-w-none text-sm text-gray-600 leading-relaxed"
                         dangerouslySetInnerHTML={{
@@ -529,9 +530,12 @@ export default function BookingUserInfoPage() {
                     placeholder="Enter your Hostel/Hotel name and address"
                     className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
                   />
-                  {/* Always show pickup description */}
+                  {/* Always show pickup guidelines */}
                   {booking?.pickupDescription && (
                     <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Pickup Guidelines:
+                      </label>
                       <p className="text-sm text-gray-600 leading-relaxed">
                         {booking.pickupDescription}
                       </p>

@@ -32,6 +32,9 @@ interface BookingDetails {
     phone: string;
   };
   createdAt: string;
+  // Vehicle properties for private transfers
+  isVehicleBooking?: boolean;
+  vehicleSeatCapacity?: number;
 }
 
 export default function CartConfirmationPage() {
@@ -403,12 +406,18 @@ export default function CartConfirmationPage() {
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-primary_green">
-                  {bookings.reduce(
-                    (total, b) => total + b.adults + b.children,
-                    0
-                  )}
+                  {bookings.reduce((total, b) => {
+                    if (b.isVehicleBooking) {
+                      return total + 1; // Count vehicles as 1 unit
+                    }
+                    return total + b.adults + b.children;
+                  }, 0)}
                 </p>
-                <p className="text-sm text-gray-600">Total Guests</p>
+                <p className="text-sm text-gray-600">
+                  {bookings.some((b) => b.isVehicleBooking)
+                    ? "Guests/Vehicles"
+                    : "Total Guests"}
+                </p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-2xl font-bold text-primary_green">
@@ -456,11 +465,20 @@ export default function CartConfirmationPage() {
                       <div className="flex items-center gap-3">
                         <Users className="text-primary_green" />
                         <span className="font-medium">
-                          {booking.adults} adult{booking.adults > 1 ? "s" : ""}
-                          {booking.children > 0 &&
-                            `, ${booking.children} child${
-                              booking.children > 1 ? "ren" : ""
-                            }`}
+                          {booking.isVehicleBooking ? (
+                            `Vehicle - ${
+                              booking.vehicleSeatCapacity || "N/A"
+                            } seats`
+                          ) : (
+                            <>
+                              {booking.adults} adult
+                              {booking.adults > 1 ? "s" : ""}
+                              {booking.children > 0 &&
+                                `, ${booking.children} child${
+                                  booking.children > 1 ? "ren" : ""
+                                }`}
+                            </>
+                          )}
                         </span>
                       </div>
 
@@ -536,7 +554,10 @@ export default function CartConfirmationPage() {
                   </li>
                 </ul>
               </li>
-              <li>• Bring enough cash for entrance fees and food.</li>
+              <li>
+                • Carry cash for entrance fees, as most entry points at the
+                destination do not accept cards.
+              </li>
               <li>
                 • Luggage and large backpacks cannot be brought on the tour.
               </li>

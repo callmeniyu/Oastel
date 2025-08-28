@@ -37,6 +37,7 @@ export default function BookingInfoPage() {
   const [serverDateTime, setServerDateTime] = useState<{
     date: string;
     time: string;
+    longDate: string;
     fullDateTime: Date;
   } | null>(null);
 
@@ -190,10 +191,13 @@ export default function BookingInfoPage() {
         setTimeSlots([]);
         setSelectedTime(""); // Clear selection when no slots available
         console.error("Failed to fetch time slots:", data.message);
+        // Don't show any toast errors - just silently handle no slots
       }
     } catch (error) {
       console.error("Error fetching time slots:", error);
       setTimeSlots([]);
+      setSelectedTime(""); // Clear selection on error
+      // Don't show any toast errors - just silently handle errors
     } finally {
       setIsLoading(false);
     }
@@ -444,17 +448,7 @@ export default function BookingInfoPage() {
               🕒 Time (Malaysia): {serverDateTime?.time || "-"}
             </span>
             <span className="text-primary_green">
-              📅 Current Date:{" "}
-              {new Date(serverDateTime.fullDateTime).toLocaleDateString(
-                "en-US",
-                {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  timeZone: "Asia/Kuala_Lumpur",
-                }
-              )}
+              📅 Current Date: {serverDateTime?.longDate || "-"}
             </span>
           </div>
         </div>
@@ -464,6 +458,7 @@ export default function BookingInfoPage() {
           <BookingCalendar
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
+            serverDateTime={serverDateTime}
           />
           <div className="w-full flex flex-col rounded-lg shadow-md p-4 bg-white">
             <h3 className="text-primary_green text-xl font-bold mb-2">
@@ -546,8 +541,11 @@ export default function BookingInfoPage() {
                 : "No. of Guests"}
             </h3>
 
-            {/* Show minimum requirement for selected slot */}
+            {/* Show minimum requirement for selected slot (hidden for Private transfers) */}
             {(() => {
+              // Do not show the slot-minimum/availability panel for Private (vehicle) transfers
+              if (transferDetails?.type === "Private") return null;
+
               const selectedSlot = timeSlots.find(
                 (slot) => slot.time === selectedTime
               );
@@ -783,6 +781,7 @@ export default function BookingInfoPage() {
         vehicleSeatCapacity={
           transferDetails?.seatCapacity || transferDetails?.maximumPerson
         }
+        vehicleName={transferDetails?.vehicle}
       />
     </div>
   );

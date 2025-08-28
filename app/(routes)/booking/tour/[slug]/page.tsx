@@ -28,6 +28,7 @@ export default function BookingInfoPage() {
   const [serverDateTime, setServerDateTime] = useState<{
     date: string;
     time: string;
+    longDate: string;
     fullDateTime: Date;
   } | null>(null);
 
@@ -50,14 +51,66 @@ export default function BookingInfoPage() {
   };
 
   const [tourDetails, setTourDetails] = useState<TourType>();
-  const [selectedDate, setSelectedDate] = useState(new Date()); // Will be updated when server time loads
+  const [selectedDate, setSelectedDate] = useState(() => {
+    // Initialize with tomorrow to avoid initial load with today's date
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  });
   const [selectedTime, setSelectedTime] = useState("");
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialDateSet, setInitialDateSet] = useState(false);
 
   const [adults, setAdults] = useState(0);
   const [children, setChildren] = useState(0);
   const [totalGuests, setTotalGuests] = useState(0);
+
+  // Function to find next available date with time slots
+  const findNextAvailableDate = async (tourId: string, startDate: Date) => {
+    const maxDaysToCheck = 30; // Check up to 30 days ahead
+    const currentDate = new Date(startDate);
+
+    for (let i = 0; i < maxDaysToCheck; i++) {
+      const dateString =
+        currentDate.getFullYear() +
+        "-" +
+        String(currentDate.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(currentDate.getDate()).padStart(2, "0");
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=tour&packageId=${tourId}&date=${dateString}`
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          const slots = Array.isArray(data.data) ? data.data : [];
+          // Check if there are any available slots
+          const hasAvailableSlots = slots.some(
+            (slot: TimeSlot) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
+
+          if (hasAvailableSlots) {
+            console.log(`📅 Found available slots on ${dateString}`);
+            return currentDate;
+          }
+        }
+      } catch (error) {
+        console.error(`Error checking date ${dateString}:`, error);
+      }
+
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // If no available date found, return the start date
+    console.log(`❌ No available slots found in next ${maxDaysToCheck} days`);
+    return startDate;
+  };
 
   // Fetch server date/time on component mount
   useEffect(() => {
@@ -67,14 +120,12 @@ export default function BookingInfoPage() {
           `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/server-datetime`
         );
         const data = await response.json();
+        console.log("Server DateTime API Response:", data); // Debug log
 
         if (data.success) {
           setServerDateTime(data.data);
-          // Set initial selected date to minimum booking date
-          const minDate = new Date(data.data.fullDateTime);
-          minDate.setDate(minDate.getDate() + 1);
-          minDate.setHours(0, 0, 0, 0);
-          setSelectedDate(minDate);
+          // Note: Don't set selectedDate here - let getTourDetails handle it
+          console.log(`📅 Server datetime fetched: ${data.data.fullDateTime}`);
         }
       } catch (error) {
         console.error("Error fetching server date/time:", error);
@@ -102,6 +153,42 @@ export default function BookingInfoPage() {
             tour.type === "private" ? 8 : tour.minimumPerson || 1;
           setAdults(initialAdults);
           setTotalGuests(initialAdults);
+
+          // Set initial date to next available date with slots
+          if (!initialDateSet && tour._id) {
+            console.log(
+              `🔍 DEBUG: About to find next available date. initialDateSet=${initialDateSet}, tour._id=${tour._id}`
+            );
+            const minDate = new Date();
+            minDate.setDate(minDate.getDate() + 1);
+            minDate.setHours(0, 0, 0, 0);
+            console.log(
+              `🔍 Looking for next available date starting from ${minDate.toDateString()}`
+            );
+
+            try {
+              const nextAvailableDate = await findNextAvailableDate(
+                tour._id,
+                minDate
+              );
+              console.log(
+                `📅 Setting tour date to: ${nextAvailableDate.toDateString()}`
+              );
+              setSelectedDate(nextAvailableDate);
+              setInitialDateSet(true);
+              console.log(
+                `✅ DEBUG: Date set successfully, initialDateSet now true`
+              );
+            } catch (error) {
+              console.error(`❌ Error in findNextAvailableDate:`, error);
+            }
+          } else {
+            console.log(
+              `⏸️ DEBUG: Skipping date finding. initialDateSet=${initialDateSet}, tour._id=${
+                tour._id || "undefined"
+              }`
+            );
+          }
         } else {
           showToast({
             type: "error",
@@ -124,7 +211,18 @@ export default function BookingInfoPage() {
   }, [slug, showToast]);
 
   const fetchTimeSlots = async () => {
-    if (!tourDetails?._id) return;
+    if (!tourDetails?._id) {
+      console.log(`⏸️ fetchTimeSlots skipped - no tour details ID`);
+      return;
+    }
+
+    console.log(
+      `🔄 fetchTimeSlots called for tour ${
+        tourDetails._id
+      } on date ${selectedDate.toDateString()}, current selectedTime: ${
+        selectedTime || "none"
+      }`
+    );
 
     try {
       setIsLoading(true);
@@ -156,27 +254,56 @@ export default function BookingInfoPage() {
         });
 
         setTimeSlots(slots);
-        setSelectedTime(""); // Reset selected time when date changes
+
+        // Auto-select first available slot if none is currently selected
+        if (slots.length > 0 && !selectedTime) {
+          const firstAvailableSlot = slots.find(
+            (slot: TimeSlot) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
+          if (firstAvailableSlot) {
+            console.log(
+              `🎯 Auto-selecting first available slot: ${firstAvailableSlot.time}`
+            );
+            setSelectedTime(firstAvailableSlot.time);
+          } else {
+            console.log(`❌ No available slots found for auto-selection`);
+          }
+        } else if (selectedTime) {
+          console.log(
+            `⏸️ Skipping auto-selection - slot already selected: ${selectedTime}`
+          );
+        } else if (slots.length === 0) {
+          console.log(`⏸️ Skipping auto-selection - no slots available`);
+        }
+
+        // Clear selected time if it's no longer available
+        if (selectedTime) {
+          const currentSlot = slots.find(
+            (slot: TimeSlot) => slot.time === selectedTime
+          );
+          if (
+            !currentSlot ||
+            !currentSlot.isAvailable ||
+            currentSlot.capacity - currentSlot.bookedCount <= 0
+          ) {
+            console.log(
+              `🧹 Clearing unavailable selected time: ${selectedTime}`
+            );
+            setSelectedTime("");
+          }
+        }
       } else {
         console.error("Failed to load time slots:", data.message);
         setTimeSlots([]);
-        // Don't show error toast for no slots found - it's normal for some dates
-        if (data.message !== "No slots found for the specified date") {
-          showToast({
-            type: "error",
-            title: "Error",
-            message: data.message || "Failed to load time slots",
-          });
-        }
+        setSelectedTime(""); // Clear selection when no slots available
+        // Don't show any toast errors - just silently handle no slots
       }
     } catch (error) {
       console.error("Error fetching time slots:", error);
       setTimeSlots([]);
-      showToast({
-        type: "error",
-        title: "Error",
-        message: "Failed to load time slots",
-      });
+      setSelectedTime(""); // Clear selection on error
+      // Don't show any toast errors - just silently handle errors
     } finally {
       setIsLoading(false);
     }
@@ -409,17 +536,7 @@ export default function BookingInfoPage() {
               🕒 Time (Malaysia): {serverDateTime?.time || "-"}
             </span>
             <span className="text-primary_green">
-              📅 Current Date:{" "}
-              {new Date(serverDateTime.fullDateTime).toLocaleDateString(
-                "en-US",
-                {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  timeZone: "Asia/Kuala_Lumpur",
-                }
-              )}
+              📅 Current Date: {serverDateTime?.longDate || "-"}
             </span>
           </div>
         </div>
@@ -431,6 +548,7 @@ export default function BookingInfoPage() {
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
             minDate={getMinimumBookingDate()}
+            serverDateTime={serverDateTime}
           />
 
           <div className="w-full flex flex-col rounded-lg shadow-md p-4 bg-white">

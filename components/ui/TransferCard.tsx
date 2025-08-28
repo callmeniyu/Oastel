@@ -27,7 +27,7 @@ type TransferCardProps = {
   vehicle?: string;
   from: string;
   to: string;
-  label?: "Recommended" | "Popular" | "Best Value" | null;
+  label?: "Recommended" | "Popular" | "Best Value" | "Best seller" | null;
 };
 
 export default function TransferCard({
@@ -51,11 +51,13 @@ export default function TransferCard({
   const getLabelStyles = (labelType: string) => {
     switch (labelType) {
       case "Recommended":
-        return "bg-primary_green text-white";
+        return "bg-purple-600 text-white";
       case "Popular":
         return "bg-orange-500 text-white";
       case "Best Value":
         return "bg-blue-500 text-white";
+      case "Best seller":
+        return "bg-red-600 text-white";
       default:
         return "bg-gray-500 text-white";
     }

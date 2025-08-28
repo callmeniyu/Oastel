@@ -39,6 +39,9 @@ interface BookingDetails {
   };
   total: number;
   createdAt: string;
+  // Vehicle properties for private transfers
+  isVehicleBooking?: boolean;
+  vehicleSeatCapacity?: number;
 }
 
 export default function BookingConfirmationPage() {
@@ -361,9 +364,15 @@ export default function BookingConfirmationPage() {
             </div>
             <div className="flex items-start gap-2">
               <Users className="w-5 h-5 text-primary_green" />
-              <p className="font-semibold">
-                {booking.adults} Adults, {booking.children} Children
-              </p>
+              {booking.isVehicleBooking ? (
+                <p className="font-semibold">
+                  Vehicle - {booking.vehicleSeatCapacity || "N/A"} seats
+                </p>
+              ) : (
+                <p className="font-semibold">
+                  {booking.adults} Adults, {booking.children} Children
+                </p>
+              )}
             </div>
             {/* Package row added here so package name appears inside Booking Details */}
             {booking.packageId && (
@@ -434,7 +443,10 @@ export default function BookingConfirmationPage() {
                 </li>
               </ul>
             </li>
-            <li>Bring enough cash for entrance fees and food.</li>
+            <li>
+              Carry cash for entrance fees, as most entry points at the
+              destination do not accept cards.
+            </li>
             <li>Luggage and large backpacks cannot be brought on the tour.</li>
             <li>Views depend on the weather and cannot be guaranteed.</li>
           </ul>

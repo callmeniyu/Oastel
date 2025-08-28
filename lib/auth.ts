@@ -112,6 +112,37 @@ export const authOptions = {
         signIn: "/auth/login",
         error: "/auth/error",
     },
+    // Enable verbose debug logging to diagnose Google login failures
+    debug: true,
+    // Lightweight logger to surface next-auth internals in the server console
+    logger: {
+        error(code: string, ...metadata: any[]) {
+            console.error("[next-auth][error]", code, ...metadata)
+        },
+        warn(code: string) {
+            console.warn("[next-auth][warn]", code)
+        },
+        debug(code: string, ...metadata: any[]) {
+            console.debug("[next-auth][debug]", code, ...metadata)
+        },
+    },
+    // Event hooks to log signIn attempts and errors
+    events: {
+        async signIn(message: any) {
+            try {
+                console.log("[next-auth][event][signIn]", { provider: message?.provider, user: message?.user?.email })
+            } catch (e) {
+                console.log("[next-auth][event][signIn] (error logging)", e)
+            }
+        },
+        async error(message: any) {
+            try {
+                console.error("[next-auth][event][error]", message)
+            } catch (e) {
+                console.error("[next-auth][event][error] (error logging)", e)
+            }
+        },
+    },
     secret: process.env.NEXTAUTH_SECRET,
 }
 
