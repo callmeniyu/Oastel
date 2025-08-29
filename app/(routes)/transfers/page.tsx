@@ -495,7 +495,7 @@ export default function Transfers() {
                       <div className="flex items-center gap-2 mb-6">
                         <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
                         <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
-                          Van
+                          Minivan Shuttle
                         </h2>
                         <hr className="border-b-2 border-primary_green w-full md:flex" />
                       </div>

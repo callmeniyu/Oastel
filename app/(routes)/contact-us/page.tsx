@@ -22,10 +22,11 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-black/30 z-10"></div>
         <Image
           // Replace with your image path
+          // Ensure this path is correct
           src="/images/contact.jpg" // Ensure this path is correct
           alt="Contact Oastel"
           fill
-          className="object-cover brightness-95 transition-all duration-700"
+          className="object-cover brightness-95 transition-all duration-700 after:content-[''] after:absolute after:inset-0 after:bg-black/60 after:z-10"
           priority
         />
         <div className="relative z-20 text-center px-4">

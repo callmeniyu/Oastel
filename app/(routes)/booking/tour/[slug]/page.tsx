@@ -590,7 +590,11 @@ export default function BookingInfoPage() {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
-                          {availableSeats} seats left
+                          {isSlotAvailable ? (
+                            <>{availableSeats} seats left</>
+                          ) : (
+                            "Sold out"
+                          )}
                         </span>
                       </div>
                     </button>
