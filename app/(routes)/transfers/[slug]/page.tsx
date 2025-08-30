@@ -223,11 +223,23 @@ export default async function TransferDetailPage({
                   <RiMapPinLine className="text-lg text-white" />
                 </div>
                 <h5 className="font-semibold text-primary_green">
-                  Pickup Location
+                  {transferDetails.details.pickupOption === "user"
+                    ? "Pickup Guidelines"
+                    : "Pickup Location"}
                 </h5>
               </div>
               <div className="prose max-w-none text-sm text-desc_gray mt-2">
-                {stripHtmlTags(transferDetails.details.pickupLocations)}
+                {transferDetails.details.pickupOption === "user" ? (
+                  // For user-defined pickup, show guidelines/instructions
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: transferDetails.details.pickupLocations,
+                    }}
+                  />
+                ) : (
+                  // For admin-defined pickup, show locations as plain text
+                  stripHtmlTags(transferDetails.details.pickupLocations)
+                )}
               </div>
             </div>
 

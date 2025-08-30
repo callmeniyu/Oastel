@@ -559,7 +559,8 @@ export default function CartConfirmationPage() {
                 destination do not accept cards.
               </li>
               <li>
-                • Luggage and large backpacks cannot be brought on the tour.
+                • Luggage upto 20kg is allowed per person for transfers. But for
+                tours luggage and large backpacks cannot be brought.
               </li>
               <li>• Views depend on the weather and cannot be guaranteed.</li>
             </ul>

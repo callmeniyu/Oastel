@@ -168,7 +168,7 @@ export default function BookingInfoPanel({
         </div>
         <div className="text-sm mb-4 flex justify-between">
           <h6 className="font-semibold">
-            {isVehicleBooking ? vehicleName || "Vehicle" : "Persons"}
+            {isVehicleBooking ? "Vehicle" : "Persons"}
           </h6>
           <div className="text-desc_gray space-y-1 flex flex-col items-end">
             {isVehicleBooking ? (

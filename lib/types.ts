@@ -118,6 +118,7 @@ export interface BookingDetailsType {
     // For private transfers
     isVehicleBooking?: boolean
     vehicleSeatCapacity?: number
+    vehicleName?: string
 }
 
 export type BlogType = {

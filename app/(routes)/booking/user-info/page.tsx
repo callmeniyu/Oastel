@@ -505,20 +505,6 @@ export default function BookingUserInfoPage() {
                       No pickup locations configured
                     </div>
                   )}
-                  {/* Always show pickup guidelines */}
-                  {booking.pickupDescription && (
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pickup Guidelines:
-                      </label>
-                      <div
-                        className="prose max-w-none text-sm text-gray-600 leading-relaxed"
-                        dangerouslySetInnerHTML={{
-                          __html: booking.pickupDescription,
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
               ) : (
                 // User-defined pickup location - show input field
@@ -530,34 +516,79 @@ export default function BookingUserInfoPage() {
                     placeholder="Enter your Hostel/Hotel name and address"
                     className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
                   />
-                  {/* Always show pickup guidelines */}
-                  {booking?.pickupDescription && (
+                </div>
+              )}
+
+              {/* Conditional green box based on pickup option */}
+              {booking?.packageType === "transfer" &&
+              booking?.pickupOption === "admin"
+                ? // Admin-defined pickup: show guidelines only (locations already shown as dropdown)
+                  booking?.pickupDescription && (
                     <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Pickup Guidelines:
-                      </label>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {booking.pickupDescription}
-                      </p>
-                    </div>
-                  )}
-                  {booking?.pickupLocations && (
-                    <div className="mt-2">
                       <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
-                        <h5 className="font-medium text-primary_green mb-1 text-sm">
+                        <h5 className="font-medium text-primary_green mb-2 text-sm">
                           Pickup Guidelines:
                         </h5>
                         <div
-                          className="prose max-w-none text-sm text-gray-700"
+                          className="prose max-w-none text-sm text-gray-700 leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: booking.pickupDescription,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                : booking?.packageType === "transfer" &&
+                  booking?.pickupOption === "user"
+                ? // User-defined pickup: show guidelines only (stored in pickupLocations field)
+                  booking?.pickupLocations && (
+                    <div className="mt-3">
+                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
+                        <h5 className="font-medium text-primary_green mb-2 text-sm">
+                          Pickup Guidelines:
+                        </h5>
+                        <div
+                          className="prose max-w-none text-sm text-gray-700 leading-relaxed"
                           dangerouslySetInnerHTML={{
                             __html: booking.pickupLocations,
                           }}
                         />
                       </div>
                     </div>
+                  )
+                : // For tours: show both locations and guidelines if available
+                  (booking?.pickupLocations || booking?.pickupDescription) && (
+                    <div className="mt-3">
+                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
+                        {booking?.pickupLocations && (
+                          <div className="mb-3">
+                            <h5 className="font-medium text-primary_green mb-2 text-sm">
+                              Available Pickup Locations:
+                            </h5>
+                            <div
+                              className="prose max-w-none text-sm text-gray-700"
+                              dangerouslySetInnerHTML={{
+                                __html: booking.pickupLocations,
+                              }}
+                            />
+                          </div>
+                        )}
+                        {booking?.pickupDescription && (
+                          <div>
+                            <h5 className="font-medium text-primary_green mb-2 text-sm">
+                              Pickup Guidelines:
+                            </h5>
+                            <div
+                              className="prose max-w-none text-sm text-gray-700 leading-relaxed"
+                              dangerouslySetInnerHTML={{
+                                __html: booking.pickupDescription,
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </div>
-              )}
             </>
           )}
 
@@ -660,6 +691,9 @@ export default function BookingUserInfoPage() {
               totalPrice={booking.totalPrice}
               packageType={booking.packageType}
               onClick={goToCheckout}
+              isVehicleBooking={booking.isVehicleBooking}
+              vehicleSeatCapacity={booking.vehicleSeatCapacity}
+              vehicleName={booking.vehicleName}
             />
           </div>
         )

@@ -401,6 +401,7 @@ export default function BookingInfoPage() {
         transferDetails?.seatCapacity ||
         transferDetails?.maximumPerson ||
         undefined,
+      vehicleName: transferDetails?.vehicle || "",
     });
     router.push("/booking/user-info");
   };
@@ -561,7 +562,9 @@ export default function BookingInfoPage() {
                       {selectedSlot.minimumPerson > 1 ? "s" : ""} |
                       <span className="font-medium"> Available:</span>{" "}
                       {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
-                      {transferDetails?.type === "Private" ? "units" : "seats"}
+                      {(transferDetails?.type as string) === "Private"
+                        ? "units"
+                        : "seats"}
                     </p>
                     <p className="text-xs text-green-600 mt-1">
                       {isFirstBooking

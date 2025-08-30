@@ -447,7 +447,11 @@ export default function BookingConfirmationPage() {
               Carry cash for entrance fees, as most entry points at the
               destination do not accept cards.
             </li>
-            <li>Luggage and large backpacks cannot be brought on the tour.</li>
+            <li>
+              {booking.packageType === "transfer"
+                ? "Luggage upto 20kg is allowed per person."
+                : "Luggage and large backpacks cannot be brought on the tour."}
+            </li>
             <li>Views depend on the weather and cannot be guaranteed.</li>
           </ul>
         </div>

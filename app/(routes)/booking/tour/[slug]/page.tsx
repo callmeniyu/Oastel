@@ -509,10 +509,11 @@ export default function BookingInfoPage() {
       packageType: "tour",
       image: tourDetails.image || "",
       transport: tourDetails.type === "private" ? "Private" : undefined,
-      pickupLocations:
-        tourDetails.details.pickupGuidelines ||
-        tourDetails.details.pickupLocation ||
-        "",
+      // Set pickup locations (HTML content from pickupLocation field)
+      pickupLocations: tourDetails.details.pickupLocation || "",
+      // Set pickup guidelines/description (from pickupGuidelines or note field)
+      pickupDescription:
+        tourDetails.details.pickupGuidelines || tourDetails.details.note || "",
     });
     router.push("/booking/user-info");
   };
