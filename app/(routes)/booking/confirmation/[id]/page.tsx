@@ -25,6 +25,9 @@ interface BookingDetails {
     to?: string;
     image?: string;
     type?: string;
+    details?: {
+      pickupGuidelines?: string;
+    };
   };
   date: string;
   time: string;
@@ -252,7 +255,20 @@ export default function BookingConfirmationPage() {
         const data = await response.json();
 
         if (data.success && data.data) {
-          setBooking(data.data);
+          // Extract pickup guidelines from packageId details if available
+          const bookingData = { ...data.data };
+          if (bookingData.packageId?.details?.pickupGuidelines) {
+            bookingData.pickupGuidelines =
+              bookingData.packageId.details.pickupGuidelines;
+          } else if (
+            bookingData.packageType === "transfer" &&
+            bookingData.packageId?.details?.pickupDescription
+          ) {
+            // Fallback for legacy transfers that use pickupDescription
+            bookingData.pickupGuidelines =
+              bookingData.packageId.details.pickupDescription;
+          }
+          setBooking(bookingData);
         } else {
           showToast({
             type: "error",
@@ -455,6 +471,22 @@ export default function BookingConfirmationPage() {
             <li>Views depend on the weather and cannot be guaranteed.</li>
           </ul>
         </div>
+
+        {/* Pickup Guidelines */}
+        {booking.packageId?.details?.pickupGuidelines && (
+          <div className="bg-green-50 border-l-4 border-green-400 p-6 mb-6">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-green-600" />
+              Pickup Guidelines:
+            </h3>
+            <div
+              className="text-gray-700 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: booking.packageId.details.pickupGuidelines,
+              }}
+            />
+          </div>
+        )}
 
         {/* Policies removed as requested */}
       </div>

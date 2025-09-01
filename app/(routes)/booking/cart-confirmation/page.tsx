@@ -26,6 +26,7 @@ interface BookingDetails {
   children: number;
   totalPrice: number;
   pickupLocation: string;
+  pickupGuidelines?: string;
   contactInfo: {
     name: string;
     email: string;
@@ -267,6 +268,13 @@ export default function CartConfirmationPage() {
               phone: "",
             },
             createdAt: data.createdAt,
+            // Extract pickup guidelines from packageId details
+            pickupGuidelines:
+              data.packageId?.details?.pickupGuidelines ||
+              (data.packageType === "transfer"
+                ? data.packageId?.details?.pickupDescription
+                : "") ||
+              "",
           };
         } catch (err) {
           console.warn(`Warning: booking ${id} failed to load`, err);
@@ -488,6 +496,22 @@ export default function CartConfirmationPage() {
                           {stripHtmlTags(booking.pickupLocation || "")}
                         </span>
                       </div>
+
+                      {/* Pickup Guidelines */}
+                      {booking.pickupGuidelines && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                          <h5 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            Pickup Guidelines:
+                          </h5>
+                          <div
+                            className="text-green-700 text-sm leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: booking.pickupGuidelines,
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* Contact Info */}

@@ -519,76 +519,78 @@ export default function BookingUserInfoPage() {
                 </div>
               )}
 
-              {/* Conditional green box based on pickup option */}
-              {booking?.packageType === "transfer" &&
-              booking?.pickupOption === "admin"
-                ? // Admin-defined pickup: show guidelines only (locations already shown as dropdown)
-                  booking?.pickupDescription && (
-                    <div className="mt-3">
-                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
-                        <h5 className="font-medium text-primary_green mb-2 text-sm">
-                          Pickup Guidelines:
-                        </h5>
-                        <div
-                          className="prose max-w-none text-sm text-gray-700 leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: booking.pickupDescription,
-                          }}
-                        />
+              {/* Display pickup guidelines/locations */}
+              {(() => {
+                // For transfers: Show only pickup guidelines
+                if (booking?.packageType === "transfer") {
+                  const transferGuidelines =
+                    booking?.pickupOption === "admin"
+                      ? (booking as any)?.pickupDescription
+                      : booking?.pickupLocations;
+
+                  if (transferGuidelines) {
+                    return (
+                      <div className="mt-3">
+                        <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
+                          <h5 className="font-medium text-primary_green mb-2 text-sm">
+                            Pickup Guidelines:
+                          </h5>
+                          <div
+                            className="prose max-w-none text-sm text-gray-700 leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: transferGuidelines,
+                            }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )
-                : booking?.packageType === "transfer" &&
-                  booking?.pickupOption === "user"
-                ? // User-defined pickup: show guidelines only (stored in pickupLocations field)
-                  booking?.pickupLocations && (
-                    <div className="mt-3">
-                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
-                        <h5 className="font-medium text-primary_green mb-2 text-sm">
-                          Pickup Guidelines:
-                        </h5>
-                        <div
-                          className="prose max-w-none text-sm text-gray-700 leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: booking.pickupLocations,
-                          }}
-                        />
+                    );
+                  }
+                }
+
+                // For tours: Show both pickup locations and pickup guidelines
+                if (booking?.packageType === "tour") {
+                  const tourLocations = booking?.pickupLocations;
+                  const tourGuidelines = (booking as any)?.details
+                    ?.pickupGuidelines;
+
+                  if (tourLocations || tourGuidelines) {
+                    return (
+                      <div className="mt-3">
+                        <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
+                          {tourLocations && (
+                            <div className="mb-3">
+                              <h5 className="font-medium text-primary_green mb-2 text-sm">
+                                Available Pickup Locations:
+                              </h5>
+                              <div
+                                className="prose max-w-none text-sm text-gray-700"
+                                dangerouslySetInnerHTML={{
+                                  __html: tourLocations,
+                                }}
+                              />
+                            </div>
+                          )}
+                          {tourGuidelines && (
+                            <div>
+                              <h5 className="font-medium text-primary_green mb-2 text-sm">
+                                Pickup Guidelines:
+                              </h5>
+                              <div
+                                className="prose max-w-none text-sm text-gray-700 leading-relaxed"
+                                dangerouslySetInnerHTML={{
+                                  __html: tourGuidelines,
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )
-                : // For tours: show both locations and guidelines if available
-                  (booking?.pickupLocations || booking?.pickupDescription) && (
-                    <div className="mt-3">
-                      <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
-                        {booking?.pickupLocations && (
-                          <div className="mb-3">
-                            <h5 className="font-medium text-primary_green mb-2 text-sm">
-                              Available Pickup Locations:
-                            </h5>
-                            <div
-                              className="prose max-w-none text-sm text-gray-700"
-                              dangerouslySetInnerHTML={{
-                                __html: booking.pickupLocations,
-                              }}
-                            />
-                          </div>
-                        )}
-                        {booking?.pickupDescription && (
-                          <div>
-                            <h5 className="font-medium text-primary_green mb-2 text-sm">
-                              Pickup Guidelines:
-                            </h5>
-                            <div
-                              className="prose max-w-none text-sm text-gray-700 leading-relaxed"
-                              dangerouslySetInnerHTML={{
-                                __html: booking.pickupDescription,
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                    );
+                  }
+                }
+
+                return null;
+              })()}
             </>
           )}
 
