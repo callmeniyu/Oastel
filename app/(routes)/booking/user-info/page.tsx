@@ -135,15 +135,15 @@ export default function BookingUserInfoPage() {
     }
 
     if (isCartBooking) {
-      // Handle cart booking
-      return handleCartBooking();
+      // Handle cart booking payment flow
+      return handleCartBookingPayment();
     }
 
-    // Handle single booking (existing logic)
-    return handleSingleBooking();
+    // Handle single booking payment flow
+    return handleSingleBookingPayment();
   };
 
-  const handleCartBooking = async () => {
+  const handleCartBookingPayment = async () => {
     if (!cart || cart.items.length === 0) {
       showToast({
         type: "error",
@@ -163,92 +163,57 @@ export default function BookingUserInfoPage() {
       return;
     }
 
-    console.log("User session data:", {
-      email: user.email,
-      name: user.name,
-      hasCart: !!cart,
-      cartItemCount: cart?.items?.length || 0,
-    });
+    console.log("[CART_PAYMENT] Preparing cart payment flow...");
 
     try {
       setIsLoading(true);
 
-      const bookingRequest = {
-        userEmail: user.email,
-        contactInfo: {
-          name: form.name,
-          email: form.email,
-          phone: `${form.countryCode}${form.phone}`,
-          whatsapp: `${form.countryCode}${form.phone}`,
-        },
+      const contactInfo = {
+        name: form.name,
+        email: form.email,
+        phone: `${form.countryCode}${form.phone}`,
+        whatsapp: `${form.countryCode}${form.phone}`,
       };
 
-      console.log("Cart booking request:", bookingRequest);
+      const cartData = {
+        ...cart,
+        userEmail: user.email,
+      };
 
-      // Book all cart items using cart booking API
-      const result = await cartBookingApi.bookCartItems(bookingRequest);
+      // Calculate total with bank charges
+      const subtotal = getCartTotal();
+      const bankCharge = subtotal * 0.028;
+      const totalAmount = subtotal + bankCharge;
 
-      if (result.success) {
-        showToast({
-          type: "success",
-          title: "Bookings Confirmed!",
-          message: `${result.totalBookings} booking(s) have been successfully created`,
-        });
+      console.log("[CART_PAYMENT] Cart payment data:", {
+        subtotal,
+        bankCharge,
+        totalAmount,
+        itemCount: cart.items.length,
+      });
 
-        // Clear the cart after successful booking
-        // Redirect first, then clear the cart to avoid the local useEffect
-        // (which redirects to /cart when the cart becomes empty) from
-        // racing with this navigation.
-        if (result.bookingIds.length > 0) {
-          const target = `/booking/cart-confirmation?bookings=${result.bookingIds.join(
-            ","
-          )}`;
-          // Set skip flag so the useEffect won't redirect to /cart when we clear the cart.
-          skipCartRedirectRef.current = true;
-          // Trigger navigation to the confirmation page.
-          // Note: in Next's app-router push may not be awaitable; we still set the skip flag
-          // to avoid immediate redirect caused by clearing the cart.
-          await router.push(target);
-          try {
-            await clearCart();
-          } catch (err) {
-            console.error("Failed to clear cart after booking:", err);
-          } finally {
-            // Clear the skip flag after a short delay to ensure navigation completed.
-            setTimeout(() => (skipCartRedirectRef.current = false), 1000);
-          }
-        } else {
-          skipCartRedirectRef.current = true;
-          await router.push("/bookings");
-          try {
-            await clearCart();
-          } catch (err) {
-            console.error("Failed to clear cart after booking:", err);
-          } finally {
-            setTimeout(() => (skipCartRedirectRef.current = false), 1000);
-          }
-        }
-      } else {
-        showToast({
-          type: "error",
-          title: "Booking Failed",
-          message: "Failed to create bookings",
-        });
-      }
+      // Redirect to payment page with cart data
+      const paymentUrl = `/payment?${new URLSearchParams({
+        amount: totalAmount.toFixed(2),
+        cartData: encodeURIComponent(JSON.stringify(cartData)),
+        contactInfo: encodeURIComponent(JSON.stringify(contactInfo)),
+      })}`;
+
+      console.log("[CART_PAYMENT] Redirecting to payment:", paymentUrl);
+      router.push(paymentUrl);
     } catch (error: any) {
-      console.error("Cart booking error:", error);
+      console.error("Cart payment preparation error:", error);
       showToast({
         type: "error",
         title: "Error",
-        message:
-          error.message || "An error occurred while creating your bookings",
+        message: error.message || "An error occurred while preparing payment",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSingleBooking = async () => {
+  const handleSingleBookingPayment = async () => {
     // Check pickup location based on transfer type
     if (
       booking?.packageType === "transfer" &&
@@ -280,10 +245,12 @@ export default function BookingUserInfoPage() {
       return;
     }
 
+    console.log("[SINGLE_PAYMENT] Preparing single booking payment flow...");
+
     try {
       setIsLoading(true);
 
-      // Prepare booking data for API
+      // Prepare booking data for payment
       const bookingData = {
         packageType: booking.packageType,
         packageId: booking.packageId,
@@ -308,108 +275,34 @@ export default function BookingUserInfoPage() {
         },
         subtotal: booking.totalPrice,
         total: booking.totalPrice,
-        paymentInfo: {
-          amount: booking.totalPrice,
-          bankCharge: 0,
-          currency: "MYR",
-          paymentStatus: "pending",
-        },
       };
 
-      // Create booking via API
-      console.log("Creating booking with data:", bookingData); // Debug log
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/bookings`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(bookingData),
-        }
-      );
+      // Calculate total with bank charges
+      const subtotal = booking.totalPrice;
+      const bankCharge = subtotal * 0.028;
+      const totalAmount = subtotal + bankCharge;
 
-      const result = await response.json();
-      console.log("Booking creation response:", result); // Debug log
+      console.log("[SINGLE_PAYMENT] Single booking payment data:", {
+        subtotal,
+        bankCharge,
+        totalAmount,
+        packageType: booking.packageType,
+      });
 
-      if (result.success) {
-        showToast({
-          type: "success",
-          title: "Booking Confirmed!",
-          message: "Your booking has been successfully created",
-        });
+      // Redirect to payment page with booking data
+      const paymentUrl = `/payment?${new URLSearchParams({
+        amount: totalAmount.toFixed(2),
+        bookingData: encodeURIComponent(JSON.stringify(bookingData)),
+      })}`;
 
-        // Get the booking ID from the result - handle nested structure
-        const bookingId =
-          result.data?.data?._id ||
-          result.data?._id ||
-          result.data?.id ||
-          result._id ||
-          result.id;
-
-        if (bookingId) {
-          // Diagnostic: fetch slots for intended date and previous date to compare booked counts
-          (async () => {
-            try {
-              const bookingDateRaw = booking.date || "";
-              // Normalize bookingDateRaw to YYYY-MM-DD
-              const bookingDateStr = bookingDateRaw.includes("T")
-                ? new Date(bookingDateRaw).toISOString().split("T")[0]
-                : bookingDateRaw;
-
-              const prevDateObj = new Date(bookingDateStr + "T12:00:00.000Z");
-              prevDateObj.setDate(prevDateObj.getDate() - 1);
-              const prevDateStr = prevDateObj.toISOString().split("T")[0];
-
-              const endpoints = [bookingDateStr, prevDateStr];
-              for (const d of endpoints) {
-                const url = `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=${booking.packageType}&packageId=${booking.packageId}&date=${d}`;
-                console.debug("[diagnostic] fetching slots for", d, url);
-                const resp = await fetch(url);
-                const json = await resp.json();
-                console.debug("[diagnostic] slots for", d, json);
-                if (json.success && Array.isArray(json.data)) {
-                  const slot = json.data.find(
-                    (s: any) => s.time === booking.time
-                  );
-                  console.debug(
-                    `[diagnostic] date=${d} time=${booking.time} bookedCount=`,
-                    slot ? slot.bookedCount : "(no slot)"
-                  );
-                }
-              }
-            } catch (err) {
-              console.error(
-                "[diagnostic] failed to fetch diagnostic slots:",
-                err
-              );
-            }
-          })();
-          // Redirect to booking confirmation page with the ID
-          router.push(`/booking/confirmation/${bookingId}`);
-        } else {
-          console.error("No booking ID found in response:", result);
-          showToast({
-            type: "error",
-            title: "Error",
-            message:
-              "Booking created but unable to redirect to confirmation page",
-          });
-          router.push("/");
-        }
-      } else {
-        showToast({
-          type: "error",
-          title: "Booking Failed",
-          message: result.error || "Failed to create booking",
-        });
-      }
-    } catch (error) {
-      console.error("Booking error:", error);
+      console.log("[SINGLE_PAYMENT] Redirecting to payment:", paymentUrl);
+      router.push(paymentUrl);
+    } catch (error: any) {
+      console.error("Single booking payment preparation error:", error);
       showToast({
         type: "error",
         title: "Error",
-        message: "An error occurred while creating your booking",
+        message: error.message || "An error occurred while preparing payment",
       });
     } finally {
       setIsLoading(false);

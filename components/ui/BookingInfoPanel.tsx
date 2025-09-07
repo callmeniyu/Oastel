@@ -275,7 +275,7 @@ export default function BookingInfoPanel({
                   : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
               } text-white text-sm px-4 py-3 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
             >
-              <p>Continue</p>
+              <p>Continue to Payment</p>
             </div>
           </>
         )}

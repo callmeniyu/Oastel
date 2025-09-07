@@ -18,6 +18,7 @@ export interface UserType {
 }
 
 export type FAQType = {
+    id?:number | string
     question: string
     answer: string
     category?: string
