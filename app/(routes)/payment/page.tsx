@@ -7,6 +7,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import CheckoutForm from "@/components/ui/CheckoutForm";
 import { useToast } from "@/context/ToastContext";
 import { paymentApi } from "@/lib/paymentApi";
+import Image from "next/image";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -250,11 +251,16 @@ export default function PaymentPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Secure Payment
             </h1>
-            <p className="text-gray-600">
-              {isCartBooking
-                ? "Complete your cart purchase"
-                : "Complete your booking"}
-            </p>
+            <div className="flex items-center justify-center space-x-2 text-gray-600">
+              <span>Powered by</span>
+              <Image
+                src="/images/stripe-seeklogo.png"
+                alt="Stripe"
+                width={60}
+                height={20}
+                className="h-5 w-12"
+              />
+            </div>
           </div>
 
           <Elements options={options} stripe={stripePromise}>

@@ -7,6 +7,7 @@ import {
   PaymentElement,
   AddressElement,
 } from "@stripe/react-stripe-js";
+import Image from "next/image";
 
 interface CheckoutFormProps {
   onSuccess: (paymentIntent: any) => void;
@@ -36,6 +37,19 @@ export default function CheckoutForm({
     setErrorMessage("");
 
     try {
+      console.log("[CHECKOUT] Validating form...");
+
+      // Submit elements to validate all fields
+      const { error: submitError } = await elements.submit();
+      if (submitError) {
+        console.error("[CHECKOUT] Form validation error:", submitError);
+        setErrorMessage(
+          submitError.message || "Please fill in all required fields"
+        );
+        setLoading(false);
+        return;
+      }
+
       console.log("[CHECKOUT] Processing payment...");
 
       // Confirm the payment
@@ -160,12 +174,43 @@ export default function CheckoutForm({
 
       {/* Payment Methods Info */}
       <div className="text-center text-sm text-gray-500">
-        <p>We accept all major credit and debit cards</p>
-        <div className="flex justify-center space-x-3 mt-2 text-xs">
-          <span>💳 Visa</span>
-          <span>💳 Mastercard</span>
-          <span>💳 American Express</span>
-          <span>💳 Discover</span>
+        <p className="mb-3">We accept all major credit and debit cards</p>
+        <div className="flex justify-center space-x-4">
+          {/* Visa */}
+          <Image
+            src="/images/footer_payment1.png"
+            alt="Visa"
+            width={40}
+            height={24}
+            className="h-12 w-16"
+          />
+
+          {/* Mastercard */}
+          <Image
+            src="/images/mastercard.png"
+            alt="Visa"
+            width={40}
+            height={24}
+            className="h-12 w-16"
+          />
+
+          {/* American Express */}
+          <Image
+            src="/images/American Express Card.png"
+            alt="Visa"
+            width={40}
+            height={24}
+            className="h-12 w-16"
+          />
+
+          {/* Discover */}
+          <Image
+            src="/images/footer_payment2.png"
+            alt="Visa"
+            width={40}
+            height={24}
+            className="h-12 w-16"
+          />
         </div>
       </div>
     </form>
