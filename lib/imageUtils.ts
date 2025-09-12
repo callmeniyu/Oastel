@@ -6,7 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
  * @returns Full URL for the image
  */
 export const resolveImageUrl = (imagePath: string): string => {
-    if (!imagePath) return "/images/placeholder-tour.jpg"
+    if (!imagePath) return ""
 
     // If it's already a full URL (Cloudinary, external, etc.), return as is
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {

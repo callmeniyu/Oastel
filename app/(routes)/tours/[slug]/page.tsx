@@ -204,7 +204,7 @@ export default function TourDetailPage() {
                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
               </div>
               <div
-                className="text-sm text-desc_gray leading-6 space-y-1"
+                className="prose max-w-none text-sm text-desc_gray mt-2"
                 dangerouslySetInnerHTML={{
                   __html: tourDetails.details.itinerary,
                 }}
@@ -220,15 +220,12 @@ export default function TourDetailPage() {
                   Pickup Location
                 </h5>
               </div>
-              <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1">
-                {tourDetails.details.pickupLocation && (
-                  <li
-                    dangerouslySetInnerHTML={{
-                      __html: tourDetails.details.pickupLocation,
-                    }}
-                  />
-                )}
-              </ul>
+              <div
+                className="prose max-w-none text-sm text-desc_gray mt-2"
+                dangerouslySetInnerHTML={{
+                  __html: tourDetails.details.pickupLocation || "",
+                }}
+              />
             </div>
 
             <div className="bg-white border rounded-md p-4 shadow-sm">
@@ -239,8 +236,8 @@ export default function TourDetailPage() {
                 <h5 className="font-semibold text-primary_green">Note</h5>
               </div>
               {tourDetails.details.note && (
-                <p
-                  className="text-sm text-desc_gray space-y-1"
+                <div
+                  className="prose max-w-none text-sm text-desc_gray mt-2"
                   dangerouslySetInnerHTML={{ __html: tourDetails.details.note }}
                 />
               )}

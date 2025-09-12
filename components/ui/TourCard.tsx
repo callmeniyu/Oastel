@@ -56,6 +56,11 @@ export default function TourCard({
   };
   const router = useRouter();
 
+  const truncate = (s?: string, n = 65) => {
+    if (!s) return "";
+    return s.length > n ? s.slice(0, n).trimEnd() + "..." : s;
+  };
+
   const navigate = (e?: MouseEvent | KeyboardEvent) => {
     // allow callers to pass an event; if it's a keyboard event check for Enter
     if (e && "key" in e && (e as KeyboardEvent).key !== "Enter") return;
@@ -103,7 +108,9 @@ export default function TourCard({
             <Tag key={i} tag={tag} />
           ))}
         </div>
-        <p className="text-desc_gray text-sm font-poppins">{description}</p>
+        <p className="text-desc_gray text-sm font-poppins">
+          {truncate(description, 65)}
+        </p>
         <div className="flex justify-between gap-2">
           <div className="flex gap-2 items-center font-semibold">
             <MdAccessTimeFilled

@@ -64,7 +64,9 @@ export default function BookingInfoPanel({
   const { showToast } = useToast();
   const { user, isAuthenticated } = SessionHook();
   const { addToCart, loading: cartLoading } = useCart();
-  const total = adults * adultPrice + children * childPrice;
+  const total = isVehicleBooking
+    ? Number(adultPrice) || 0
+    : adults * adultPrice + children * childPrice;
   const [isPickupModalOpen, setIsPickupModalOpen] = useState(false);
 
   // Utility to strip HTML tags from any input (protect stored pickupLocation)
@@ -166,30 +168,35 @@ export default function BookingInfoPanel({
           <h6 className="font-semibold">Duration</h6>
           <p className="text-desc_gray">{duration} hrs</p>
         </div>
-        <div className="text-sm mb-4 flex justify-between">
-          <h6 className="font-semibold">
-            {isVehicleBooking ? "Vehicle" : "Persons"}
-          </h6>
-          <div className="text-desc_gray space-y-1 flex flex-col items-end">
-            {isVehicleBooking ? (
+        {isVehicleBooking ? (
+          <div className="text-sm mb-4 flex justify-between">
+            <h6 className="font-semibold">Vehicle</h6>
+            <div className="text-desc_gray space-y-1 flex flex-col items-end">
               <div>
                 <p>
-                  {vehicleName || "Private Vehicle"} • Seats:{" "}
-                  {vehicleSeatCapacity || "N/A"}
+                  {vehicleName || "Private Vehicle"} (
+                  {vehicleSeatCapacity || "N/A"} seats)
                 </p>
               </div>
-            ) : type === "private" ? (
-              <div>
-                <p>{adults}x Persons</p>
-              </div>
-            ) : (
-              <div>
-                <p>{adults}x Adults</p>
-                <p>{children}x Children</p>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-sm mb-4 flex justify-between">
+            <h6 className="font-semibold">Persons</h6>
+            <div className="text-desc_gray space-y-1 flex flex-col items-end">
+              {type === "private" ? (
+                <div>
+                  <p>{adults}x Persons</p>
+                </div>
+              ) : (
+                <div>
+                  <p>{adults}x Adults</p>
+                  <p>{children}x Children</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
       <div
         className={`border-y p-5 flex justify-between ${

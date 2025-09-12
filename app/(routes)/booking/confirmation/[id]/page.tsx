@@ -25,6 +25,8 @@ interface BookingDetails {
     to?: string;
     image?: string;
     type?: string;
+    vehicle?: string;
+    seatCapacity?: number;
     details?: {
       pickupGuidelines?: string;
     };
@@ -42,9 +44,10 @@ interface BookingDetails {
   };
   total: number;
   createdAt: string;
-  // Vehicle properties for private transfers
+  // Vehicle properties for private transfers and tours
   isVehicleBooking?: boolean;
   vehicleSeatCapacity?: number;
+  vehicleName?: string;
 }
 
 export default function BookingConfirmationPage() {
@@ -380,9 +383,15 @@ export default function BookingConfirmationPage() {
             </div>
             <div className="flex items-start gap-2">
               <Users className="w-5 h-5 text-primary_green" />
-              {booking.isVehicleBooking ? (
+              {booking.isVehicleBooking ||
+              booking.packageId?.type === "private" ? (
                 <p className="font-semibold">
-                  Vehicle - {booking.vehicleSeatCapacity || "N/A"} seats
+                  Vehicle -{" "}
+                  {booking.vehicleName || booking.packageId?.vehicle || "N/A"} (
+                  {booking.vehicleSeatCapacity ||
+                    booking.packageId?.seatCapacity ||
+                    "N/A"}{" "}
+                  seats)
                 </p>
               ) : (
                 <p className="font-semibold">
@@ -480,7 +489,7 @@ export default function BookingConfirmationPage() {
               Pickup Guidelines:
             </h3>
             <div
-              className="text-gray-700 leading-relaxed"
+              className="prose max-w-none text-gray-700 leading-relaxed"
               dangerouslySetInnerHTML={{
                 __html: booking.packageId.details.pickupGuidelines,
               }}

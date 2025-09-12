@@ -156,9 +156,9 @@ export default async function TransferDetailPage({
                 </div>
                 <h5 className="font-semibold text-primary_green">From</h5>
               </div>
-              <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                <p>{transferDetails.from}</p>
-              </ul>
+              <div className="prose max-w-none text-sm text-desc_gray mt-2">
+                {transferDetails.from}
+              </div>
             </div>
             <div className="bg-white border rounded-md p-4 shadow-sm">
               <div className="flex gap-2 items-center">
@@ -167,9 +167,9 @@ export default async function TransferDetailPage({
                 </div>
                 <h5 className="font-semibold text-primary_green">To</h5>
               </div>
-              <ul className="list-disc ml-5 text-sm text-desc_gray space-y-1 mt-2">
-                <p>{transferDetails.to}</p>
-              </ul>
+              <div className="prose max-w-none text-sm text-desc_gray mt-2">
+                {transferDetails.to}
+              </div>
             </div>
             <div className="bg-white border rounded-md p-4 shadow-sm">
               <div className="flex gap-2 items-center">
@@ -210,7 +210,7 @@ export default async function TransferDetailPage({
                 <h5 className="font-semibold text-primary_green">Itinerary</h5>
               </div>
               <div
-                className="text-sm text-desc_gray leading-6 space-y-1 mt-2"
+                className="prose max-w-none text-sm text-desc_gray mt-2"
                 dangerouslySetInnerHTML={{
                   __html: transferDetails.details.itinerary,
                 }}

@@ -51,6 +51,11 @@ export default function BookingInfoPage() {
   };
 
   const [tourDetails, setTourDetails] = useState<TourType>();
+  const [vehicleDetails, setVehicleDetails] = useState<{
+    name: string;
+    seats: number;
+    units: number;
+  } | null>(null);
   const [selectedDate, setSelectedDate] = useState(() => {
     // Initialize with tomorrow to avoid initial load with today's date
     const tomorrow = new Date();
@@ -148,6 +153,58 @@ export default function BookingInfoPage() {
         if (data.success) {
           const tour = data.data;
           setTourDetails(tour);
+
+          // Fetch vehicle details if it's a private tour
+          if (tour.type === "private" && tour.vehicle) {
+            try {
+              const vehicleIdentifier = String(tour.vehicle);
+
+              // If the stored vehicle looks like a Mongo ObjectId, try ID lookup first
+              const isObjectId = /^[0-9a-fA-F]{24}$/.test(vehicleIdentifier);
+
+              if (isObjectId) {
+                const vehicleResponse = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles/${vehicleIdentifier}`
+                );
+                const vehicleData = await vehicleResponse.json();
+                if (vehicleData.success && vehicleData.data) {
+                  setVehicleDetails({
+                    name: vehicleData.data.name,
+                    seats: vehicleData.data.seats,
+                    units: vehicleData.data.units,
+                  });
+                } else {
+                  // fallback to list search below
+                  throw new Error(
+                    "Vehicle not found by id, falling back to list search"
+                  );
+                }
+              } else {
+                // If tour.vehicle stores a name (older data), fetch list and match by name
+                const listRes = await fetch(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles`
+                );
+                const listData = await listRes.json();
+                if (listData.success && Array.isArray(listData.data)) {
+                  const found = listData.data.find(
+                    (v: any) =>
+                      v.name === vehicleIdentifier ||
+                      v._id === vehicleIdentifier
+                  );
+                  if (found) {
+                    setVehicleDetails({
+                      name: found.name,
+                      seats: found.seats,
+                      units: found.units,
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching vehicle details:", error);
+            }
+          }
+
           // Always start with 8 adults for private tours
           const initialAdults =
             tour.type === "private" ? 8 : tour.minimumPerson || 1;
@@ -460,29 +517,42 @@ export default function BookingInfoPage() {
       return;
     }
 
-    const totalGuests = adults + children;
+    // For private tours, skip guest validation since it's vehicle-based
+    if (tourDetails.type !== "private") {
+      const totalGuests = adults + children;
 
-    // Check minimum person requirement for this specific slot - USE minimumPerson
-    if (totalGuests < selectedSlot.minimumPerson) {
-      const isFirstBooking = selectedSlot.bookedCount === 0;
-      showToast({
-        type: "error",
-        title: "Minimum guests required",
-        message: `Minimum ${selectedSlot.minimumPerson} person${
-          selectedSlot.minimumPerson > 1 ? "s" : ""
-        } required for this ${isFirstBooking ? "first booking" : "booking"}`,
-      });
-      return;
-    }
+      // Check minimum person requirement for this specific slot - USE minimumPerson
+      if (totalGuests < selectedSlot.minimumPerson) {
+        const isFirstBooking = selectedSlot.bookedCount === 0;
+        showToast({
+          type: "error",
+          title: "Minimum guests required",
+          message: `Minimum ${selectedSlot.minimumPerson} person${
+            selectedSlot.minimumPerson > 1 ? "s" : ""
+          } required for this ${isFirstBooking ? "first booking" : "booking"}`,
+        });
+        return;
+      }
 
-    if (totalGuests > selectedSlot.capacity - selectedSlot.bookedCount) {
-      showToast({
-        type: "error",
-        title: "Not enough capacity",
-        message:
-          "Selected time slot doesn't have enough capacity for your group",
-      });
-      return;
+      if (totalGuests > selectedSlot.capacity - selectedSlot.bookedCount) {
+        showToast({
+          type: "error",
+          title: "Not enough capacity",
+          message:
+            "Selected time slot doesn't have enough capacity for your group",
+        });
+        return;
+      }
+    } else {
+      // For private tours, check if there are available units
+      if (selectedSlot.capacity - selectedSlot.bookedCount < 1) {
+        showToast({
+          type: "error",
+          title: "No units available",
+          message: "No vehicle units available for this time slot",
+        });
+        return;
+      }
     }
 
     const totalPrice = calculateTotalPrice();
@@ -500,9 +570,10 @@ export default function BookingInfoPage() {
       time: selectedTime,
       type: tourDetails.type || "Private Tour",
       duration: tourDetails.duration || "4-6 hours",
-      adults,
-      children,
-      adultPrice: getAdultPrice(),
+      adults: tourDetails.type === "private" ? 1 : adults, // Set to 1 for private tours for booking system compatibility
+      children: tourDetails.type === "private" ? 0 : children,
+      adultPrice:
+        tourDetails.type === "private" ? tourDetails.newPrice : getAdultPrice(),
       childPrice: tourDetails.childPrice || 0,
       totalPrice: totalPrice,
       total: totalPrice,
@@ -514,6 +585,11 @@ export default function BookingInfoPage() {
       // Set pickup guidelines/description (from pickupGuidelines or note field)
       pickupDescription:
         tourDetails.details.pickupGuidelines || tourDetails.details.note || "",
+      // Add vehicle information for private tours
+      vehicleName:
+        tourDetails.type === "private" ? vehicleDetails?.name : undefined,
+      vehicleSeats:
+        tourDetails.type === "private" ? vehicleDetails?.seats : undefined,
     });
     router.push("/booking/user-info");
   };
@@ -522,7 +598,7 @@ export default function BookingInfoPage() {
   const calculateTotalPrice = () => {
     if (!tourDetails) return 0;
     return tourDetails.type === "private"
-      ? (adults / 8) * (tourDetails.newPrice || 0)
+      ? tourDetails.newPrice || 0 // Full vehicle price for private tours
       : adults * (tourDetails.newPrice || 0) +
           children * (tourDetails.childPrice || 0);
   };
@@ -592,7 +668,13 @@ export default function BookingInfoPage() {
                         <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
                           {isSlotAvailable ? (
-                            <>{availableSeats} seats left</>
+                            <>
+                              {availableSeats}{" "}
+                              {tourDetails?.type === "private"
+                                ? "units"
+                                : "seats"}{" "}
+                              left
+                            </>
                           ) : (
                             "Sold out"
                           )}
@@ -620,47 +702,85 @@ export default function BookingInfoPage() {
         {/* Show guest selection only when a time slot is selected */}
         {selectedTime && (
           <div className="rounded-lg shadow-md p-4 bg-white">
-            <h3 className="text-primary_green text-xl font-bold mb-2">
-              No. of Guests
-            </h3>
-
-            {/* Show minimum requirement for selected slot */}
-            {(() => {
-              const selectedSlot = timeSlots.find(
-                (slot) => slot.time === selectedTime
-              );
-              if (selectedSlot) {
-                const isFirstBooking = selectedSlot.bookedCount === 0;
-                return (
-                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-700">
-                      <span className="font-medium">Selected Time:</span>{" "}
-                      {selectedTime} |
-                      <span className="font-medium"> Minimum Required:</span>{" "}
-                      {selectedSlot.minimumPerson} person
-                      {selectedSlot.minimumPerson > 1 ? "s" : ""} |
-                      <span className="font-medium"> Available:</span>{" "}
-                      {selectedSlot.capacity - selectedSlot.bookedCount} seats
-                    </p>
-                    <p className="text-xs text-green-600 mt-1">
-                      {isFirstBooking
-                        ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
-                        : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
-                    </p>
+            {tourDetails?.type === "private" ? (
+              /* Private Tour Vehicle Information */
+              <>
+                <h3 className="text-primary_green text-xl font-bold mb-2">
+                  Vehicle Details
+                </h3>
+                {vehicleDetails ? (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold text-lg text-gray-800">
+                          {vehicleDetails.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Seats: {vehicleDetails.seats} passengers
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-primary_green">
+                          RM {tourDetails.newPrice}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Price for entire vehicle
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                );
-              }
-              return null;
-            })()}
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-gray-500">Loading vehicle details...</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* Co-Tour Guest Selection */
+              <>
+                <h3 className="text-primary_green text-xl font-bold mb-2">
+                  No. of Guests
+                </h3>
 
-            <div className="space-y-6 border p-3 rounded-lg my-4">
-              {[
-                {
-                  label: tourDetails?.type === "private" ? "Group" : "Adults",
-                  desc: [
-                    tourDetails?.type === "private"
-                      ? "Maximum: 8 persons per group. Increments by 8."
-                      : (() => {
+                {/* Show minimum requirement for selected slot */}
+                {(() => {
+                  const selectedSlot = timeSlots.find(
+                    (slot) => slot.time === selectedTime
+                  );
+                  if (selectedSlot) {
+                    const isFirstBooking = selectedSlot.bookedCount === 0;
+                    return (
+                      <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-700">
+                          <span className="font-medium">Selected Time:</span>{" "}
+                          {selectedTime} |
+                          <span className="font-medium">
+                            {" "}
+                            Minimum Required:
+                          </span>{" "}
+                          {selectedSlot.minimumPerson} person
+                          {selectedSlot.minimumPerson > 1 ? "s" : ""} |
+                          <span className="font-medium"> Available:</span>{" "}
+                          {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
+                          seats
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          {isFirstBooking
+                            ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
+                            : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                <div className="space-y-6 border p-3 rounded-lg my-4">
+                  {[
+                    {
+                      label: "Adults",
+                      desc: [
+                        (() => {
                           const selectedSlot = timeSlots.find(
                             (slot) => slot.time === selectedTime
                           );
@@ -672,127 +792,111 @@ export default function BookingInfoPage() {
                             slotMinimum > 1 ? "s" : ""
                           } for selected time slot.`;
                         })(),
-                  ],
-                  value: adults,
-                  onIncrement: () =>
-                    tourDetails?.type === "private"
-                      ? updateAdults(adults + 8)
-                      : updateAdults(adults + 1),
-                  onDecrement: () =>
-                    tourDetails?.type === "private"
-                      ? updateAdults(adults - 8)
-                      : updateAdults(adults - 1),
-                  disableDecrement:
-                    tourDetails?.type === "private"
-                      ? adults <= 8
-                      : (() => {
-                          const selectedSlot = timeSlots.find(
-                            (slot) => slot.time === selectedTime
-                          );
-                          const slotMinimum = selectedSlot?.minimumPerson || 1;
-                          return adults <= Math.max(1, slotMinimum - children);
-                        })(),
-                  disableIncrement:
-                    totalGuests >= (tourDetails?.maximumPerson || Infinity) ||
-                    totalGuests >= getAvailableCapacity() ||
-                    (tourDetails?.type === "private" &&
-                      adults + 8 > getAvailableCapacity()),
-                  price: getAdultPrice(),
-                },
-                ...(tourDetails?.type !== "private"
-                  ? [
-                      {
-                        label: "Child",
-                        desc: [
-                          "Age between 3 to 7 years. Child seats are not provided",
-                        ],
-                        value: children,
-                        onIncrement: () => updateChildren(children + 1),
-                        onDecrement: () => updateChildren(children - 1),
-                        disableDecrement: children <= 0,
-                        disableIncrement:
-                          totalGuests >=
-                            (tourDetails?.maximumPerson || Infinity) ||
-                          totalGuests >= getAvailableCapacity(),
-                        price: tourDetails?.childPrice || 0,
-                      },
-                    ]
-                  : []),
-              ].map(
-                ({
-                  label,
-                  value,
-                  price,
-                  desc,
-                  onIncrement,
-                  onDecrement,
-                  disableIncrement,
-                  disableDecrement,
-                }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                  >
-                    <div className="flex-1">
-                      <p className="font-semibold">
-                        {label}{" "}
-                        <span className="text-sm text-desc_gray">
-                          {label === "Group"
-                            ? "Group (Price for entire group (1-8 members))"
-                            : `(RM ${price})`}
-                        </span>
-                      </p>
-                      <div className="space-y-1 mt-1">
-                        {desc.map((d, index) => (
-                          <p
-                            key={index}
-                            className="text-xs text-desc_gray font-light"
-                          >
-                            {d}
+                      ],
+                      value: adults,
+                      onIncrement: () => updateAdults(adults + 1),
+                      onDecrement: () => updateAdults(adults - 1),
+                      disableDecrement: (() => {
+                        const selectedSlot = timeSlots.find(
+                          (slot) => slot.time === selectedTime
+                        );
+                        const slotMinimum = selectedSlot?.minimumPerson || 1;
+                        return adults <= Math.max(1, slotMinimum - children);
+                      })(),
+                      disableIncrement:
+                        totalGuests >=
+                          (tourDetails?.maximumPerson || Infinity) ||
+                        totalGuests >= getAvailableCapacity(),
+                      price: getAdultPrice(),
+                    },
+                    {
+                      label: "Child",
+                      desc: [
+                        "Age between 3 to 7 years. Child seats are not provided",
+                      ],
+                      value: children,
+                      onIncrement: () => updateChildren(children + 1),
+                      onDecrement: () => updateChildren(children - 1),
+                      disableDecrement: children <= 0,
+                      disableIncrement:
+                        totalGuests >=
+                          (tourDetails?.maximumPerson || Infinity) ||
+                        totalGuests >= getAvailableCapacity(),
+                      price: tourDetails?.childPrice || 0,
+                    },
+                  ].map(
+                    ({
+                      label,
+                      value,
+                      price,
+                      desc,
+                      onIncrement,
+                      onDecrement,
+                      disableIncrement,
+                      disableDecrement,
+                    }) => (
+                      <div
+                        key={label}
+                        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                      >
+                        <div className="flex-1">
+                          <p className="font-semibold">
+                            {label}{" "}
+                            <span className="text-sm text-desc_gray">
+                              (RM {price})
+                            </span>
                           </p>
-                        ))}
-                      </div>
-                    </div>
+                          <div className="space-y-1 mt-1">
+                            {desc.map((d, index) => (
+                              <p
+                                key={index}
+                                className="text-xs text-desc_gray font-light"
+                              >
+                                {d}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
 
-                    <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
-                      <div className="flex items-center gap-2 border rounded-full">
-                        <button
-                          onClick={onDecrement}
-                          disabled={disableDecrement}
-                          className={`px-3 py-1.5 rounded-l-xl text-lg ${
-                            disableDecrement
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "hover:bg-primary_green hover:text-white"
-                          }`}
-                        >
-                          -
-                        </button>
-                        <span className="min-w-[24px] text-center">
-                          {value}
-                        </span>
-                        <button
-                          onClick={onIncrement}
-                          disabled={disableIncrement}
-                          className={`px-3 py-1.5 rounded-r-xl text-lg ${
-                            disableIncrement
-                              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                              : "hover:bg-primary_green hover:text-white"
-                          }`}
-                        >
-                          +
-                        </button>
-                      </div>
+                        <div className="flex items-center justify-between md:justify-normal gap-6 w-full md:w-auto">
+                          <div className="flex items-center gap-2 border rounded-full">
+                            <button
+                              onClick={onDecrement}
+                              disabled={disableDecrement}
+                              className={`px-3 py-1.5 rounded-l-xl text-lg ${
+                                disableDecrement
+                                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                  : "hover:bg-primary_green hover:text-white"
+                              }`}
+                            >
+                              -
+                            </button>
+                            <span className="min-w-[24px] text-center">
+                              {value}
+                            </span>
+                            <button
+                              onClick={onIncrement}
+                              disabled={disableIncrement}
+                              className={`px-3 py-1.5 rounded-r-xl text-lg ${
+                                disableIncrement
+                                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                  : "hover:bg-primary_green hover:text-white"
+                              }`}
+                            >
+                              +
+                            </button>
+                          </div>
 
-                      <span className="font-semibold text-primary_green min-w-[80px] text-right">
-                        {tourDetails?.type === "private"
-                          ? `RM ${(value / 8) * (tourDetails.newPrice || 0)}`
-                          : `RM ${value * price}`}
-                      </span>
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
+                          <span className="font-semibold text-primary_green min-w-[80px] text-right">
+                            RM {value * price}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -800,14 +904,18 @@ export default function BookingInfoPage() {
         {!selectedTime && (
           <div className="rounded-lg shadow-md p-4 bg-gray-50 border-2 border-dashed border-gray-300">
             <h3 className="text-gray-500 text-xl font-bold mb-2">
-              No. of Guests
+              {tourDetails?.type === "private"
+                ? "Vehicle Details"
+                : "No. of Guests"}
             </h3>
             <div className="text-center py-8">
               <p className="text-gray-500 text-lg">
                 👆 Please select a time slot first
               </p>
               <p className="text-gray-400 text-sm mt-2">
-                Guest selection will appear after choosing your preferred time
+                {tourDetails?.type === "private"
+                  ? "Vehicle information will appear after choosing your preferred time"
+                  : "Guest selection will appear after choosing your preferred time"}
               </p>
             </div>
           </div>
@@ -820,9 +928,13 @@ export default function BookingInfoPage() {
         time={selectedTime}
         type={tourDetails?.type || "Private Tour"}
         duration={tourDetails?.duration || "4-6 hours"}
-        adults={adults}
-        children={children}
-        adultPrice={getAdultPrice()}
+        adults={tourDetails?.type === "private" ? 1 : adults} // Display 1 for private tours (vehicle booking)
+        children={tourDetails?.type === "private" ? 0 : children}
+        adultPrice={
+          tourDetails?.type === "private"
+            ? tourDetails?.newPrice || 0
+            : getAdultPrice()
+        }
         childPrice={tourDetails?.childPrice || 0}
         totalPrice={calculateTotalPrice()}
         onClick={handleContinue}
@@ -833,6 +945,9 @@ export default function BookingInfoPage() {
           pickupOption: "user",
           pickupLocations: "",
         }}
+        isVehicleBooking={tourDetails?.type === "private"}
+        vehicleName={vehicleDetails?.name}
+        vehicleSeatCapacity={vehicleDetails?.seats}
       />
     </div>
   );

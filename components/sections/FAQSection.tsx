@@ -83,8 +83,8 @@ export default function FAQSection({ faqs }: FAQSectionProps) {
                   } text-sm text-desc_gray font-poppins`}
                 >
                   {faq && (
-                    <p
-                      className="text-sm text-desc_gray space-y-1"
+                    <div
+                      className="prose max-w-none text-sm text-desc_gray"
                       dangerouslySetInnerHTML={{ __html: faq.answer }}
                     />
                   )}

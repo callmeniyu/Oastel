@@ -51,6 +51,8 @@ export type TourType = {
     childPrice: number
     minimumPerson: number
     maximumPerson?: number
+    vehicle?: string
+    seatCapacity?: number
     departureTimes: string[]
     label?: "Recommended" | "Popular" | "Best Value" | "Best seller" | null
     details: TourDetailsType
@@ -120,6 +122,7 @@ export interface BookingDetailsType {
     isVehicleBooking?: boolean
     vehicleSeatCapacity?: number
     vehicleName?: string
+    vehicleSeats?: number
 }
 
 export type BlogType = {

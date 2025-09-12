@@ -72,6 +72,11 @@ export default function TransferCard({
   };
   const router = useRouter();
 
+  const truncate = (s?: string, n = 65) => {
+    if (!s) return "";
+    return s.length > n ? s.slice(0, n).trimEnd() + "..." : s;
+  };
+
   const navigate = (e?: MouseEvent | KeyboardEvent) => {
     if (e && "key" in e && (e as KeyboardEvent).key !== "Enter") return;
     router.push(`/transfers/${slug}`);
@@ -118,7 +123,9 @@ export default function TransferCard({
             <Tag key={i} tag={tag} />
           ))}
         </div>
-        <p className="text-desc_gray text-sm font-poppins">{desc}</p>
+        <p className="text-desc_gray text-sm font-poppins">
+          {truncate(desc, 65)}
+        </p>
         <div className="flex justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 items-center font-semibold">
