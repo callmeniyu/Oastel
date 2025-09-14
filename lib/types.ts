@@ -66,6 +66,7 @@ export interface TransferDetails {
     pickupOption: "admin" | "user"
     pickupLocations: string
     dropOffLocations?: string
+    pickupGuidelines?: string
     note?: string
     faq: FAQType[]
 }
@@ -123,6 +124,11 @@ export interface BookingDetailsType {
     vehicleSeatCapacity?: number
     vehicleName?: string
     vehicleSeats?: number
+    // Add details field for transfer/tour specific information
+    details?: {
+        pickupGuidelines?: string
+        note?: string
+    }
 }
 
 export type BlogType = {
@@ -131,6 +137,7 @@ export type BlogType = {
     title: string
     slug: string
     description: string
+    publishDate?: string | Date
     createdAt: Date
     updatedAt: Date
     category: string

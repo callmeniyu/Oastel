@@ -1,14 +1,11 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Tag from "@/components/ui/Tag";
 import TourCard from "@/components/ui/TourCard";
 import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
-import Loader from "@/components/ui/Loader";
 import { FaBookmark } from "react-icons/fa";
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FaClock } from "react-icons/fa6";
@@ -20,102 +17,114 @@ import { transferApi } from "@/lib/transferApi";
 import { TourType } from "@/lib/types";
 import { resolveImageUrl } from "@/lib/imageUtils";
 import { formatBookedCount } from "@/lib/utils";
+import {
+  generateTourMetadata,
+  generateTourStructuredData,
+} from "@/lib/seoUtils";
 
-export default function TourDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+type TourDetailPageProps = {
+  params: { slug: string };
+};
 
-  const [tourDetails, setTourDetails] = useState<TourType | null>(null);
-  const [otherTours, setOtherTours] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Generate metadata for SEO
+export async function generateMetadata({
+  params,
+}: TourDetailPageProps): Promise<Metadata> {
+  try {
+    const response = await tourApi.getTourBySlug(params.slug);
+    const tour = response.data;
 
-  useEffect(() => {
-    const fetchTourData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // Fetch current tour by slug
-        const currentTourResponse = await tourApi.getTourBySlug(slug);
-        setTourDetails(currentTourResponse.data);
-
-        // Fetch both tours and transfers for recommendations
-        const [allToursResponse, allTransfersResponse] = await Promise.all([
-          tourApi.getTours({ limit: 100 }),
-          transferApi.getTransfers({ limit: 100 }),
-        ]);
-
-        // Separate tours and transfers, exclude current tour
-        const availableTours = allToursResponse.data.filter(
-          (tour) => tour.slug !== slug
-        );
-        const availableTransfers = allTransfersResponse.data;
-
-        const shuffle = (arr: any[]) =>
-          [...arr].sort(() => Math.random() - 0.5);
-
-        const selectedTours = shuffle(availableTours).slice(0, 2);
-        const selectedTransfers = shuffle(availableTransfers).slice(0, 2);
-
-        // Interleave selections so UX shows mixed packages
-        const combined: any[] = [];
-        for (
-          let i = 0;
-          i < Math.max(selectedTours.length, selectedTransfers.length);
-          i++
-        ) {
-          if (selectedTours[i]) combined.push(selectedTours[i]);
-          if (selectedTransfers[i]) combined.push(selectedTransfers[i]);
-        }
-
-        setOtherTours(combined);
-      } catch (err) {
-        console.error("Error fetching tour data:", err);
-        setError("Failed to load tour details. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (slug) {
-      fetchTourData();
+    if (!tour) {
+      return {
+        title: "Tour Not Found - Oastel",
+        description: "The requested tour could not be found.",
+      };
     }
-  }, [slug]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader />
-      </div>
-    );
+    return generateTourMetadata(tour);
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Tour - Oastel",
+      description: "Discover amazing tours in Malaysia with Oastel.",
+    };
   }
+}
 
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">{error}</h1>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary_green text-white rounded-lg hover:bg-green-700"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
+// Generate static params for static generation
+export async function generateStaticParams() {
+  try {
+    const response = await tourApi.getTours({ limit: 1000 });
+    return response.data.map((tour: any) => ({
+      slug: tour.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
+}
+
+export default async function TourDetailPage({ params }: TourDetailPageProps) {
+  const { slug } = params;
+
+  // Fetch tour details
+  let tourDetails: TourType | null = null;
+  try {
+    const response = await tourApi.getTourBySlug(slug);
+    tourDetails = response.data;
+  } catch (error) {
+    console.error("Error fetching tour:", error);
+    notFound();
   }
 
   if (!tourDetails) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600">Tour not found</h1>
-        </div>
-      </div>
-    );
+    notFound();
   }
+
+  // Fetch other tours and transfers for recommendations
+  let otherTours: any[] = [];
+  try {
+    const [allToursResponse, allTransfersResponse] = await Promise.all([
+      tourApi.getTours({ limit: 100 }),
+      transferApi.getTransfers({ limit: 100 }),
+    ]);
+
+    // Separate tours and transfers, exclude current tour
+    const availableTours = allToursResponse.data.filter(
+      (tour) => tour.slug !== slug
+    );
+    const availableTransfers = allTransfersResponse.data;
+
+    const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
+
+    const selectedTours = shuffle(availableTours).slice(0, 2);
+    const selectedTransfers = shuffle(availableTransfers).slice(0, 2);
+
+    // Interleave selections so UX shows mixed packages
+    const combined: any[] = [];
+    for (
+      let i = 0;
+      i < Math.max(selectedTours.length, selectedTransfers.length);
+      i++
+    ) {
+      if (selectedTours[i]) combined.push(selectedTours[i]);
+      if (selectedTransfers[i]) combined.push(selectedTransfers[i]);
+    }
+
+    otherTours = combined;
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    // Continue without recommendations
+  }
+
+  // Helper function to strip HTML tags
+  const stripHtmlTags = (html: string) => {
+    if (!html) return "";
+    return html
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 space-y-10 font-poppins">
@@ -331,6 +340,14 @@ export default function TourDetailPage() {
           )}
         </div>
       </section>
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateTourStructuredData(tourDetails)),
+        }}
+      />
     </div>
   );
 }

@@ -205,7 +205,7 @@ export default function TransferFilterBar({
       {/* Transport Types */}
       <div className="border-t pt-4 mb-4">
         <h4 className="font-semibold text-title_black mb-2 text-sm">
-          Type of transport
+          Type of transfers
         </h4>
         <ul className="space-y-1 text-desc_gray text-sm">
           {transportTypes.map((val) => (

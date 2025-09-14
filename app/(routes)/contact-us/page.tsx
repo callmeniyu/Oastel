@@ -1,4 +1,5 @@
 "use client";
+import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -13,6 +14,9 @@ import {
   FaTelegram,
   FaEnvelope,
 } from "react-icons/fa";
+
+// Note: Since this is a client component, metadata should be handled in layout
+// Create a layout.tsx file for this route with metadata
 
 export default function ContactPage() {
   return (

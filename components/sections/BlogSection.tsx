@@ -17,7 +17,7 @@ export default function BlogSection() {
         setLoading(true);
         const response = await blogApi.getBlogs({
           limit: 3,
-          sortBy: "createdAt",
+          sortBy: "publishDate",
           sortOrder: "desc",
         });
         setBlogs(response.data);

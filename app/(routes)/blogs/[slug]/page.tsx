@@ -58,7 +58,7 @@ export default async function BlogDetailsPage({ params }: Props) {
   try {
     // Fetch more blogs to ensure we have at least 4 after filtering out current blog
     const response = await blogApi.getBlogs({
-      sortBy: "createdAt",
+      sortBy: "publishDate",
       sortOrder: "desc",
       limit: 8, // Increased limit to ensure we have enough after filtering
     });
@@ -73,17 +73,15 @@ export default async function BlogDetailsPage({ params }: Props) {
     // Continue with empty array - this won't break the page
   }
 
-  // Create safe date string
+  // Create safe date string (prefer publishDate set in admin)
   let formattedDate = "Unknown date";
   try {
-    formattedDate = new Date(blogDetails.createdAt).toLocaleDateString(
-      "en-GB",
-      {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }
-    );
+    const rawDate = blogDetails.publishDate || blogDetails.createdAt;
+    formattedDate = new Date(rawDate).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   } catch (dateError) {
     console.warn("Date formatting error:", dateError);
   }

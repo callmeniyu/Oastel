@@ -131,7 +131,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 onClick={() => toggleSection("transports")}
                 className="flex items-center justify-between w-full px-3 py-3 rounded-lg hover:bg-primary_green/5 transition-colors"
               >
-                <span className="font-medium text-title_black">Transports</span>
+                <span className="font-medium text-title_black">Transfers</span>
                 {expandedSections.transports ? (
                   <FiChevronUp className="text-primary_green" />
                 ) : (

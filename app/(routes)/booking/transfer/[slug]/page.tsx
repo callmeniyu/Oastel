@@ -402,6 +402,11 @@ export default function BookingInfoPage() {
         transferDetails?.maximumPerson ||
         undefined,
       vehicleName: transferDetails?.vehicle || "",
+      // Include transfer details for pickup guidelines
+      details: {
+        pickupGuidelines: transferDetails.details.pickupGuidelines || "",
+        note: transferDetails.details.note || "",
+      },
     });
     router.push("/booking/user-info");
   };

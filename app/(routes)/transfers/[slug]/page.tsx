@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import Tag from "@/components/ui/Tag";
 import TourCard from "@/components/ui/TourCard";
@@ -13,21 +15,70 @@ import { IoWarningOutline } from "react-icons/io5";
 import { transferApi } from "@/lib/transferApi";
 import { tourApi } from "@/lib/tourApi";
 import { FaBus, FaWalking } from "react-icons/fa";
+import {
+  generateTransferMetadata,
+  generateTransferStructuredData,
+} from "@/lib/seoUtils";
 
 type TransferDetailPageProps = {
   params: { slug: string };
 };
 
+// Generate metadata for SEO
+export async function generateMetadata({
+  params,
+}: TransferDetailPageProps): Promise<Metadata> {
+  try {
+    const response = await transferApi.getTransferBySlug(params.slug);
+    const transfer = response.data;
+
+    if (!transfer) {
+      return {
+        title: "Transfer Not Found - Oastel",
+        description: "The requested transfer could not be found.",
+      };
+    }
+
+    return generateTransferMetadata(transfer);
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Transfer - Oastel",
+      description: "Comfortable transfers across Malaysia with Oastel.",
+    };
+  }
+}
+
+// Generate static params for static generation
+export async function generateStaticParams() {
+  try {
+    const response = await transferApi.getTransfers({ limit: 1000 });
+    return response.data.map((transfer: any) => ({
+      slug: transfer.slug,
+    }));
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
+}
+
 export default async function TransferDetailPage({
   params,
 }: TransferDetailPageProps) {
   const { slug } = params;
+
+  // Fetch transfer details
   let transferDetails = null;
   try {
     const response = await transferApi.getTransferBySlug(slug);
     transferDetails = response.data;
   } catch (error) {
     console.error("Error fetching transfer by slug:", error);
+    notFound();
+  }
+
+  if (!transferDetails) {
+    notFound();
   }
 
   // Utility to strip HTML tags
@@ -362,6 +413,16 @@ export default async function TransferDetailPage({
           )}
         </div>
       </section>
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            generateTransferStructuredData(transferDetails)
+          ),
+        }}
+      />
     </div>
   );
 }

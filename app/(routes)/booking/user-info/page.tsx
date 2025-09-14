@@ -418,7 +418,7 @@ export default function BookingUserInfoPage() {
                 if (booking?.packageType === "transfer") {
                   const transferGuidelines =
                     booking?.pickupOption === "admin"
-                      ? (booking as any)?.pickupDescription
+                      ? (booking as any)?.details?.pickupGuidelines
                       : booking?.pickupLocations;
 
                   if (transferGuidelines) {
