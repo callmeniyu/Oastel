@@ -38,6 +38,32 @@ export function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     const { pathname } = url;
 
+    // Handle specific /service-page/* redirects first
+    if (pathname === "/service-page/oastel-trip-nap") {
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
+    
+    if (pathname === "/service-page/private-guided-mossy-forest-highlands-day-trip") {
+      url.pathname = "/tours/private-full-day-highlands-mossy-forest-discovery";
+      return NextResponse.redirect(url);
+    }
+    
+    if (pathname === "/service-page/full-day-private-land-rover-tour-your-own-group") {
+      url.pathname = "/tours/mossy-forest-full-day-highland-discovery";
+      return NextResponse.redirect(url);
+    }
+    
+    if (pathname === "/service-page/private-highland-escape") {
+      url.pathname = "/tours/private-full-day-highlands-mossy-forest-discovery";
+      return NextResponse.redirect(url);
+    }
+    
+    if (pathname === "/service-page/half-day-land-rover-tour-to-mossy-forest") {
+      url.pathname = "/tours/half-day-mossy-forest-land-rover-trip";
+      return NextResponse.redirect(url);
+    }
+
     // Allow if path is exactly allowed
     if (ALLOWED_EXACT.includes(pathname)) {
       return NextResponse.next();
