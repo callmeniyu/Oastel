@@ -15,6 +15,7 @@ const ALLOWED_PREFIXES = [
   "/transfers",
   "/booking",
   "/bookings",
+  "/payment",
   "/login",
   "/admin",
   "/contact-us",

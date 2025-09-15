@@ -51,9 +51,9 @@ export const metadata: Metadata = {
   },
   category: "travel",
   icons: {
-    icon: "../public/favicons/favicon.ico",
-    shortcut: "../public/favicons/favicon.ico",
-    apple: "../public/favicons/apple-touch-icon.png",
+    icon: "/favicons/favicon.ico",
+    shortcut: "/favicons/favicon.ico",
+    apple: "/favicons/apple-touch-icon.png",
   },
 };
 

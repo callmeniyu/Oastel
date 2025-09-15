@@ -20,15 +20,16 @@ export default function PaymentPage() {
 
   const [clientSecret, setClientSecret] = useState<string>("");
   const [paymentIntentId, setPaymentIntentId] = useState<string>("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false - no initial loading
+  const [paymentIntentCreated, setPaymentIntentCreated] = useState(false);
   const [error, setError] = useState<string>("");
   const [bookingData, setBookingData] = useState<any>(null);
   const [isCartBooking, setIsCartBooking] = useState(false);
 
   useEffect(() => {
-    const initializePayment = async () => {
+    const validatePaymentData = async () => {
       try {
-        console.log("[PAYMENT_PAGE] Initializing payment...");
+        console.log("[PAYMENT_PAGE] Validating payment data...");
 
         // Get payment data from URL params
         const bookingDataParam = searchParams.get("bookingData");
@@ -40,8 +41,6 @@ export default function PaymentPage() {
           throw new Error("Payment amount is missing");
         }
 
-        const amount = parseFloat(amountParam);
-
         if (cartDataParam && contactInfoParam) {
           // Cart booking flow
           console.log("[PAYMENT_PAGE] Processing cart booking payment");
@@ -51,25 +50,6 @@ export default function PaymentPage() {
           const contactInfo = JSON.parse(decodeURIComponent(contactInfoParam));
 
           setBookingData({ cartData, contactInfo });
-
-          const response = await paymentApi.createCartPaymentIntent({
-            amount,
-            cartData,
-            contactInfo,
-          });
-
-          if (response.success && response.data) {
-            setClientSecret(response.data.clientSecret);
-            setPaymentIntentId(response.data.paymentIntentId);
-            console.log(
-              "[PAYMENT_PAGE] Cart payment intent created:",
-              response.data.paymentIntentId
-            );
-          } else {
-            throw new Error(
-              response.error || "Failed to create payment intent"
-            );
-          }
         } else if (bookingDataParam) {
           // Single booking flow
           console.log("[PAYMENT_PAGE] Processing single booking payment");
@@ -77,42 +57,86 @@ export default function PaymentPage() {
 
           const bookingData = JSON.parse(decodeURIComponent(bookingDataParam));
           setBookingData(bookingData);
-
-          const response = await paymentApi.createPaymentIntent({
-            amount,
-            bookingData,
-          });
-
-          if (response.success && response.data) {
-            setClientSecret(response.data.clientSecret);
-            setPaymentIntentId(response.data.paymentIntentId);
-            console.log(
-              "[PAYMENT_PAGE] Single payment intent created:",
-              response.data.paymentIntentId
-            );
-          } else {
-            throw new Error(
-              response.error || "Failed to create payment intent"
-            );
-          }
         } else {
           throw new Error("No booking data found");
         }
       } catch (error: any) {
-        console.error("[PAYMENT_PAGE] Error initializing payment:", error);
+        console.error("[PAYMENT_PAGE] Error validating payment data:", error);
         setError(error.message);
         showToast({
           type: "error",
           title: "Payment Error",
-          message: error.message || "Failed to initialize payment",
+          message: error.message || "Invalid payment data",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
-    initializePayment();
+    validatePaymentData();
   }, [searchParams, showToast]);
+
+  // Create payment intent only when user starts interacting with payment form
+  const createPaymentIntent = async () => {
+    if (paymentIntentCreated || loading) return;
+
+    try {
+      setLoading(true);
+      console.log("[PAYMENT_PAGE] Creating payment intent...");
+
+      const amountParam = searchParams.get("amount");
+      if (!amountParam || !bookingData) {
+        throw new Error("Payment data is incomplete");
+      }
+
+      const amount = parseFloat(amountParam);
+
+      if (isCartBooking) {
+        const response = await paymentApi.createCartPaymentIntent({
+          amount,
+          cartData: bookingData.cartData,
+          contactInfo: bookingData.contactInfo,
+        });
+
+        if (response.success && response.data) {
+          setClientSecret(response.data.clientSecret);
+          setPaymentIntentId(response.data.paymentIntentId);
+          setPaymentIntentCreated(true);
+          console.log(
+            "[PAYMENT_PAGE] Cart payment intent created:",
+            response.data.paymentIntentId
+          );
+        } else {
+          throw new Error(response.error || "Failed to create payment intent");
+        }
+      } else {
+        const response = await paymentApi.createPaymentIntent({
+          amount,
+          bookingData,
+        });
+
+        if (response.success && response.data) {
+          setClientSecret(response.data.clientSecret);
+          setPaymentIntentId(response.data.paymentIntentId);
+          setPaymentIntentCreated(true);
+          console.log(
+            "[PAYMENT_PAGE] Single payment intent created:",
+            response.data.paymentIntentId
+          );
+        } else {
+          throw new Error(response.error || "Failed to create payment intent");
+        }
+      }
+    } catch (error: any) {
+      console.error("[PAYMENT_PAGE] Error creating payment intent:", error);
+      setError(error.message);
+      showToast({
+        type: "error",
+        title: "Payment Error",
+        message: error.message || "Failed to initialize payment",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePaymentSuccess = async (paymentIntent: any) => {
     try {
@@ -190,17 +214,6 @@ export default function PaymentPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
-          <p className="text-gray-600">Setting up secure payment...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -221,11 +234,90 @@ export default function PaymentPage() {
     );
   }
 
+  if (!bookingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading payment data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show start payment button before creating payment intent
+  if (!paymentIntentCreated && !loading) {
+    const amount = parseFloat(searchParams.get("amount") || "0");
+
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Complete Your Payment
+              </h1>
+              <div className="flex items-center justify-center space-x-2 text-gray-600 mb-4">
+                <span>Powered by</span>
+                <Image
+                  src="/images/stripe-seeklogo.png"
+                  alt="Stripe"
+                  width={60}
+                  height={20}
+                  className="h-5 w-12"
+                />
+              </div>
+              <div className="text-3xl font-bold text-primary_green mb-4">
+                RM {amount.toFixed(2)}
+              </div>
+              <p className="text-gray-600 text-sm mb-6">
+                Click "Start Payment" to proceed with secure payment processing.
+                Your payment will only be charged after you complete the card
+                details.
+              </p>
+            </div>
+
+            <button
+              onClick={createPaymentIntent}
+              className="w-full px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90 font-semibold transition-colors"
+            >
+              Start Payment Process
+            </button>
+
+            <button
+              onClick={() => router.back()}
+              className="w-full mt-3 px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up secure payment...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!clientSecret) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600">Unable to initialize payment</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
+          >
+            Go Back
+          </button>
         </div>
       </div>
     );

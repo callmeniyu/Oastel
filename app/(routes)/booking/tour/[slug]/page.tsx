@@ -156,52 +156,74 @@ export default function BookingInfoPage() {
 
           // Fetch vehicle details if it's a private tour
           if (tour.type === "private" && tour.vehicle) {
+            // Always try to resolve vehicle robustly: try ID lookup, then list lookup
+            const vehicleIdentifier = String(tour.vehicle);
+            const isObjectId = /^[0-9a-fA-F]{24}$/.test(vehicleIdentifier);
+
+            let resolved = false;
+
+            // Helper to set vehicle details safely
+            const applyVehicle = (v: any) => {
+              if (v && v.name) {
+                setVehicleDetails({
+                  name: v.name,
+                  seats: v.seats || v.seatCapacity || 0,
+                  units: v.units || 1,
+                });
+                resolved = true;
+              }
+            };
+
             try {
-              const vehicleIdentifier = String(tour.vehicle);
-
-              // If the stored vehicle looks like a Mongo ObjectId, try ID lookup first
-              const isObjectId = /^[0-9a-fA-F]{24}$/.test(vehicleIdentifier);
-
               if (isObjectId) {
-                const vehicleResponse = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles/${vehicleIdentifier}`
-                );
-                const vehicleData = await vehicleResponse.json();
-                if (vehicleData.success && vehicleData.data) {
-                  setVehicleDetails({
-                    name: vehicleData.data.name,
-                    seats: vehicleData.data.seats,
-                    units: vehicleData.data.units,
-                  });
-                } else {
-                  // fallback to list search below
-                  throw new Error(
-                    "Vehicle not found by id, falling back to list search"
+                try {
+                  const vehicleResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles/${vehicleIdentifier}`
                   );
-                }
-              } else {
-                // If tour.vehicle stores a name (older data), fetch list and match by name
-                const listRes = await fetch(
-                  `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles`
-                );
-                const listData = await listRes.json();
-                if (listData.success && Array.isArray(listData.data)) {
-                  const found = listData.data.find(
-                    (v: any) =>
-                      v.name === vehicleIdentifier ||
-                      v._id === vehicleIdentifier
-                  );
-                  if (found) {
-                    setVehicleDetails({
-                      name: found.name,
-                      seats: found.seats,
-                      units: found.units,
-                    });
+                  const vehicleData = await vehicleResponse.json();
+                  if (vehicleData && vehicleData.success && vehicleData.data) {
+                    applyVehicle(vehicleData.data);
                   }
+                } catch (idErr) {
+                  console.warn("Vehicle ID lookup failed:", idErr);
+                }
+              }
+
+              // If not resolved yet, try list lookup (matches by name or id)
+              if (!resolved) {
+                try {
+                  const listRes = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/vehicles`
+                  );
+                  const listData = await listRes.json();
+                  if (
+                    listData &&
+                    listData.success &&
+                    Array.isArray(listData.data)
+                  ) {
+                    const found = listData.data.find(
+                      (v: any) =>
+                        v.name === vehicleIdentifier ||
+                        v._id === vehicleIdentifier ||
+                        String(v._id) === vehicleIdentifier
+                    );
+                    applyVehicle(found);
+                  }
+                } catch (listErr) {
+                  console.warn("Vehicle list lookup failed:", listErr);
                 }
               }
             } catch (error) {
-              console.error("Error fetching vehicle details:", error);
+              console.error("Error resolving vehicle details:", error);
+            }
+
+            // If still not resolved, set a sentinel to avoid indefinite loading
+            if (!resolved) {
+              setVehicleDetails({
+                name: "(Vehicle not available)",
+                seats: 0,
+                units: 0,
+              });
             }
           }
 
