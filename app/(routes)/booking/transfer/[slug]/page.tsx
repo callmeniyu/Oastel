@@ -98,10 +98,10 @@ export default function BookingInfoPage() {
 
         if (response.success && response.data) {
           setTransferDetails(response.data);
-          // Set initial values based on minimumPerson requirement
-          const minimumPersons = response.data.minimumPerson || 1;
-          setAdults(minimumPersons);
-          setTotalGuests(minimumPersons);
+          // IMPORTANT: Always start with 0 guests - let users increment to meet minimum requirements
+          console.log(`🎯 Setting initial guest counts to 0 for transfer`);
+          setAdults(0);
+          setTotalGuests(0);
           setChildren(0);
 
           // Set initial date to next available date with slots
@@ -163,15 +163,15 @@ export default function BookingInfoPage() {
         const slots = Array.isArray(data.data) ? data.data : [];
         setTimeSlots(slots);
 
-        // Auto-select first available time slot only if none selected and slots are available
-        if (slots.length > 0 && !selectedTime) {
-          const firstAvailableSlot = slots.find(
-            (slot: any) =>
-              slot.isAvailable && slot.capacity - slot.bookedCount > 0
-          );
-          if (firstAvailableSlot) {
-            setSelectedTime(firstAvailableSlot.time);
-          }
+        // IMPORTANT: Never auto-select time slots - always let users choose manually
+        console.log(
+          `📋 Loaded ${slots.length} time slots - waiting for user selection. Current selectedTime: "${selectedTime}"`
+        );
+
+        // Explicitly prevent any auto-selection by clearing selectedTime if it somehow got set
+        if (selectedTime && !slots.find((slot) => slot.time === selectedTime)) {
+          console.log(`🧹 Clearing invalid selected time: ${selectedTime}`);
+          setSelectedTime("");
         }
 
         // Clear selected time if it's no longer available
@@ -227,7 +227,7 @@ export default function BookingInfoPage() {
 
     const newTotal = newCount + children;
     if (
-      newCount >= Math.max(1, minimumRequired - children) && // Ensure adults + children meets minimum
+      newCount >= 0 && // Allow starting from 0
       newTotal <= (transferDetails.maximumPerson || Infinity) &&
       newTotal <= availableCapacity
     ) {
@@ -251,7 +251,7 @@ export default function BookingInfoPage() {
     const newTotal = adults + newCount;
 
     if (
-      newTotal >= minimumRequired && // Ensure total meets minimum requirement
+      newCount >= 0 && // Allow starting from 0
       newTotal <= (transferDetails.maximumPerson || Infinity) &&
       newTotal <= availableCapacity
     ) {
@@ -280,31 +280,31 @@ export default function BookingInfoPage() {
     return selectedSlot.capacity - selectedSlot.bookedCount;
   };
 
-  // Effect to handle slot selection and reset adults to minimum when slot changes
-  useEffect(() => {
-    if (selectedTime && timeSlots.length > 0 && transferDetails) {
-      const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
-      if (selectedSlot) {
-        const slotMinimum = selectedSlot.minimumPerson || 1;
-        const currentTotal = adults + children;
-
-        console.log(
-          `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
-        );
-
-        // Always reset adults to slot minimum when slot changes (unless user has manually set more)
-        // This ensures adults start at the correct value for each slot
-        if (adults !== slotMinimum) {
-          const newAdults = Math.max(slotMinimum, 1);
-          console.log(
-            `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
-          );
-          setAdults(newAdults);
-          setTotalGuests(newAdults + children);
-        }
-      }
-    }
-  }, [selectedTime, timeSlots, transferDetails]); // Removed children dependency to reset properly
+  // Remove the auto-reset behavior - let users manage guest counts manually
+  // useEffect(() => {
+  //   if (selectedTime && timeSlots.length > 0 && transferDetails) {
+  //     const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+  //     if (selectedSlot) {
+  //       const slotMinimum = selectedSlot.minimumPerson || 1;
+  //       const currentTotal = adults + children;
+  //
+  //       console.log(
+  //         `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
+  //       );
+  //
+  //       // Always reset adults to slot minimum when slot changes (unless user has manually set more)
+  //       // This ensures adults start at the correct value for each slot
+  //       if (adults !== slotMinimum) {
+  //         const newAdults = Math.max(slotMinimum, 1);
+  //         console.log(
+  //           `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
+  //         );
+  //         setAdults(newAdults);
+  //         setTotalGuests(newAdults + children);
+  //       }
+  //     }
+  //   }
+  // }, [selectedTime, timeSlots, transferDetails]); // Removed children dependency to reset properly
 
   const handleContinue = () => {
     if (!transferDetails) return;
@@ -342,13 +342,12 @@ export default function BookingInfoPage() {
 
     // Check minimum person requirement for this specific slot - USE minimumPerson
     if (totalGuests < selectedSlot.minimumPerson) {
-      const isFirstBooking = selectedSlot.bookedCount === 0;
       showToast({
         type: "error",
         title: "Minimum guests required",
-        message: `Minimum ${selectedSlot.minimumPerson} person${
+        message: `Please select at least ${selectedSlot.minimumPerson} guest${
           selectedSlot.minimumPerson > 1 ? "s" : ""
-        } required for this ${isFirstBooking ? "first booking" : "booking"}`,
+        } for this time slot. Current selection: ${totalGuests}`,
       });
       return;
     }
@@ -600,30 +599,11 @@ export default function BookingInfoPage() {
                 [
                   {
                     label: "Adults",
-                    desc: [
-                      (() => {
-                        const selectedSlot = timeSlots.find(
-                          (slot) => slot.time === selectedTime
-                        );
-                        const slotMinimum =
-                          selectedSlot?.minimumPerson ||
-                          transferDetails?.minimumPerson ||
-                          1;
-                        return `Minimum: ${slotMinimum} person${
-                          slotMinimum > 1 ? "s" : ""
-                        } for selected time slot.`;
-                      })(),
-                    ],
+                    desc: ["Select the number of adults for your transfer"],
                     value: adults,
                     onIncrement: () => updateAdults(adults + 1),
                     onDecrement: () => updateAdults(adults - 1),
-                    disableDecrement: (() => {
-                      const selectedSlot = timeSlots.find(
-                        (slot) => slot.time === selectedTime
-                      );
-                      const slotMinimum = selectedSlot?.minimumPerson || 1;
-                      return adults <= Math.max(1, slotMinimum - children);
-                    })(),
+                    disableDecrement: adults <= 0,
                     disableIncrement:
                       totalGuests >=
                       (transferDetails?.maximumPerson || Infinity),
@@ -638,16 +618,7 @@ export default function BookingInfoPage() {
                           value: children,
                           onIncrement: () => updateChildren(children + 1),
                           onDecrement: () => updateChildren(children - 1),
-                          disableDecrement: (() => {
-                            const selectedSlot = timeSlots.find(
-                              (slot) => slot.time === selectedTime
-                            );
-                            const slotMinimum =
-                              selectedSlot?.minimumPerson || 1;
-                            return (
-                              children <= 0 || adults + children <= slotMinimum
-                            );
-                          })(),
+                          disableDecrement: children <= 0,
                           disableIncrement:
                             totalGuests >=
                             (transferDetails?.maximumPerson || Infinity),
@@ -776,7 +747,23 @@ export default function BookingInfoPage() {
         onClick={handleContinue}
         packageType="transfer"
         packageId={transferDetails?._id}
-        disabled={!selectedTime || isLoading}
+        disabled={
+          !selectedTime ||
+          isLoading ||
+          (() => {
+            // For private transfers, no guest validation needed (vehicle booking)
+            if (transferDetails?.type === "Private") return false;
+
+            // For shared transfers, check minimum guest requirement
+            const selectedSlot = timeSlots.find(
+              (slot) => slot.time === selectedTime
+            );
+            if (!selectedSlot) return true;
+
+            const totalGuests = adults + children;
+            return totalGuests < selectedSlot.minimumPerson;
+          })()
+        }
         transferDetails={
           transferDetails
             ? {

@@ -227,9 +227,12 @@ export default function BookingInfoPage() {
             }
           }
 
-          // Always start with 8 adults for private tours
-          const initialAdults =
-            tour.type === "private" ? 8 : tour.minimumPerson || 1;
+          // IMPORTANT: Start guest counts correctly based on tour type
+          // Private tours: 8 adults (vehicle booking), Regular tours: 0 adults (user must select)
+          const initialAdults = tour.type === "private" ? 8 : 0;
+          console.log(
+            `🎯 Setting initial adults count to: ${initialAdults} (tour type: ${tour.type})`
+          );
           setAdults(initialAdults);
           setTotalGuests(initialAdults);
 
@@ -334,26 +337,15 @@ export default function BookingInfoPage() {
 
         setTimeSlots(slots);
 
-        // Auto-select first available slot if none is currently selected
-        if (slots.length > 0 && !selectedTime) {
-          const firstAvailableSlot = slots.find(
-            (slot: TimeSlot) =>
-              slot.isAvailable && slot.capacity - slot.bookedCount > 0
-          );
-          if (firstAvailableSlot) {
-            console.log(
-              `🎯 Auto-selecting first available slot: ${firstAvailableSlot.time}`
-            );
-            setSelectedTime(firstAvailableSlot.time);
-          } else {
-            console.log(`❌ No available slots found for auto-selection`);
-          }
-        } else if (selectedTime) {
-          console.log(
-            `⏸️ Skipping auto-selection - slot already selected: ${selectedTime}`
-          );
-        } else if (slots.length === 0) {
-          console.log(`⏸️ Skipping auto-selection - no slots available`);
+        // IMPORTANT: Never auto-select time slots - always let users choose manually
+        console.log(
+          `📋 Loaded ${slots.length} time slots - waiting for user selection. Current selectedTime: "${selectedTime}"`
+        );
+
+        // Explicitly prevent any auto-selection by clearing selectedTime if it somehow got set
+        if (selectedTime && !slots.find((slot) => slot.time === selectedTime)) {
+          console.log(`🧹 Clearing invalid selected time: ${selectedTime}`);
+          setSelectedTime("");
         }
 
         // Clear selected time if it's no longer available
@@ -402,31 +394,31 @@ export default function BookingInfoPage() {
     return () => clearInterval(autoRefreshInterval);
   }, [selectedDate, tourDetails?._id, showToast]);
 
-  // Update adults count when slot is selected to meet minimum requirement
-  useEffect(() => {
-    if (selectedTime && timeSlots.length > 0 && tourDetails) {
-      const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
-      if (selectedSlot && tourDetails.type !== "private") {
-        const slotMinimum = selectedSlot.minimumPerson;
-        const currentTotal = adults + children;
-
-        console.log(
-          `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
-        );
-
-        // Always reset adults to slot minimum when slot changes (unless user has manually set more)
-        // This ensures adults start at the correct value for each slot
-        if (adults !== slotMinimum) {
-          const newAdults = Math.max(slotMinimum, 1);
-          console.log(
-            `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
-          );
-          setAdults(newAdults);
-          setTotalGuests(newAdults + children);
-        }
-      }
-    }
-  }, [selectedTime, timeSlots, tourDetails]); // Removed children dependency to reset properly
+  // Remove the auto-reset behavior - let users manage guest counts manually
+  // useEffect(() => {
+  //   if (selectedTime && timeSlots.length > 0 && tourDetails) {
+  //     const selectedSlot = timeSlots.find((slot) => slot.time === selectedTime);
+  //     if (selectedSlot && tourDetails.type !== "private") {
+  //       const slotMinimum = selectedSlot.minimumPerson;
+  //       const currentTotal = adults + children;
+  //
+  //       console.log(
+  //         `🔍 Slot selected: ${selectedTime}, SlotMinimum: ${slotMinimum}, CurrentAdults: ${adults}, CurrentChildren: ${children}, CurrentTotal: ${currentTotal}`
+  //       );
+  //
+  //       // Always reset adults to slot minimum when slot changes (unless user has manually set more)
+  //       // This ensures adults start at the correct value for each slot
+  //       if (adults !== slotMinimum) {
+  //         const newAdults = Math.max(slotMinimum, 1);
+  //         console.log(
+  //           `🔄 Resetting adults from ${adults} to ${newAdults} for slot minimum (${slotMinimum})`
+  //         );
+  //         setAdults(newAdults);
+  //         setTotalGuests(newAdults + children);
+  //       }
+  //     }
+  //   }
+  // }, [selectedTime, timeSlots, tourDetails]); // Removed children dependency to reset properly
 
   // Calculate price per person for private tours (newPrice / 8)
   const getAdultPrice = () => {
@@ -472,7 +464,7 @@ export default function BookingInfoPage() {
     } else {
       const newTotal = newCount + children;
       if (
-        newCount >= Math.max(1, minimumRequired - children) && // Ensure adults + children meets minimum
+        newCount >= 0 && // Allow starting from 0
         newTotal <= (tourDetails.maximumPerson || Infinity) &&
         newTotal <= availableCapacity
       ) {
@@ -497,7 +489,7 @@ export default function BookingInfoPage() {
     const newTotal = adults + newCount;
 
     if (
-      newTotal >= minimumRequired && // Ensure total meets minimum requirement
+      newCount >= 0 && // Allow starting from 0
       newTotal <= (tourDetails.maximumPerson || Infinity) &&
       newTotal <= availableCapacity
     ) {
@@ -519,12 +511,22 @@ export default function BookingInfoPage() {
   const handleContinue = () => {
     if (!tourDetails) return;
 
-    // Check if date and time are selected
+    // Check if date is selected
     if (!selectedDate) {
       showToast({
         type: "error",
         title: "Date Required",
         message: "Please select a date for your booking",
+      });
+      return;
+    }
+
+    // Check if time is selected
+    if (!selectedTime) {
+      showToast({
+        type: "error",
+        title: "Time Required",
+        message: "Please select a time slot for your booking",
       });
       return;
     }
@@ -545,13 +547,12 @@ export default function BookingInfoPage() {
 
       // Check minimum person requirement for this specific slot - USE minimumPerson
       if (totalGuests < selectedSlot.minimumPerson) {
-        const isFirstBooking = selectedSlot.bookedCount === 0;
         showToast({
           type: "error",
           title: "Minimum guests required",
-          message: `Minimum ${selectedSlot.minimumPerson} person${
+          message: `Please select at least ${selectedSlot.minimumPerson} guest${
             selectedSlot.minimumPerson > 1 ? "s" : ""
-          } required for this ${isFirstBooking ? "first booking" : "booking"}`,
+          } for this time slot. Current selection: ${totalGuests}`,
         });
         return;
       }
@@ -801,30 +802,11 @@ export default function BookingInfoPage() {
                   {[
                     {
                       label: "Adults",
-                      desc: [
-                        (() => {
-                          const selectedSlot = timeSlots.find(
-                            (slot) => slot.time === selectedTime
-                          );
-                          const slotMinimum =
-                            selectedSlot?.minimumPerson ||
-                            tourDetails?.minimumPerson ||
-                            1;
-                          return `Minimum: ${slotMinimum} person${
-                            slotMinimum > 1 ? "s" : ""
-                          } for selected time slot.`;
-                        })(),
-                      ],
+                      desc: ["Select the number of adults for your tour"],
                       value: adults,
                       onIncrement: () => updateAdults(adults + 1),
                       onDecrement: () => updateAdults(adults - 1),
-                      disableDecrement: (() => {
-                        const selectedSlot = timeSlots.find(
-                          (slot) => slot.time === selectedTime
-                        );
-                        const slotMinimum = selectedSlot?.minimumPerson || 1;
-                        return adults <= Math.max(1, slotMinimum - children);
-                      })(),
+                      disableDecrement: adults <= 0,
                       disableIncrement:
                         totalGuests >=
                           (tourDetails?.maximumPerson || Infinity) ||
@@ -962,7 +944,23 @@ export default function BookingInfoPage() {
         onClick={handleContinue}
         packageType="tour"
         packageId={tourDetails?._id}
-        disabled={!selectedDate || !selectedTime}
+        disabled={
+          !selectedDate ||
+          !selectedTime ||
+          (() => {
+            // For private tours, no guest validation needed (vehicle booking)
+            if (tourDetails?.type === "private") return false;
+
+            // For regular tours, check minimum guest requirement
+            const selectedSlot = timeSlots.find(
+              (slot) => slot.time === selectedTime
+            );
+            if (!selectedSlot) return true;
+
+            const totalGuests = adults + children;
+            return totalGuests < selectedSlot.minimumPerson;
+          })()
+        }
         transferDetails={{
           pickupOption: "user",
           pickupLocations: "",

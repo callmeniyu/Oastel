@@ -26,7 +26,7 @@ export default function BookingUserInfoPage() {
     name: "",
     email: "",
     phone: "",
-    countryCode: "+60", // Malaysia's country code
+    countryCode: "", // require user to select a country
     pickupLocation: "",
   });
 
@@ -120,7 +120,14 @@ export default function BookingUserInfoPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "countryCode") {
+        // If country is cleared, also clear phone to avoid concatenation issues
+        return { ...prev, countryCode: value, phone: value ? prev.phone : "" };
+      }
+
+      return { ...prev, [name]: value } as any;
+    });
   };
 
   const handleConfirmBooking = async () => {
@@ -496,6 +503,7 @@ export default function BookingUserInfoPage() {
                 onChange={handleChange}
                 className="sm:w-52 border border-primary_green/40 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary_green"
               >
+                <option value="">Select country...</option>
                 {countries.map((c) => (
                   <option key={c.cca2} value={c.callingCode}>
                     {c.name} ({c.callingCode})
@@ -506,8 +514,17 @@ export default function BookingUserInfoPage() {
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                placeholder="Enter WhatsApp number"
-                className="flex-1 border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
+                placeholder={
+                  form.countryCode
+                    ? "Enter WhatsApp number"
+                    : "Select country first"
+                }
+                disabled={form.countryCode === ""}
+                className={`flex-1 border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green ${
+                  form.countryCode === ""
+                    ? "bg-gray-100 cursor-not-allowed"
+                    : "bg-white"
+                }`}
               />
             </div>
           </div>
