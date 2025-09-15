@@ -24,7 +24,7 @@ export default function BookingInfoPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const [transferDetails, setTransferDetails] = useState<TransferType>();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [initialDateSet, setInitialDateSet] = useState(false);
   const [selectedTime, setSelectedTime] = useState("");
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -104,16 +104,8 @@ export default function BookingInfoPage() {
           setTotalGuests(0);
           setChildren(0);
 
-          // Set initial date to next available date with slots
-          if (!initialDateSet && response.data._id) {
-            const minDate = getMinimumBookingDate();
-            const nextAvailableDate = await findNextAvailableDate(
-              response.data._id,
-              minDate
-            );
-            setSelectedDate(nextAvailableDate);
-            setInitialDateSet(true);
-          }
+          // Do NOT auto-set initial date - let user select date manually
+          console.log(`📅 Transfer loaded - waiting for user to select date`);
         } else {
           showToast({
             type: "error",
@@ -136,7 +128,7 @@ export default function BookingInfoPage() {
   }, [slug, showToast, initialDateSet]);
 
   const fetchTimeSlots = async () => {
-    if (!transferDetails?._id) return;
+    if (!transferDetails?._id || !selectedDate) return;
 
     try {
       setIsLoading(true);
@@ -163,16 +155,24 @@ export default function BookingInfoPage() {
         const slots = Array.isArray(data.data) ? data.data : [];
         setTimeSlots(slots);
 
-        // IMPORTANT: Never auto-select time slots - always let users choose manually
-        console.log(
-          `📋 Loaded ${slots.length} time slots - waiting for user selection. Current selectedTime: "${selectedTime}"`
-        );
+        // Auto-select first available time slot when date is selected
+        if (slots.length > 0 && !selectedTime) {
+          const firstAvailableSlot = slots.find(
+            (slot: TimeSlot) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
 
-        // Explicitly prevent any auto-selection by clearing selectedTime if it somehow got set
-        if (selectedTime && !slots.find((slot) => slot.time === selectedTime)) {
-          console.log(`🧹 Clearing invalid selected time: ${selectedTime}`);
-          setSelectedTime("");
+          if (firstAvailableSlot) {
+            console.log(
+              `🎯 Auto-selecting first available time slot: ${firstAvailableSlot.time}`
+            );
+            setSelectedTime(firstAvailableSlot.time);
+          }
         }
+
+        console.log(
+          `📋 Loaded ${slots.length} time slots. Current selectedTime: "${selectedTime}"`
+        );
 
         // Clear selected time if it's no longer available
         if (selectedTime) {
@@ -340,14 +340,14 @@ export default function BookingInfoPage() {
 
     const totalGuests = adults + children;
 
-    // Check minimum person requirement for this specific slot - USE minimumPerson
-    if (totalGuests < selectedSlot.minimumPerson) {
+    // Check minimum adults requirement (children don't count toward minimum)
+    if (adults < selectedSlot.minimumPerson) {
       showToast({
         type: "error",
-        title: "Minimum guests required",
-        message: `Please select at least ${selectedSlot.minimumPerson} guest${
+        title: "Minimum adults required",
+        message: `Please select at least ${selectedSlot.minimumPerson} adult${
           selectedSlot.minimumPerson > 1 ? "s" : ""
-        } for this time slot. Current selection: ${totalGuests}`,
+        } for this time slot. Current adults: ${adults}`,
       });
       return;
     }
@@ -474,10 +474,18 @@ export default function BookingInfoPage() {
                 <div className="animate-spin h-6 w-6 border-2 border-primary_green border-t-transparent rounded-full"></div>
               </div>
             ) : timeSlots.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <p>No available time slots for this date.</p>
-                <p className="text-sm mt-1">Please select a different date.</p>
-              </div>
+              !selectedDate ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Please select a date to show available time slots.</p>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No available time slots for this date.</p>
+                  <p className="text-sm mt-1">
+                    Please select a different date.
+                  </p>
+                </div>
+              )
             ) : (
               <div className="flex flex-col gap-2">
                 {timeSlots.map((slot) => {
@@ -561,8 +569,11 @@ export default function BookingInfoPage() {
                     <p className="text-sm text-green-700">
                       <span className="font-medium">Selected Time:</span>{" "}
                       {selectedTime} |
-                      <span className="font-medium"> Minimum Required:</span>{" "}
-                      {selectedSlot.minimumPerson} person
+                      <span className="font-medium">
+                        {" "}
+                        Minimum Adults Required:
+                      </span>{" "}
+                      {selectedSlot.minimumPerson} adult
                       {selectedSlot.minimumPerson > 1 ? "s" : ""} |
                       <span className="font-medium"> Available:</span>{" "}
                       {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
@@ -571,9 +582,9 @@ export default function BookingInfoPage() {
                         : "seats"}
                     </p>
                     <p className="text-xs text-green-600 mt-1">
-                      {isFirstBooking
-                        ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
-                        : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
+                      Children don't count toward the minimum requirement - you
+                      need at least {selectedSlot.minimumPerson} adult
+                      {selectedSlot.minimumPerson > 1 ? "s" : ""}
                     </p>
                   </div>
                 );
@@ -735,7 +746,7 @@ export default function BookingInfoPage() {
 
       <BookingInfoPanel
         title={transferDetails?.title || "Transfer Title"}
-        date={selectedDate}
+        date={selectedDate || new Date()}
         time={selectedTime}
         type={transferDetails?.type || "Private transfer"}
         duration={transferDetails?.duration || "4-6 hours"}
@@ -747,23 +758,7 @@ export default function BookingInfoPage() {
         onClick={handleContinue}
         packageType="transfer"
         packageId={transferDetails?._id}
-        disabled={
-          !selectedTime ||
-          isLoading ||
-          (() => {
-            // For private transfers, no guest validation needed (vehicle booking)
-            if (transferDetails?.type === "Private") return false;
-
-            // For shared transfers, check minimum guest requirement
-            const selectedSlot = timeSlots.find(
-              (slot) => slot.time === selectedTime
-            );
-            if (!selectedSlot) return true;
-
-            const totalGuests = adults + children;
-            return totalGuests < selectedSlot.minimumPerson;
-          })()
-        }
+        disabled={false}
         transferDetails={
           transferDetails
             ? {

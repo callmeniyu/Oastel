@@ -56,13 +56,7 @@ export default function BookingInfoPage() {
     seats: number;
     units: number;
   } | null>(null);
-  const [selectedDate, setSelectedDate] = useState(() => {
-    // Initialize with tomorrow to avoid initial load with today's date
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
-  });
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -236,41 +230,8 @@ export default function BookingInfoPage() {
           setAdults(initialAdults);
           setTotalGuests(initialAdults);
 
-          // Set initial date to next available date with slots
-          if (!initialDateSet && tour._id) {
-            console.log(
-              `🔍 DEBUG: About to find next available date. initialDateSet=${initialDateSet}, tour._id=${tour._id}`
-            );
-            const minDate = new Date();
-            minDate.setDate(minDate.getDate() + 1);
-            minDate.setHours(0, 0, 0, 0);
-            console.log(
-              `🔍 Looking for next available date starting from ${minDate.toDateString()}`
-            );
-
-            try {
-              const nextAvailableDate = await findNextAvailableDate(
-                tour._id,
-                minDate
-              );
-              console.log(
-                `📅 Setting tour date to: ${nextAvailableDate.toDateString()}`
-              );
-              setSelectedDate(nextAvailableDate);
-              setInitialDateSet(true);
-              console.log(
-                `✅ DEBUG: Date set successfully, initialDateSet now true`
-              );
-            } catch (error) {
-              console.error(`❌ Error in findNextAvailableDate:`, error);
-            }
-          } else {
-            console.log(
-              `⏸️ DEBUG: Skipping date finding. initialDateSet=${initialDateSet}, tour._id=${
-                tour._id || "undefined"
-              }`
-            );
-          }
+          // Do NOT auto-set initial date - let user select date manually
+          console.log(`📅 Tour loaded - waiting for user to select date`);
         } else {
           showToast({
             type: "error",
@@ -293,8 +254,10 @@ export default function BookingInfoPage() {
   }, [slug, showToast]);
 
   const fetchTimeSlots = async () => {
-    if (!tourDetails?._id) {
-      console.log(`⏸️ fetchTimeSlots skipped - no tour details ID`);
+    if (!tourDetails?._id || !selectedDate) {
+      console.log(
+        `⏸️ fetchTimeSlots skipped - no tour details ID or no date selected`
+      );
       return;
     }
 
@@ -337,16 +300,24 @@ export default function BookingInfoPage() {
 
         setTimeSlots(slots);
 
-        // IMPORTANT: Never auto-select time slots - always let users choose manually
-        console.log(
-          `📋 Loaded ${slots.length} time slots - waiting for user selection. Current selectedTime: "${selectedTime}"`
-        );
+        // Auto-select first available time slot when date is selected
+        if (slots.length > 0 && !selectedTime) {
+          const firstAvailableSlot = slots.find(
+            (slot: TimeSlot) =>
+              slot.isAvailable && slot.capacity - slot.bookedCount > 0
+          );
 
-        // Explicitly prevent any auto-selection by clearing selectedTime if it somehow got set
-        if (selectedTime && !slots.find((slot) => slot.time === selectedTime)) {
-          console.log(`🧹 Clearing invalid selected time: ${selectedTime}`);
-          setSelectedTime("");
+          if (firstAvailableSlot) {
+            console.log(
+              `🎯 Auto-selecting first available time slot: ${firstAvailableSlot.time}`
+            );
+            setSelectedTime(firstAvailableSlot.time);
+          }
         }
+
+        console.log(
+          `📋 Loaded ${slots.length} time slots. Current selectedTime: "${selectedTime}"`
+        );
 
         // Clear selected time if it's no longer available
         if (selectedTime) {
@@ -543,20 +514,19 @@ export default function BookingInfoPage() {
 
     // For private tours, skip guest validation since it's vehicle-based
     if (tourDetails.type !== "private") {
-      const totalGuests = adults + children;
-
-      // Check minimum person requirement for this specific slot - USE minimumPerson
-      if (totalGuests < selectedSlot.minimumPerson) {
+      // Check minimum adults requirement (children don't count toward minimum)
+      if (adults < selectedSlot.minimumPerson) {
         showToast({
           type: "error",
-          title: "Minimum guests required",
-          message: `Please select at least ${selectedSlot.minimumPerson} guest${
+          title: "Minimum adults required",
+          message: `Please select at least ${selectedSlot.minimumPerson} adult${
             selectedSlot.minimumPerson > 1 ? "s" : ""
-          } for this time slot. Current selection: ${totalGuests}`,
+          } for this time slot. Current adults: ${adults}`,
         });
         return;
       }
 
+      const totalGuests = adults + children;
       if (totalGuests > selectedSlot.capacity - selectedSlot.bookedCount) {
         showToast({
           type: "error",
@@ -706,10 +676,17 @@ export default function BookingInfoPage() {
                     </button>
                   );
                 })
+              ) : !selectedDate ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>Please select a date to show available time slots.</p>
+                </div>
               ) : (
-                <p className="text-desc_gray text-sm my-1">
-                  No time slots available for this date
-                </p>
+                <div className="text-center py-8 text-gray-500">
+                  <p>No available time slots for this date</p>
+                  <p className="text-sm mt-1">
+                    Please select a different date.
+                  </p>
+                </div>
               )}
             </div>
             {timeSlots.length > 0 && (
@@ -790,7 +767,7 @@ export default function BookingInfoPage() {
                         <p className="text-xs text-green-600 mt-1">
                           {isFirstBooking
                             ? `This is the first booking for this slot (requires ${selectedSlot.minimumPerson} minimum)`
-                            : `This slot already has bookings (minimum reduced to ${selectedSlot.minimumPerson})`}
+                            : ``}
                         </p>
                       </div>
                     );
@@ -928,7 +905,7 @@ export default function BookingInfoPage() {
 
       <BookingInfoPanel
         title={tourDetails?.title || "Tour Title"}
-        date={selectedDate}
+        date={selectedDate || new Date()}
         time={selectedTime}
         type={tourDetails?.type || "Private Tour"}
         duration={tourDetails?.duration || "4-6 hours"}
@@ -944,23 +921,7 @@ export default function BookingInfoPage() {
         onClick={handleContinue}
         packageType="tour"
         packageId={tourDetails?._id}
-        disabled={
-          !selectedDate ||
-          !selectedTime ||
-          (() => {
-            // For private tours, no guest validation needed (vehicle booking)
-            if (tourDetails?.type === "private") return false;
-
-            // For regular tours, check minimum guest requirement
-            const selectedSlot = timeSlots.find(
-              (slot) => slot.time === selectedTime
-            );
-            if (!selectedSlot) return true;
-
-            const totalGuests = adults + children;
-            return totalGuests < selectedSlot.minimumPerson;
-          })()
-        }
+        disabled={false}
         transferDetails={{
           pickupOption: "user",
           pickupLocations: "",
