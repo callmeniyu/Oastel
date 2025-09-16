@@ -10,8 +10,8 @@ import { generatePageMetadata, SITE_CONFIG } from "@/lib/seoUtils";
 
 export const metadata: Metadata = {
   ...generatePageMetadata(
-    "Best Tours & Transfers in Malaysia",
-    "Discover Malaysia with Oastel's budget-friendly tours and comfortable transfers. From Cameron Highlands Mossy Forest tours to Perhentian Islands transfers, book your perfect Malaysian adventure today.",
+    "Best Tours, Transfers and Co-Living in Cameron Highlands - Book Online with Oastel",
+    "Discover Cameron Highlands with Oastel's budget-friendly tours and comfortable transfers. From Mossy Forest tours to Perhentian Islands transfers, book your perfect Malaysian adventure today.",
     "",
     [
       "Malaysia tours",
