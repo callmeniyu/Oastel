@@ -26,6 +26,8 @@ const ALLOWED_PREFIXES = [
   "/news",
   "/uploads",
   "/about",
+  "/auth",
+  "/profile",
 ];
 
 // Additional explicitly allowed exact paths

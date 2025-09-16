@@ -461,7 +461,7 @@ export default function BookingInfoPage() {
       <div className="space-y-6 md:col-span-2">
         <div className="flex flex-col md:flex-row gap-6">
           <BookingCalendar
-            selectedDate={selectedDate ?? getMinimumBookingDate()}
+            selectedDate={selectedDate}
             onDateChange={setSelectedDate}
             serverDateTime={serverDateTime}
           />

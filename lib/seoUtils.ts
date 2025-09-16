@@ -113,7 +113,7 @@ export function truncateText(text: string, maxLength: number): string {
 // Generate keywords array for specific content
 export function generateKeywords(
   baseKeywords: string[] = [],
-  contentType: 'tour' | 'transfer' | 'general' = 'general',
+  contentType: 'tour' | 'transfer' | 'general' | 'blog' = 'general',
   location?: string
 ): string[] {
   let keywords = [...baseKeywords, ...SITE_CONFIG.keywords];

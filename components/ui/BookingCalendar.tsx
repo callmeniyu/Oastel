@@ -4,7 +4,7 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 
 type Props = {
-  selectedDate: Date;
+  selectedDate: Date | null;
   onDateChange: (date: Date) => void;
   minDate?: Date;
   serverDateTime?: {
@@ -51,7 +51,7 @@ export default function BookingCalendar({
       </h3>
       <DayPicker
         mode="single"
-        selected={selectedDate}
+        selected={selectedDate || undefined}
         onSelect={(date) => date && onDateChange(date)}
         fromDate={minDate || today}
         today={today}
