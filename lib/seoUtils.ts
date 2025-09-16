@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { resolveImageUrl } from '@/lib/imageUtils';
 
 // Define SEO keywords by category
 export const SEO_KEYWORDS = {
@@ -328,6 +329,72 @@ export function generatePageMetadata(
     twitter: generateTwitterCard(fullTitle, description),
     alternates: {
       canonical: `${SITE_CONFIG.url}${path}`
+    }
+  };
+}
+
+// Main function to generate complete metadata for blogs
+export function generateBlogMetadata(blog: any): Metadata {
+  const title = `${blog.title} | ${blog.category} Blog - Oastel`;
+  const description = truncateText(
+    stripHtmlTags(blog.description || blog.content || `Read about ${blog.title} on Oastel's blog. Discover travel tips, destination guides, and more.`),
+    160
+  );
+  
+  const keywords = generateKeywords(
+    [blog.title, blog.category, ...(blog.tags || [])],
+    'blog',
+    'Malaysia travel'
+  );
+
+  // Format publish date for structured data
+  const publishDate = blog.publishDate || blog.createdAt;
+  const isoDate = publishDate ? new Date(publishDate).toISOString() : new Date().toISOString();
+
+  return {
+    title,
+    description,
+    keywords: keywords.join(', '),
+    authors: [{ name: SITE_CONFIG.author }],
+    openGraph: {
+      ...generateOpenGraph(title, description, blog.image),
+      type: 'article',
+      publishedTime: isoDate,
+      section: blog.category,
+      tags: blog.tags || [blog.category]
+    },
+    twitter: generateTwitterCard(title, description, blog.image),
+    alternates: {
+      canonical: `${SITE_CONFIG.url}/blogs/${blog.slug}`
+    },
+    other: {
+      'structured-data': JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: blog.title,
+        description: description,
+        image: blog.image ? resolveImageUrl(blog.image) : `${SITE_CONFIG.url}/images/og-default.jpg`,
+        author: {
+          '@type': 'Organization',
+          name: SITE_CONFIG.author
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_CONFIG.author,
+          logo: {
+            '@type': 'ImageObject',
+            url: `${SITE_CONFIG.url}/images/logo.png`
+          }
+        },
+        datePublished: isoDate,
+        dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : isoDate,
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${SITE_CONFIG.url}/blogs/${blog.slug}`
+        },
+        articleSection: blog.category,
+        wordCount: stripHtmlTags(blog.content || '').split(' ').length
+      })
     }
   };
 }

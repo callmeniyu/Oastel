@@ -6,7 +6,6 @@ import { blogApi } from "@/lib/blogApi";
 import SearchInput from "@/components/ui/SearchInput";
 import BlogCard from "@/components/ui/BlogCard";
 import Image from "next/image";
-import { IoRefresh } from "react-icons/io5";
 
 export default function BlogArea() {
   const [searchTerm, setSearchTerm] = useState("");

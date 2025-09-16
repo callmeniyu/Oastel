@@ -1,16 +1,41 @@
 import { blogApi } from "@/lib/blogApi";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import BlogImage from "@/components/ui/BlogImage";
 import BlogCard from "@/components/ui/BlogCard";
 import { MdOutlineDateRange } from "react-icons/md";
 import { TbCategory } from "react-icons/tb";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { generateBlogMetadata } from "@/lib/seoUtils";
 
 type Props = {
   params: {
     slug: string;
   };
 };
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const response = await blogApi.getBlogBySlug(params.slug);
+
+    if (!response.success || !response.data) {
+      return {
+        title: "Blog Not Found - Oastel",
+        description: "The requested blog post could not be found.",
+      };
+    }
+
+    return generateBlogMetadata(response.data);
+  } catch (error) {
+    console.error("Error generating blog metadata:", error);
+    return {
+      title: "Blog - Oastel",
+      description:
+        "Discover travel stories, tips and destination guides on Oastel's blog.",
+    };
+  }
+}
 
 export default async function BlogDetailsPage({ params }: Props) {
   const { slug } = params;
