@@ -84,7 +84,7 @@ export const SOCIAL_LINKS = {
 export const SITE_CONFIG = {
   name: 'Oastel',
   title: 'Oastel - Tours, Transfers & Stays in Cameron Highlands',
-  description: 'Discover Cameron Highlands with Oastel\'s budget-friendly tours and transfers. From Cameron Highlands Mossy Forest tours to Perhentian Islands transfers, we offer private and shared adventures across Malaysia.',
+  description: 'Discover Cameron Highlands with Oastel\'s budget-friendly tours and transfers. From Cameron Highlands Mossy Forest tours to Perhentian Islands transfers, we offer private and shared adventures across Cameron Highlands.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://oastel.com', // Update with actual domain
   author: 'Oastel Team',
   keywords: [

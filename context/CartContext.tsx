@@ -101,10 +101,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
     setLoading(true);
     try {
-      const updatedCart = await cartApi.addToCart({
+      // Debug: log payload being sent to server to help diagnose 400 responses
+      const payload = {
         userEmail: userEmail,
         ...item,
-      });
+      };
+      // eslint-disable-next-line no-console
+      console.debug("Adding to cart payload:", payload);
+
+      const updatedCart = await cartApi.addToCart(payload);
       if (updatedCart) {
         setCart(updatedCart);
         showToast({
@@ -117,10 +122,12 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       return false;
     } catch (error) {
       console.error("Error adding to cart:", error);
+      // Show server-provided message when available
+      const errMsg = (error as any)?.message || "Failed to add item to cart";
       showToast({
         type: "error",
         title: "Error",
-        message: "Failed to add item to cart",
+        message: errMsg,
       });
       return false;
     } finally {

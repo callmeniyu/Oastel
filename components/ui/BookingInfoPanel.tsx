@@ -36,6 +36,15 @@ type Props = {
     pickupOption: "admin" | "user";
     pickupLocations: string;
   };
+  // Validation parameters for Add to Cart
+  timeSlots?: Array<{
+    time: string;
+    capacity: number;
+    bookedCount: number;
+    isAvailable: boolean;
+    minimumPerson: number;
+  }>;
+  tourType?: string; // "private" or other
 };
 
 export default function BookingInfoPanel({
@@ -59,6 +68,8 @@ export default function BookingInfoPanel({
   isVehicleBooking,
   vehicleSeatCapacity,
   vehicleName,
+  timeSlots,
+  tourType,
 }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -87,6 +98,7 @@ export default function BookingInfoPanel({
       packageId,
       isAuthenticated,
     });
+
     if (!isAuthenticated || !user) {
       showToast({
         type: "error",
@@ -102,6 +114,87 @@ export default function BookingInfoPanel({
         type: "error",
         title: "Error",
         message: "Package information is missing",
+      });
+      return;
+    }
+
+    // Validation: Check if date is selected (date should not be invalid)
+    if (!date || isNaN(date.getTime())) {
+      showToast({
+        type: "error",
+        title: "Date Required",
+        message: "Please select a date for your booking",
+      });
+      return;
+    }
+
+    // Validation: Check if time is selected
+    if (!time) {
+      showToast({
+        type: "error",
+        title: "Time Required",
+        message: "Please select a time slot for your booking",
+      });
+      return;
+    }
+
+    // Validation: Check time slot availability and requirements
+    if (timeSlots && timeSlots.length > 0) {
+      const selectedSlot = timeSlots.find((slot) => slot.time === time);
+      if (!selectedSlot) {
+        showToast({
+          type: "error",
+          title: "Invalid time slot",
+          message: "Please select a valid time slot",
+        });
+        return;
+      }
+
+      // For private tours, check if there are available units
+      if (tourType === "private" || isVehicleBooking) {
+        if (selectedSlot.capacity - selectedSlot.bookedCount < 1) {
+          showToast({
+            type: "error",
+            title: "No units available",
+            message: "No vehicle units available for this time slot",
+          });
+          return;
+        }
+      } else {
+        // For non-private tours/transfers, validate guest requirements
+        // Check minimum adults requirement (children don't count toward minimum)
+        if (adults < selectedSlot.minimumPerson) {
+          showToast({
+            type: "error",
+            title: "Minimum adults required",
+            message: `Please select at least ${
+              selectedSlot.minimumPerson
+            } adult${
+              selectedSlot.minimumPerson > 1 ? "s" : ""
+            } for this time slot. Current adults: ${adults}`,
+          });
+          return;
+        }
+
+        const totalGuests = adults + children;
+        if (totalGuests > selectedSlot.capacity - selectedSlot.bookedCount) {
+          showToast({
+            type: "error",
+            title: "Not enough capacity",
+            message:
+              "Selected time slot doesn't have enough capacity for your group",
+          });
+          return;
+        }
+      }
+    }
+
+    // Validation: For non-private bookings, ensure at least 1 adult
+    if (!isVehicleBooking && adults < 1) {
+      showToast({
+        type: "error",
+        title: "Adults Required",
+        message: "Please select at least 1 adult for your booking",
       });
       return;
     }

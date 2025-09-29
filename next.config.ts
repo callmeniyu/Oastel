@@ -115,6 +115,23 @@ const nextConfig: NextConfig = {
                 destination: "/tours/mossy-forest-highland-discovery",
                 permanent: true,
             },
+            // Additional legacy service page redirects
+            {
+                source: "/service-page/full-day-coral-hill-private-tour",
+                destination: "/tours/full-day-coral-mossy-forest-hill-private-tour",
+                permanent: true,
+            },
+            {
+                source: "/service-page/half-day-land-rover-road-trip-co-tour",
+                destination: "/tours/half-day-mossy-forest-land-rover-trip",
+                permanent: true,
+            },
+            // Tour page redirects (URL updates)
+            {
+                source: "/tours/mossy-forest-highland-discovery",
+                destination: "/tours/mossy-forest-full-day-highland-discovery",
+                permanent: true,
+            },
         ];
     },
     /* config options here */

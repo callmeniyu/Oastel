@@ -660,17 +660,11 @@ export default function BookingInfoPage() {
                       <div className="flex justify-between items-center">
                         <span className="font-medium">{formattedTime}</span>
                         <span className="text-sm">
-                          {isSlotAvailable ? (
-                            <>
-                              {availableSeats}{" "}
-                              {tourDetails?.type === "private"
-                                ? "units"
-                                : "seats"}{" "}
-                              left
-                            </>
-                          ) : (
-                            "Sold out"
-                          )}
+                          {isSlotAvailable
+                            ? availableSeats <= 6
+                              ? "Only a few left"
+                              : "Available"
+                            : "Sold out"}
                         </span>
                       </div>
                     </button>
@@ -929,6 +923,8 @@ export default function BookingInfoPage() {
         isVehicleBooking={tourDetails?.type === "private"}
         vehicleName={vehicleDetails?.name}
         vehicleSeatCapacity={vehicleDetails?.seats}
+        timeSlots={timeSlots}
+        tourType={tourDetails?.type}
       />
     </div>
   );

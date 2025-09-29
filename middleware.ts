@@ -66,6 +66,22 @@ export function middleware(req: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Also handle legacy slugs that we added as redirects in next.config.ts
+    if (pathname === "/service-page/full-day-coral-hill-private-tour") {
+      url.pathname = "/tours/full-day-coral-mossy-forest-hill-private-tour";
+      return NextResponse.redirect(url);
+    }
+
+    if (pathname === "/tours/mossy-forest-highland-discovery") {
+      url.pathname = "/tours/mossy-forest-full-day-highland-discovery";
+      return NextResponse.redirect(url);
+    }
+
+    if (pathname === "/service-page/full-day-land-rover-road-trip-co-tour") {
+      url.pathname = "/tours/mossy-forest-full-day-highland-discovery";
+      return NextResponse.redirect(url);
+    }
+
     // Allow if path is exactly allowed
     if (ALLOWED_EXACT.includes(pathname)) {
       return NextResponse.next();

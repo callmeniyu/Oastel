@@ -80,8 +80,22 @@ export class CartAPI {
         body: JSON.stringify(item),
       });
 
+      // If the response is not OK, try to parse the response body to get a useful message
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let bodyText: string | null = null;
+        try {
+          const data = await response.json();
+          bodyText = data?.message ? JSON.stringify(data) : JSON.stringify(data);
+        } catch (e) {
+          try {
+            bodyText = await response.text();
+          } catch (e2) {
+            bodyText = null;
+          }
+        }
+        const msg = bodyText ? `HTTP ${response.status}: ${bodyText}` : `HTTP error! status: ${response.status}`;
+        console.error('Add to cart failed response body:', bodyText);
+        throw new Error(msg);
       }
 
       const data = await response.json();
