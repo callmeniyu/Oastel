@@ -45,3 +45,14 @@ html {
 .animate-fadeInUp {
     animation: fadeInUp 0.3s ease-out both;
 }
+
+/* Ensure most site text is selectable by default. Some components intentionally disable selection
+   (e.g. buttons or UI controls) via utility classes; this rule re-enables selection for normal
+   content in case a decorative overlay or CSS accidentally prevents it. */
+
+html, body, #__next, .app-root, .container, main, section {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}

@@ -10,10 +10,18 @@ import {
   FaRegEnvelope as Mail,
   FaPhone as Phone,
   FaMapMarkerAlt as MapPin,
+  FaStar as Star,
+  FaCamera as Camera,
+  FaTag as Tag,
+  FaGift as Gift,
+  FaMoneyBillWave as Money,
+  FaHotel as Hotel,
+  FaInstagram as Instagram,
 } from "react-icons/fa";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import SessionHook from "@/hooks/SessionHook";
+import Image from "next/image";
 
 interface BookingDetails {
   _id: string;
@@ -119,6 +127,50 @@ export default function BookingConfirmationPage() {
       // Ensure cloned content stretches to wrapper width
       clone.style.width = "100%";
       clone.style.boxSizing = "border-box";
+
+      // Sanitize clone for print: remove interactive overlays, backdrop-filters,
+      // transforms, and force a white background so html2canvas captures cleanly.
+      const sanitizeNode = (node: HTMLElement) => {
+        // Remove any elements that are purely decorative and might block rendering
+        node
+          .querySelectorAll(
+            '[style*="backdrop-filter"], [style*="-webkit-backdrop-filter"], .pointer-events-none, .blur-lg, .blur-sm'
+          )
+          .forEach((el) => {
+            try {
+              (el as HTMLElement).style.backdropFilter = "none";
+              try {
+                (el as HTMLElement).style.setProperty(
+                  "-webkit-backdrop-filter",
+                  "none"
+                );
+              } catch (_) {}
+              (el as HTMLElement).style.filter = "none";
+              (el as HTMLElement).classList.remove("pointer-events-none");
+            } catch (_) {}
+          });
+
+        // Remove transforms on elements that might shift content during capture
+        node.querySelectorAll("*[style]").forEach((el) => {
+          const s = (el as HTMLElement).style;
+          if (s.transform && s.transform !== "none") s.transform = "none";
+          if (s.transition) s.transition = "none";
+        });
+
+        // Force readable background and text colors
+        node.querySelectorAll("*").forEach((el) => {
+          const e = el as HTMLElement;
+          try {
+            e.style.background =
+              e.style.background ||
+              (e.tagName.toLowerCase() === "body" ? "#fff" : "transparent");
+            e.style.color = e.style.color || getComputedStyle(e).color;
+            e.style.boxShadow = "none";
+          } catch (_) {}
+        });
+      };
+
+      sanitizeNode(clone);
 
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
@@ -496,6 +548,156 @@ export default function BookingConfirmationPage() {
             />
           </div>
         )}
+
+        {/* New Year Giveaway – Enhanced Design with Giftly */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-green-500 to-teal-600 rounded-3xl shadow-2xl border border-white/20 mb-6">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full translate-y-36 -translate-x-36 pointer-events-none"></div>
+
+          <div className="relative z-10 p-8">
+            {/* Header Section */}
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-3">
+                <Gift className="text-yellow-300 w-5 h-5" />
+                <span className="text-white font-semibold text-sm">
+                  SPECIAL OFFER
+                </span>
+              </div>
+              <h2 className="text-4xl font-black text-white mb-3 drop-shadow-lg">
+                NEW YEAR GIVEAWAY
+              </h2>
+              <div className="inline-block bg-gradient-to-r from-yellow-400 to-amber-400 text-green-800 px-6 py-2 rounded-2xl font-bold text-xl shadow-lg transform -rotate-1">
+                WIN $100 GIFT CARD
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid justify-center lg:grid-cols-2 gap-6 items-center">
+              {/* Left: How to Enter */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                {/* Center: Giftly Image */}
+                <div className="flex justify-center">
+                  <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                    <Image
+                      src="/images/giftly.png"
+                      alt="Giftly Gift Card"
+                      width={200}
+                      height={120}
+                      className="rounded-lg"
+                    />
+                  </div>
+                </div>
+                <h3 className="text-white font-bold text-lg mb-4 text-center">
+                  How to Enter
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <Star className="text-green-700 w-4 h-4" />
+                    </div>
+                    <div className="text-white">
+                      <div className="font-semibold">Share your experience</div>
+                      <div className="text-sm opacity-90">
+                        Write your experience on Google
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <Camera className="text-green-700 w-4 h-4" />
+                    </div>
+                    <div className="text-white">
+                      <div className="font-semibold">Share on Instagram</div>
+                      <div className="text-sm opacity-90">Tag @oastelvibe</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Prize Details */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                <h3 className="text-white font-bold text-lg mb-4 text-center">
+                  Your Prize
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <Money className="text-green-700 w-4 h-4" />
+                    </div>
+                    <div className="text-white">
+                      <div className="font-semibold">
+                        $100 to use at any hotel, anywhere
+                      </div>
+                      <div className="text-sm opacity-90">
+                        Perfect gift card alternative to Booking•com
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <Gift className="text-green-700 w-4 h-4" />
+                    </div>
+                    <div className="text-white">
+                      <div className="font-semibold">Winner announced</div>
+                      <div className="text-sm opacity-90">
+                        Jan 1, 2026 on Instagram
+                      </div>
+                    </div>
+                  </div>
+                  {/* Center: Giftly Image */}
+                  <div className="flex justify-center">
+                    <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl">
+                      <Image
+                        src="/images/giftly2.png"
+                        alt="Giftly Gift Card"
+                        width={200}
+                        height={120}
+                        className="rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center mt-8">
+              <a
+                href="https://g.page/r/CZmbJ22DFJ1HEBE/review"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <button className="bg-white text-green-700 font-black text-lg px-8 py-4 rounded-full shadow-2xl hover:bg-yellow-50 hover:scale-105 transition-all duration-300 border-2 border-yellow-400">
+                  LEAVE YOUR EXPERIENCE & ENTER
+                </button>
+              </a>
+              <div className="mt-3 text-white/90 text-sm">
+                Offer valid Oct 1 – Dec 31, 2025
+              </div>
+            </div>
+
+            {/* Giftly Footer */}
+            <div className="mt-6 pt-4 border-t border-white/20 text-center">
+              <p className="text-white/70 text-xs">
+                Gift cards are issued by Giftly and securely processed by
+                Oastel.
+              </p>
+            </div>
+          </div>
+
+          {/* Decorative Elements */}
+          <div className="absolute top-4 right-6 opacity-20">
+            <Instagram className="w-6 h-6 text-white" />
+          </div>
+          <div className="absolute bottom-4 left-6 opacity-20">
+            <Star className="w-5 h-5 text-yellow-300" />
+          </div>
+        </div>
 
         {/* Policies removed as requested */}
       </div>
