@@ -121,6 +121,37 @@ class PaymentApi {
     }
   }
 
+  // Cancel payment intent to avoid incomplete status
+  async cancelPaymentIntent(paymentIntentId: string): Promise<PaymentApiResponse> {
+    try {
+      console.log('[PAYMENT_API] Canceling payment intent:', paymentIntentId);
+      
+      const response = await fetch(`${API_BASE_URL}/api/payments/cancel-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ paymentIntentId }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('[PAYMENT_API] Failed to cancel payment intent:', result);
+        throw new Error(result.error || 'Failed to cancel payment intent');
+      }
+
+      console.log('[PAYMENT_API] Payment intent canceled successfully:', result.data);
+      return result;
+    } catch (error: any) {
+      console.error('[PAYMENT_API] Error canceling payment intent:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to cancel payment intent'
+      };
+    }
+  }
+
   // Get payment status
   async getPaymentStatus(paymentIntentId: string): Promise<PaymentApiResponse> {
     try {

@@ -131,41 +131,84 @@ export default function BookingConfirmationPage() {
       // Sanitize clone for print: remove interactive overlays, backdrop-filters,
       // transforms, and force a white background so html2canvas captures cleanly.
       const sanitizeNode = (node: HTMLElement) => {
-        // Remove any elements that are purely decorative and might block rendering
+        // Handle backdrop-blur elements - replace with solid backgrounds instead of removing
         node
           .querySelectorAll(
-            '[style*="backdrop-filter"], [style*="-webkit-backdrop-filter"], .pointer-events-none, .blur-lg, .blur-sm'
+            '.backdrop-blur-sm, .backdrop-blur-lg, [style*="backdrop-filter"]'
           )
           .forEach((el) => {
+            const element = el as HTMLElement;
             try {
-              (el as HTMLElement).style.backdropFilter = "none";
-              try {
-                (el as HTMLElement).style.setProperty(
-                  "-webkit-backdrop-filter",
-                  "none"
-                );
-              } catch (_) {}
-              (el as HTMLElement).style.filter = "none";
-              (el as HTMLElement).classList.remove("pointer-events-none");
+              element.style.backdropFilter = "none";
+              (element.style as any).webkitBackdropFilter = "none";
+              element.style.filter = "none";
+
+              // Replace backdrop-blur with solid background for better PDF rendering
+              if (element.classList.contains("bg-white/10")) {
+                element.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+              } else if (element.classList.contains("bg-white/20")) {
+                element.style.backgroundColor = "rgba(255, 255, 255, 0.25)";
+              } else if (element.classList.contains("bg-white/90")) {
+                element.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+              }
             } catch (_) {}
           });
 
-        // Remove transforms on elements that might shift content during capture
-        node.querySelectorAll("*[style]").forEach((el) => {
-          const s = (el as HTMLElement).style;
-          if (s.transform && s.transform !== "none") s.transform = "none";
-          if (s.transition) s.transition = "none";
+        // Remove problematic decorative overlays (absolute positioned circles and patterns)
+        node
+          .querySelectorAll(
+            ".absolute.inset-0, .absolute.top-0, .absolute.bottom-0"
+          )
+          .forEach((el) => {
+            const element = el as HTMLElement;
+            if (
+              element.classList.contains("pointer-events-none") ||
+              element.style.background?.includes("white/") ||
+              element.classList.contains("bg-white/5")
+            ) {
+              element.style.display = "none";
+            }
+          });
+
+        // Remove transforms and transitions that might cause rendering issues
+        node.querySelectorAll("*").forEach((el) => {
+          const element = el as HTMLElement;
+          try {
+            if (element.style.transform && element.style.transform !== "none") {
+              element.style.transform = "none";
+            }
+            if (element.style.transition) {
+              element.style.transition = "none";
+            }
+            // Remove complex box shadows that might not render well
+            if (element.style.boxShadow) {
+              element.style.boxShadow = "none";
+            }
+          } catch (_) {}
         });
 
-        // Force readable background and text colors
+        // Ensure proper backgrounds and text colors for readability
         node.querySelectorAll("*").forEach((el) => {
-          const e = el as HTMLElement;
+          const element = el as HTMLElement;
           try {
-            e.style.background =
-              e.style.background ||
-              (e.tagName.toLowerCase() === "body" ? "#fff" : "transparent");
-            e.style.color = e.style.color || getComputedStyle(e).color;
-            e.style.boxShadow = "none";
+            const computedStyle = getComputedStyle(element);
+
+            // For elements with gradient backgrounds, ensure they have fallback colors
+            if (
+              element.classList.contains("bg-gradient-to-br") ||
+              element.classList.contains("bg-gradient-to-r")
+            ) {
+              element.style.backgroundColor = "#059669"; // emerald-600 fallback
+            }
+
+            // Ensure text is readable
+            if (
+              computedStyle.color === "rgb(255, 255, 255)" ||
+              element.classList.contains("text-white")
+            ) {
+              element.style.color = "#ffffff";
+              element.style.textShadow = "1px 1px 2px rgba(0,0,0,0.5)";
+            }
           } catch (_) {}
         });
       };

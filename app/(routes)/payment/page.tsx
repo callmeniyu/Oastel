@@ -25,6 +25,7 @@ export default function PaymentPage() {
   const [error, setError] = useState<string>("");
   const [bookingData, setBookingData] = useState<any>(null);
   const [isCartBooking, setIsCartBooking] = useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
 
   useEffect(() => {
     const validatePaymentData = async () => {
@@ -73,6 +74,60 @@ export default function PaymentPage() {
 
     validatePaymentData();
   }, [searchParams, showToast]);
+
+  // Handle payment intent cancellation when user navigates away
+  useEffect(() => {
+    const cancelPaymentIntentOnUnload = async () => {
+      if (paymentIntentId && !isNavigatingAway) {
+        try {
+          console.log(
+            "[PAYMENT_PAGE] Canceling payment intent due to page unload:",
+            paymentIntentId
+          );
+          await paymentApi.cancelPaymentIntent(paymentIntentId);
+        } catch (error) {
+          console.error(
+            "[PAYMENT_PAGE] Error canceling payment intent on unload:",
+            error
+          );
+        }
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (paymentIntentId && !isNavigatingAway) {
+        // Cancel payment intent when user closes/refreshes page
+        cancelPaymentIntentOnUnload();
+
+        // Show confirmation dialog for unsaved changes
+        e.preventDefault();
+        e.returnValue =
+          "You have an active payment session. Are you sure you want to leave?";
+        return "You have an active payment session. Are you sure you want to leave?";
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === "hidden" &&
+        paymentIntentId &&
+        !isNavigatingAway
+      ) {
+        // Cancel payment intent when tab becomes hidden (user switches tabs)
+        cancelPaymentIntentOnUnload();
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [paymentIntentId, isNavigatingAway]);
 
   // Create payment intent only when user starts interacting with payment form
   const createPaymentIntent = async () => {
@@ -138,8 +193,29 @@ export default function PaymentPage() {
     }
   };
 
+  // Handle explicit navigation away (Go Back button)
+  const handleGoBack = async () => {
+    setIsNavigatingAway(true);
+
+    if (paymentIntentId) {
+      try {
+        console.log(
+          "[PAYMENT_PAGE] Canceling payment intent before going back:",
+          paymentIntentId
+        );
+        await paymentApi.cancelPaymentIntent(paymentIntentId);
+      } catch (error) {
+        console.error("[PAYMENT_PAGE] Error canceling payment intent:", error);
+      }
+    }
+
+    router.back();
+  };
+
   const handlePaymentSuccess = async (paymentIntent: any) => {
     try {
+      setIsNavigatingAway(true); // Prevent cancellation when navigating to success page
+
       console.log(
         "[PAYMENT_PAGE] Payment successful, confirming...",
         paymentIntent.id
@@ -224,7 +300,7 @@ export default function PaymentPage() {
           </h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => router.back()}
+            onClick={handleGoBack}
             className="px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
           >
             Go Back
@@ -285,7 +361,7 @@ export default function PaymentPage() {
             </button>
 
             <button
-              onClick={() => router.back()}
+              onClick={handleGoBack}
               className="w-full mt-3 px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
               Go Back
@@ -313,7 +389,7 @@ export default function PaymentPage() {
         <div className="text-center">
           <p className="text-gray-600">Unable to initialize payment</p>
           <button
-            onClick={() => router.back()}
+            onClick={handleGoBack}
             className="mt-4 px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
           >
             Go Back
