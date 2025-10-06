@@ -12,7 +12,7 @@ export default function ContactInfo() {
         <div className="px-6 md:px-6">
           <h2 className="section-title text-center">
             Explore Stories, Travel Tips, and Local Experiences from the Heart
-            of Malaysia
+            of Cameron Highlands
           </h2>
           <p className="section-desc text-center mb-12">
             Read travel stories, destination guides, and curated insights for

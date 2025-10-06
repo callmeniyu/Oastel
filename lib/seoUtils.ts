@@ -28,37 +28,38 @@ export const SEO_KEYWORDS = {
     'Co-tour Cameron Highlands',
     'Budget tour',
     'Family tour',
-    'Adventure tours Malaysia',
-    'Half day tours Malaysia',
-    'Sunrise tour Malaysia'
+    'Adventure tours Cameron Highlands',
+    'Half day tours Cameron Highlands',
+    'Sunrise tour Cameron Highlands'
   ],
   
   // Transfer-specific keywords  
   transfers: [
+    'mossyforest',
     'Minivan transfer Cameron Highlands to Kuala Besut',
     'Taman Negara to Perhentian Islands transfer',
     'Kuala Tahan minivan transfer',
     'Cameron Highlands to Perhentian Islands transfer',
     'Perhentian Islands boat ticket + minivan',
-    'Van transfer Malaysia',
-    'Private van Malaysia',
-    'Boat + van transfer Malaysia',
-    'Van ticket Malaysia',
-    'Taman Negara transfer van Malaysia',
+    'Van transfer Cameron Highlands',
+    'Private van Cameron Highlands',
+    'Boat + van transfer Cameron Highlands',
+    'Van ticket Cameron Highlands',
+    'Taman Negara transfer van Cameron Highlands',
     'Kuala Besut jetty van transfer',
     'Private tour from Kuala Lumpur to Cameron Highlands'
   ],
   
   // Service-related keywords
   services: [
-    'Tours and transfers Malaysia',
-    'Budget tours Malaysia',
+    'Tours and transfers Cameron Highlands',
+    'Budget tours Cameron Highlands',
     'Friendly tour',
     'Sharing trip',
     'Private trip',
     'Family trip',
     'Vacation',
-    'Intimate group adventure tour Malaysia',
+    'Intimate group adventure tour Cameron Highlands',
     'Pick up from hostel tour Cameron Highlands'
   ],
   
@@ -68,9 +69,9 @@ export const SEO_KEYWORDS = {
     'Mossy Forest ticket price', 
     'Mossy Forest Cameron Highlands fees',
     'Mossy Forest admission cost',
-    'Book private van transfer Malaysia online',
+    'Book private van transfer Cameron Highlands online',
     'Cheap private tour Malaysia Cameron Highlands',
-    'Shared co-tour vs private tour cost Malaysia'
+    'Shared co-tour vs private tour cost Cameron Highlands'
   ]
 };
 
@@ -224,7 +225,7 @@ export function generateTwitterCard(
 // Main function to generate complete metadata for tours
 export function generateTourMetadata(tour: any): Metadata {
   // Extract destination from title or tags
-  const destination = extractDestination(tour.title, tour.tags) || 'Malaysia';
+  const destination = extractDestination(tour.title, tour.tags) || 'Cameron Highlands';
   
   const title = `${tour.title} | ${tour.type === 'private' ? 'Private' : 'Shared'} Tour in ${destination} - Oastel`;
   const description = truncateText(
@@ -284,7 +285,7 @@ function extractDestination(title: string, tags: string[] = []): string | null {
 export function generateTransferMetadata(transfer: any): Metadata {
   const title = `${transfer.title} | ${transfer.from} to ${transfer.to} Transfer - Oastel`;
   const description = truncateText(
-    stripHtmlTags(transfer.description || transfer.desc || `Comfortable ${transfer.type} transfer from ${transfer.from} to ${transfer.to}. Book your Malaysia transfer with Oastel.`),
+    stripHtmlTags(transfer.description || transfer.desc || `Comfortable ${transfer.type} transfer from ${transfer.from} to ${transfer.to}. Book your Cameron Highlands transfer with Oastel.`),
     160
   );
   
@@ -344,7 +345,7 @@ export function generateBlogMetadata(blog: any): Metadata {
   const keywords = generateKeywords(
     [blog.title, blog.category, ...(blog.tags || [])],
     'blog',
-    'Malaysia travel'
+    'Cameron Highlands travel'
   );
 
   // Format publish date for structured data

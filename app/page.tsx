@@ -14,12 +14,12 @@ export const metadata: Metadata = {
     "Discover Cameron Highlands with Oastel's budget-friendly tours and comfortable transfers. From Mossy Forest tours to Perhentian Islands transfers, book your perfect Malaysian adventure today.",
     "",
     [
-      "Malaysia tours",
-      "Malaysia transfers",
+      "Cameron Highlands tours",
+      "Cameron Highlands transfers",
       "Cameron Highlands",
       "Mossy Forest",
       "Perhentian Islands",
-      "budget travel Malaysia",
+      "budget travel Cameron Highlands",
     ]
   ),
   // Explicitly set icons here to ensure the root page SSR emits public-root paths

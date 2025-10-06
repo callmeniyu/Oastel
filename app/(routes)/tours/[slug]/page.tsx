@@ -46,7 +46,7 @@ export async function generateMetadata({
     console.error("Error generating metadata:", error);
     return {
       title: "Tour - Oastel",
-      description: "Discover amazing tours in Malaysia with Oastel.",
+      description: "Discover amazing tours in Cameron Highlands with Oastel.",
     };
   }
 }

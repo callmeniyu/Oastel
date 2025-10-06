@@ -44,7 +44,8 @@ export async function generateMetadata({
     console.error("Error generating metadata:", error);
     return {
       title: "Transfer - Oastel",
-      description: "Comfortable transfers across Malaysia with Oastel.",
+      description:
+        "Comfortable transfers across Cameron Highlands with Oastel.",
     };
   }
 }

@@ -28,6 +28,7 @@ const ALLOWED_PREFIXES = [
   "/about",
   "/auth",
   "/profile",
+  "/cart",
 ];
 
 // Additional explicitly allowed exact paths

@@ -105,8 +105,8 @@ export default function BlogArea() {
           </h3>
           <p className="text-desc_gray text-base leading-relaxed">
             Dive into stories, guides, and travel inspiration from across
-            Malaysia. Our blog is where you’ll find hidden gems, expert tips,
-            and local insights to help you plan smarter and travel deeper.
+            Cameron Highlands. Our blog is where you’ll find hidden gems, expert
+            tips, and local insights to help you plan smarter and travel deeper.
             Whether you're exploring the highlands, hopping between islands, or
             discovering cultural trails, we bring you real stories and practical
             advice from the road.
