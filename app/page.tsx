@@ -10,15 +10,19 @@ import { generatePageMetadata, SITE_CONFIG } from "@/lib/seoUtils";
 
 export const metadata: Metadata = {
   ...generatePageMetadata(
-    "Best Tours, Transfers and Co-Living in Cameron Highlands - Book Online with Oastel",
-    "Discover Cameron Highlands with Oastel's budget-friendly tours and comfortable transfers. From Mossy Forest tours to Perhentian Islands transfers, book your perfect Malaysian adventure today.",
+    "Cameron Highlands Tours & Transfers | Mossy Forest Adventures - Oastel",
+    "Discover Cameron Highlands with Oastel's budget-friendly tours and comfortable transfers. From Mossy Forest tours to sunrise viewpoint tours, book your perfect Cameron Highlands adventure today.",
     "",
     [
       "Cameron Highlands tours",
       "Cameron Highlands transfers",
-      "Cameron Highlands",
-      "Mossy Forest",
-      "Perhentian Islands",
+      "Mossy Forest Cameron Highlands",
+      "Mossy Forest tour",
+      "sunrise tour Cameron Highlands",
+      "Land Rover ride Mossy Forest",
+      "Cameron Highlands sightseeing",
+      "Mossy Forest entrance",
+      "Cameron Highlands adventure trip",
       "budget travel Cameron Highlands",
     ]
   ),

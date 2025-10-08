@@ -6,11 +6,13 @@ export const SEO_KEYWORDS = {
   // Primary destination keywords
   destinations: [
     'Cameron Highlands',
+    'Mossy Forest Brinchang',
+    'Gunung Brinchang viewpoint',
+    'BOH Tea Plantation',
     'Taman Negara', 
     'Kuala Besut',
     'Perhentian Islands',
-    'Kuala Lumpur',
-    'Malaysia'
+    'Kuala Lumpur'
   ],
   
   // Tour-specific keywords
@@ -20,22 +22,44 @@ export const SEO_KEYWORDS = {
     'Cameron Highlands Mossy Forest',
     'Mossy Forest hiking',
     'Mossy Forest trekking',
+    'Mossy Forest half-day tour',
+    'Mossy Forest full-day tour',
+    'Mossy Forest eco tour',
+    'Mossy Forest tour price',
+    'Mossy Forest with guide',
+    'Mossy Forest taxi service',
+    'Land Rover ride Mossy Forest',
+    'Mossy Forest walk Cameron Highlands',
+    'Mossy Forest jungle trekking',
+    'Mossy Forest nature trail',
+    'Mossy Forest adventure tour',
+    'Mossy Forest misty weather',
+    'Mossy Forest Instagram spots',
+    'Mossy Forest photography tour',
+    'Sunrise Cameron Highlands tour',
+    'Cameron Highlands sunrise tour',
+    'Sunrise viewpoint Cameron Highlands tour',
+    'Best sunrise tour Cameron Highlands',
+    'Sunrise and Mossy Forest tour Cameron Highlands',
+    'Sunrise tea plantation tour Cameron Highlands',
+    'Sunrise hiking tour Cameron Highlands',
+    'Private sunrise tour Cameron Highlands',
+    'Sunrise photography tour Cameron Highlands',
+    'Cameron Highlands sunrise package',
+    'Cameron Highlands sightseeing',
+    'Cameron Highlands jungle walk',
+    'Cameron Highlands adventure trip',
     'Half day land rover tour Cameron Highlands',
-    'Sunrise tour Cameron Highlands private',
-    'Cameron Highlands tour packages Malaysia',
-    'Pahang private tours',
     'Private tour Cameron Highlands',
     'Co-tour Cameron Highlands',
     'Budget tour',
     'Family tour',
     'Adventure tours Cameron Highlands',
-    'Half day tours Cameron Highlands',
-    'Sunrise tour Cameron Highlands'
+    'Half day tours Cameron Highlands'
   ],
   
   // Transfer-specific keywords  
   transfers: [
-    'mossyforest',
     'Minivan transfer Cameron Highlands to Kuala Besut',
     'Taman Negara to Perhentian Islands transfer',
     'Kuala Tahan minivan transfer',
@@ -63,6 +87,19 @@ export const SEO_KEYWORDS = {
     'Pick up from hostel tour Cameron Highlands'
   ],
   
+  // Visitor info keywords
+  visitorInfo: [
+    'Mossy Forest parking',
+    'Mossy Forest travel tips',
+    'Mossy Forest weather forecast',
+    'Mossy Forest safety tips',
+    'Mossy Forest what to wear',
+    'Mossy Forest best season',
+    'Mossy Forest entrance Cameron Highlands',
+    'Mossy Forest location',
+    'Mossy Forest Cameron Highlands map'
+  ],
+  
   // Price/booking related
   pricing: [
     'Mossy Forest entrance fee',
@@ -70,7 +107,7 @@ export const SEO_KEYWORDS = {
     'Mossy Forest Cameron Highlands fees',
     'Mossy Forest admission cost',
     'Book private van transfer Cameron Highlands online',
-    'Cheap private tour Malaysia Cameron Highlands',
+    'Cheap private tour Cameron Highlands',
     'Shared co-tour vs private tour cost Cameron Highlands'
   ]
 };
@@ -84,14 +121,15 @@ export const SOCIAL_LINKS = {
 // Website constants
 export const SITE_CONFIG = {
   name: 'Oastel',
-  title: 'Oastel - Tours, Transfers & Stays in Cameron Highlands',
-  description: 'Discover Cameron Highlands with Oastel\'s budget-friendly tours and transfers. From Cameron Highlands Mossy Forest tours to Perhentian Islands transfers, we offer private and shared adventures across Cameron Highlands.',
+  title: 'Oastel - Cameron Highlands Tours, Mossy Forest & Sunrise Tours',
+  description: 'Discover Cameron Highlands with Oastel\'s budget-friendly tours and transfers. From Mossy Forest tours to sunrise viewpoint tours, we offer private and shared adventures across Cameron Highlands.',
   url: process.env.NEXT_PUBLIC_SITE_URL || 'https://oastel.com', // Update with actual domain
   author: 'Oastel Team',
   keywords: [
     ...SEO_KEYWORDS.destinations,
-    ...SEO_KEYWORDS.tours.slice(0, 10), // First 10 tour keywords
+    ...SEO_KEYWORDS.tours.slice(0, 15), // First 15 tour keywords
     ...SEO_KEYWORDS.transfers.slice(0, 10), // First 10 transfer keywords
+    ...SEO_KEYWORDS.visitorInfo.slice(0, 5), // First 5 visitor info keywords
     ...SEO_KEYWORDS.services.slice(0, 5) // First 5 service keywords
   ]
 };
@@ -121,9 +159,11 @@ export function generateKeywords(
   
   // Add content-specific keywords
   if (contentType === 'tour') {
-    keywords.push(...SEO_KEYWORDS.tours.slice(0, 15));
+    keywords.push(...SEO_KEYWORDS.tours.slice(0, 20), ...SEO_KEYWORDS.visitorInfo.slice(0, 5));
   } else if (contentType === 'transfer') {
     keywords.push(...SEO_KEYWORDS.transfers.slice(0, 15));
+  } else if (contentType === 'blog') {
+    keywords.push(...SEO_KEYWORDS.tours.slice(0, 10), ...SEO_KEYWORDS.visitorInfo.slice(0, 5));
   }
   
   // Add location-specific keywords if provided

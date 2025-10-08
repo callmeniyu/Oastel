@@ -300,7 +300,7 @@ export default function MyBookingsContent() {
             Please sign in to view your bookings.
           </p>
           <button
-            onClick={() => (window.location.href = "/auth/login")}
+            onClick={() => (window.location.href = "/auth")}
             className="bg-primary_green text-white px-8 py-3 rounded-lg hover:bg-primary_green/90 transition-colors font-medium"
           >
             Sign In

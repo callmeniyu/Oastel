@@ -80,6 +80,66 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Organization Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "TravelAgency",
+              name: "Oastel",
+              description:
+                "Cameron Highlands tours, transfers and adventures including Mossy Forest tours, sunrise tours, and Land Rover rides",
+              url: SITE_CONFIG.url,
+              logo: `${SITE_CONFIG.url}/images/logo.png`,
+              address: {
+                "@type": "PostalAddress",
+                addressRegion: "Cameron Highlands",
+                addressCountry: "MY",
+              },
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: "+60196592141",
+                contactType: "customer service",
+                availableLanguage: "English",
+              },
+              sameAs: ["https://www.instagram.com/oastelvibe"],
+              hasOfferCatalog: {
+                "@type": "OfferCatalog",
+                name: "Cameron Highlands Tours & Transfers",
+                itemListElement: [
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "TourPackage",
+                      name: "Mossy Forest Tours Cameron Highlands",
+                      description:
+                        "Explore the mystical Mossy Forest in Cameron Highlands with our guided tours",
+                    },
+                  },
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "TourPackage",
+                      name: "Sunrise Tours Cameron Highlands",
+                      description:
+                        "Experience breathtaking sunrise views with our Cameron Highlands sunrise tours",
+                    },
+                  },
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "Service",
+                      name: "Cameron Highlands Transfers",
+                      description:
+                        "Comfortable van transfers across Cameron Highlands and to other destinations",
+                    },
+                  },
+                ],
+              },
+            }),
+          }}
+        />
       </head>
       <body className={`${poppins.variable}`}>
         <AuthSessionProvider>

@@ -83,7 +83,7 @@ export default function CartPage() {
     if (status === "loading") return;
 
     if (status === "unauthenticated" || !session?.user?.email) {
-      router.push("/auth/login");
+      router.push("/auth");
       return;
     }
   }, [session, status, router]);

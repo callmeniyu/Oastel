@@ -109,7 +109,7 @@ export default function MyCartContent() {
             Please sign in to view your cart.
           </p>
           <button
-            onClick={() => (window.location.href = "/auth/login")}
+            onClick={() => (window.location.href = "/auth")}
             className="bg-primary_green text-white px-6 py-2 rounded-lg hover:bg-primary_green/90 transition-colors"
           >
             Sign In
