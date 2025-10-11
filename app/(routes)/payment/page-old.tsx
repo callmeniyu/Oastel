@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import DeferredCheckoutForm from "@/components/ui/DeferredCheckoutForm";
+import CheckoutForm from "@/components/ui/CheckoutForm";
 import { useToast } from "@/context/ToastContext";
 import { paymentApi } from "@/lib/paymentApi";
 import Image from "next/image";
@@ -18,7 +18,7 @@ export default function PaymentPage() {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading for data validation only
   const [error, setError] = useState<string>("");
   const [bookingData, setBookingData] = useState<any>(null);
   const [isCartBooking, setIsCartBooking] = useState(false);
@@ -47,28 +47,17 @@ export default function PaymentPage() {
           const cartData = JSON.parse(decodeURIComponent(cartDataParam));
           const contactInfo = JSON.parse(decodeURIComponent(contactInfoParam));
 
-          setBookingData({
-            cartData,
-            contactInfo,
-            amount: parseFloat(amountParam),
-          });
+          setBookingData({ cartData, contactInfo });
         } else if (bookingDataParam) {
           // Single booking flow
           console.log("[PAYMENT_PAGE] Processing single booking payment");
           setIsCartBooking(false);
 
-          const parsedBookingData = JSON.parse(
-            decodeURIComponent(bookingDataParam)
-          );
-          setBookingData({
-            ...parsedBookingData,
-            amount: parseFloat(amountParam),
-          });
+          const bookingData = JSON.parse(decodeURIComponent(bookingDataParam));
+          setBookingData(bookingData);
         } else {
-          throw new Error("Missing booking data");
+          throw new Error("No booking data found");
         }
-
-        console.log("[PAYMENT_PAGE] Payment data validated successfully");
       } catch (error: any) {
         console.error("[PAYMENT_PAGE] Error validating payment data:", error);
         setError(error.message);
@@ -77,73 +66,111 @@ export default function PaymentPage() {
           title: "Payment Error",
           message: error.message || "Invalid payment data",
         });
-      } finally {
-        setLoading(false);
       }
     };
 
     validatePaymentData();
   }, [searchParams, showToast]);
 
-  // Create payment intent on demand when user submits form
-  const createPaymentIntentOnSubmit = async (): Promise<string> => {
-    try {
-      console.log("[PAYMENT_PAGE] Creating payment intent on form submit...");
+  // Removed page unload handlers to prevent interfering with Stripe payment flow
+  // No auto-cancellation or warnings - let payment intents expire naturally
 
-      if (!bookingData) {
+  // Create payment intent when form loads (but with shorter timeout)
+  const createPaymentIntent = async () => {
+    if (paymentIntentCreated || loading) return;
+
+    try {
+      setLoading(true);
+      console.log(
+        "[PAYMENT_PAGE] Creating payment intent with shorter timeout..."
+      );
+
+      const amountParam = searchParams.get("amount");
+      if (!amountParam || !bookingData) {
         throw new Error("Payment data is incomplete");
       }
 
+      const amount = parseFloat(amountParam);
+
       if (isCartBooking) {
         const response = await paymentApi.createCartPaymentIntent({
-          amount: bookingData.amount,
+          amount,
           cartData: bookingData.cartData,
           contactInfo: bookingData.contactInfo,
         });
 
         if (response.success && response.data) {
+          setClientSecret(response.data.clientSecret);
+          setPaymentIntentId(response.data.paymentIntentId);
+          setPaymentIntentCreated(true);
           console.log(
-            "[PAYMENT_PAGE] Cart payment intent created on submit:",
+            "[PAYMENT_PAGE] Cart payment intent created:",
             response.data.paymentIntentId
           );
-          return response.data.clientSecret;
         } else {
           throw new Error(response.error || "Failed to create payment intent");
         }
       } else {
         const response = await paymentApi.createPaymentIntent({
-          amount: bookingData.amount,
+          amount,
           bookingData,
         });
 
         if (response.success && response.data) {
+          setClientSecret(response.data.clientSecret);
+          setPaymentIntentId(response.data.paymentIntentId);
+          setPaymentIntentCreated(true);
           console.log(
-            "[PAYMENT_PAGE] Single payment intent created on submit:",
+            "[PAYMENT_PAGE] Single payment intent created:",
             response.data.paymentIntentId
           );
-          return response.data.clientSecret;
         } else {
           throw new Error(response.error || "Failed to create payment intent");
         }
       }
     } catch (error: any) {
-      console.error(
-        "[PAYMENT_PAGE] Error creating payment intent on submit:",
-        error
-      );
-      throw error;
+      console.error("[PAYMENT_PAGE] Error creating payment intent:", error);
+      setError(error.message);
+      showToast({
+        type: "error",
+        title: "Payment Error",
+        message: error.message || "Failed to initialize payment",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Auto-create payment intent when form loads
+  useEffect(() => {
+    if (bookingData && !paymentIntentCreated && !loading) {
+      createPaymentIntent();
+    }
+  }, [bookingData, paymentIntentCreated, loading]);
 
   // Handle explicit navigation away (Go Back button)
   const handleGoBack = async () => {
     setIsNavigatingAway(true);
+
+    // No longer auto-cancel payment intents - let them expire naturally
+    // if (paymentIntentId) {
+    //   try {
+    //     console.log(
+    //       "[PAYMENT_PAGE] Canceling payment intent before going back:",
+    //       paymentIntentId
+    //     );
+    //     await paymentApi.cancelPaymentIntent(paymentIntentId);
+    //   } catch (error) {
+    //     console.error("[PAYMENT_PAGE] Error canceling payment intent:", error);
+    //   }
+    // }
+
     router.back();
   };
 
   const handlePaymentSuccess = async (paymentIntent: any) => {
     try {
-      setIsNavigatingAway(true);
+      setIsNavigatingAway(true); // Prevent cancellation when navigating to success page
 
       console.log(
         "[PAYMENT_PAGE] Payment successful, confirming...",
@@ -195,20 +222,51 @@ export default function PaymentPage() {
           "Payment was successful but booking creation failed. Please contact support.",
       });
 
-      router.push("/contact");
+      // Redirect to a support page or booking failed page
+      router.push(
+        `/booking/payment-success-booking-failed?paymentId=${paymentIntent.id}`
+      );
     }
   };
 
   const handlePaymentError = (error: any) => {
-    console.error("[PAYMENT_PAGE] Payment error:", error);
+    console.error("[PAYMENT_PAGE] Payment failed:", error);
+
     showToast({
       type: "error",
       title: "Payment Failed",
-      message: error.message || "Payment failed. Please try again.",
+      message: error.message || "Payment was not successful",
     });
+
+    // Redirect to payment failed page
+    router.push(
+      `/booking/payment-failed?error=${encodeURIComponent(
+        error.message || "Payment failed"
+      )}`
+    );
   };
 
-  if (loading) {
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Payment Setup Failed
+          </h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={handleGoBack}
+            className="px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!bookingData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -219,30 +277,78 @@ export default function PaymentPage() {
     );
   }
 
-  if (error) {
+  // Show payment form immediately (no "Start Payment" button)
+  if (!paymentIntentCreated && !loading) {
+    const amount = parseFloat(searchParams.get("amount") || "0");
+
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Complete Your Payment
+              </h1>
+              <div className="flex items-center justify-center space-x-2 text-gray-600 mb-4">
+                <span>Powered by</span>
+                <Image
+                  src="/images/stripe-seeklogo.png"
+                  alt="Stripe"
+                  width={60}
+                  height={20}
+                  className="h-5 w-12"
+                />
+              </div>
+              <div className="text-3xl font-bold text-primary_green mb-4">
+                RM {amount.toFixed(2)}
+              </div>
+              <p className="text-gray-600 text-sm mb-6">
+                Your payment will be processed securely. Payment intent will be
+                created only when you submit the form.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+              </div>
+              <p className="text-gray-500 mt-4">
+                Initializing secure payment form...
+              </p>
+            </div>
+
+            <button
+              onClick={handleGoBack}
+              className="w-full mt-6 px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-500 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Payment Error
-          </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+          <p className="text-gray-600">Setting up secure payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Unable to initialize payment</p>
           <button
             onClick={handleGoBack}
-            className="px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
+            className="mt-4 px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90"
           >
             Go Back
           </button>
@@ -258,11 +364,8 @@ export default function PaymentPage() {
     },
   };
 
-  // Use Elements without client secret - payment intent will be created on submit
   const options = {
-    mode: "payment" as const,
-    amount: Math.round(bookingData.amount * 100), // Convert to cents
-    currency: "myr",
+    clientSecret,
     appearance,
   };
 
@@ -284,26 +387,15 @@ export default function PaymentPage() {
                 className="h-5 w-12"
               />
             </div>
-            <div className="text-3xl font-bold text-primary_green mt-4">
-              RM {bookingData.amount.toFixed(2)}
-            </div>
           </div>
 
           <Elements options={options} stripe={stripePromise}>
-            <DeferredCheckoutForm
+            <CheckoutForm
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
               isCartBooking={isCartBooking}
-              createPaymentIntentOnSubmit={createPaymentIntentOnSubmit}
             />
           </Elements>
-
-          <button
-            onClick={handleGoBack}
-            className="w-full mt-4 px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Go Back
-          </button>
         </div>
       </div>
     </div>

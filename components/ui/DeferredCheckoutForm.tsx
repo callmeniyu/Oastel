@@ -9,17 +9,19 @@ import {
 } from "@stripe/react-stripe-js";
 import Image from "next/image";
 
-interface CheckoutFormProps {
+interface DeferredCheckoutFormProps {
   onSuccess: (paymentIntent: any) => void;
   onError: (error: any) => void;
   isCartBooking: boolean;
+  createPaymentIntentOnSubmit: () => Promise<string>;
 }
 
-export default function CheckoutForm({
+export default function DeferredCheckoutForm({
   onSuccess,
   onError,
   isCartBooking,
-}: CheckoutFormProps) {
+  createPaymentIntentOnSubmit,
+}: DeferredCheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -32,7 +34,7 @@ export default function CheckoutForm({
     }
 
     if (!stripe || !elements) {
-      console.error("[CHECKOUT] Stripe not loaded");
+      console.error("[DEFERRED_CHECKOUT] Stripe not loaded");
       return;
     }
 
@@ -40,24 +42,36 @@ export default function CheckoutForm({
     setErrorMessage("");
 
     try {
-      console.log("[CHECKOUT] Validating form...");
-
-      // First, validate the form elements
+      // Validate the Elements immediately as soon as the customer presses Pay.
+      // This must be called before any asynchronous work (like creating a PaymentIntent)
+      // according to Stripe's deferred flow requirements.
       const { error: submitError } = await elements.submit();
       if (submitError) {
-        console.error("[CHECKOUT] Form validation error:", submitError);
+        console.error(
+          "[DEFERRED_CHECKOUT] Form validation error:",
+          submitError
+        );
         setErrorMessage(
           submitError.message || "Please fill in all required fields"
         );
         setLoading(false);
+        onError(submitError);
         return;
       }
 
-      console.log("[CHECKOUT] Processing payment...");
+      console.log("[DEFERRED_CHECKOUT] Creating payment intent on submit...");
 
-      // Confirm the payment
+      // Create payment intent only when user actually submits
+      const clientSecret = await createPaymentIntentOnSubmit();
+
+      console.log(
+        "[DEFERRED_CHECKOUT] Payment intent created, processing payment..."
+      );
+
+      // Confirm payment with the newly created payment intent
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
+        clientSecret: clientSecret,
         redirect: "if_required",
         confirmParams: {
           return_url: window.location.href,
@@ -65,12 +79,12 @@ export default function CheckoutForm({
       });
 
       if (error) {
-        console.error("[CHECKOUT] Payment failed:", error);
+        console.error("[DEFERRED_CHECKOUT] Payment failed:", error);
         setErrorMessage(error.message || "Payment failed");
         onError(error);
       } else if (paymentIntent) {
         console.log(
-          "[CHECKOUT] Payment successful:",
+          "[DEFERRED_CHECKOUT] Payment successful:",
           paymentIntent.id,
           paymentIntent.status
         );
@@ -79,7 +93,7 @@ export default function CheckoutForm({
           onSuccess(paymentIntent);
         } else {
           console.error(
-            "[CHECKOUT] Payment not successful:",
+            "[DEFERRED_CHECKOUT] Payment not successful:",
             paymentIntent.status
           );
           const statusError = {
@@ -90,30 +104,21 @@ export default function CheckoutForm({
           onError(statusError);
         }
       }
-    } catch (err: any) {
-      console.error("[CHECKOUT] Unexpected error:", err);
-      const unexpectedError = {
-        message: err.message || "An unexpected error occurred",
-        type: "validation_error",
-      };
-      setErrorMessage(unexpectedError.message);
-      onError(unexpectedError);
+    } catch (error: any) {
+      console.error("[DEFERRED_CHECKOUT] Error during payment process:", error);
+      setErrorMessage(error.message || "Payment processing failed");
+      onError(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // Prevent implicit form submission (Enter key / automatic submits) by
-    // blocking the default onSubmit. Validation will run only when the
-    // explicit Pay Now button is clicked which calls handleSubmit.
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Payment Element */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Payment Details
-        </label>
-        <div className="border rounded-md p-3">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-gray-900">Payment Method</h3>
+        <div className="p-4 border border-gray-200 rounded-md">
           <PaymentElement
             options={{
               layout: "tabs",
@@ -122,15 +127,14 @@ export default function CheckoutForm({
         </div>
       </div>
 
-      {/* Address Element */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Billing Address
-        </label>
-        <div className="border rounded-md p-3">
+      {/* Billing Address */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-gray-900">Billing Address</h3>
+        <div className="p-4 border border-gray-200 rounded-md">
           <AddressElement
             options={{
               mode: "billing",
+              allowedCountries: ["MY"],
             }}
           />
         </div>
@@ -138,36 +142,38 @@ export default function CheckoutForm({
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-red-800 text-sm">
-            <strong>Payment Error:</strong> {errorMessage}
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Payment Error
+              </h3>
+              <div className="mt-1 text-sm text-red-700">{errorMessage}</div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Payment Information */}
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <div className="text-blue-800 text-sm">
-          <div className="flex items-start">
-            <div className="text-blue-500 mr-2">🔒</div>
-            <div>
-              <p className="font-medium mb-1">Secure Payment</p>
-              <p>
-                Your payment information is encrypted and secure. We use Stripe
-                for payment processing.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Submit Button */}
       <button
         type="button"
-        onClick={(e) => handleSubmit(e)}
-        disabled={loading || !stripe || !elements}
-        className={`w-full py-3 px-4 rounded-md font-semibold text-white transition-colors ${
-          loading || !stripe || !elements
+        onClick={() => handleSubmit()}
+        disabled={!stripe || loading}
+        className={`w-full px-6 py-3 text-white font-semibold rounded-md transition-colors ${
+          loading || !stripe
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary_green hover:bg-primary_green/90"
         }`}
@@ -178,7 +184,7 @@ export default function CheckoutForm({
             Processing Payment...
           </div>
         ) : (
-          `Pay Now - Complete ${isCartBooking ? "Cart " : ""}Booking`
+          `Pay Now - Complete ${isCartBooking ? "Cart" : "Booking"}`
         )}
       </button>
 
@@ -198,7 +204,7 @@ export default function CheckoutForm({
           {/* Mastercard */}
           <Image
             src="/images/mastercard.png"
-            alt="Visa"
+            alt="Mastercard"
             width={40}
             height={24}
             className="h-12 w-16"
@@ -207,7 +213,7 @@ export default function CheckoutForm({
           {/* American Express */}
           <Image
             src="/images/American Express Card.png"
-            alt="Visa"
+            alt="American Express"
             width={40}
             height={24}
             className="h-12 w-16"
@@ -216,12 +222,16 @@ export default function CheckoutForm({
           {/* Discover */}
           <Image
             src="/images/footer_payment2.png"
-            alt="Visa"
+            alt="Discover"
             width={40}
             height={24}
             className="h-12 w-16"
           />
         </div>
+        <p className="mt-3 text-xs">
+          🔒 Your payment information is encrypted and secure. No payment intent
+          is created until you click "Pay Now".
+        </p>
       </div>
     </form>
   );
