@@ -4,3 +4,6 @@ npm i date-fns
   debugger
   return true
 }
+
+
+NODE_OPTIONS="--max-old-space-size=2048" npm run build
