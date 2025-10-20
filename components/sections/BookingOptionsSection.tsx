@@ -4,14 +4,13 @@ import { IoHomeOutline } from "react-icons/io5";
 import { FiMapPin } from "react-icons/fi";
 import { LiaShuttleVanSolid } from "react-icons/lia";
 
-
 export default function BookingOptions() {
   const options = [
     {
       title: "Book Stay",
       description: "Reserve a co-living space with ease",
       icon: <IoHomeOutline size={40} />,
-      href: "https://booking.exely.com/en/oastel/",
+      href: "/",
     },
     {
       title: "Book Tour",
@@ -29,7 +28,6 @@ export default function BookingOptions() {
 
   return (
     <section className="px-2 md:px-8 font-poppins mt-6 hidden md:block">
-
       <div className="grid grid-cols-3 gap-2 md:gap-6 max-w-5xl mx-auto">
         {options.map((opt, idx) => (
           <Link
@@ -40,8 +38,12 @@ export default function BookingOptions() {
             <div className="text-primary_green transition-colors">
               {opt.icon}
             </div>
-            <h3 className="text-md sm:text-xl font-semibold text-primary_green transition-colors">{opt.title}</h3>
-            <p className="text-sm text-gray-400 transition-colors hidden sm:block">{opt.description}</p>
+            <h3 className="text-md sm:text-xl font-semibold text-primary_green transition-colors">
+              {opt.title}
+            </h3>
+            <p className="text-sm text-gray-400 transition-colors hidden sm:block">
+              {opt.description}
+            </p>
           </Link>
         ))}
       </div>

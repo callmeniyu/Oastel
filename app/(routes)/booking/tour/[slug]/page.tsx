@@ -747,16 +747,13 @@ export default function BookingInfoPage() {
                       <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                         <p className="text-sm text-green-700">
                           <span className="font-medium">Selected Time:</span>{" "}
-                          {selectedTime} |
+                          {selectedTime}
                           <span className="font-medium">
                             {" "}
                             Minimum Required:
                           </span>{" "}
                           {selectedSlot.minimumPerson} person
                           {selectedSlot.minimumPerson > 1 ? "s" : ""} |
-                          <span className="font-medium"> Available:</span>{" "}
-                          {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
-                          seats
                         </p>
                         <p className="text-xs text-green-600 mt-1">
                           {isFirstBooking

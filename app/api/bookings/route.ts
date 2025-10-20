@@ -73,8 +73,17 @@ export async function GET(request: NextRequest) {
             8000 // 8 second timeout
         );
 
+        // Check if server returned HTML instead of JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('text/html')) {
+            return NextResponse.json(
+                { success: false, error: 'Server is down or returning HTML instead of JSON' },
+                { status: 503 }
+            );
+        }
+
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await response.json().catch(() => ({ error: 'Server error' }));
             return NextResponse.json(
                 { success: false, error: errorData.error || 'Failed to fetch bookings' },
                 { status: response.status }

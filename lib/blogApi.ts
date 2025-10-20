@@ -112,4 +112,34 @@ export const blogApi = {
             return { success: false, message: "Failed to increment views" }
         }
     },
+
+    // Set featured rank for a blog (0..3)
+    setFeaturedRank: async (id: string, rank: number) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/blogs/${id}/feature`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ featuredRank: rank }),
+            })
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error setting featured rank:', error)
+            throw error
+        }
+    },
+
+    // Fetch featured blogs (top 3)
+    getFeaturedBlogs: async (): Promise<BlogsResponse> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/blogs?featured=true`)
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+            return await response.json()
+        } catch (error) {
+            console.error('Error fetching featured blogs:', error)
+            throw error
+        }
+    },
 }

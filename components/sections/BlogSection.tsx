@@ -15,6 +15,20 @@ export default function BlogSection() {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
+        // Try fetching featured blogs first
+        try {
+          const featured = await blogApi.getFeaturedBlogs();
+          if (featured && featured.data && featured.data.length > 0) {
+            setBlogs(featured.data);
+            setError(null);
+            return;
+          }
+        } catch (err) {
+          console.debug(
+            "No featured blogs or failed to fetch featured, falling back to recent"
+          );
+        }
+
         const response = await blogApi.getBlogs({
           limit: 3,
           sortBy: "publishDate",

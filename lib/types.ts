@@ -143,4 +143,5 @@ export type BlogType = {
     category: string
     views: number
     content: string
+    featuredRank?: number
 }
