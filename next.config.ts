@@ -78,11 +78,6 @@ const nextConfig: NextConfig = {
                 permanent: true,
             },
             {
-                source: "/book-online",
-                destination: "/",
-                permanent: true,
-            },
-            {
                 source: "/news/oastel%C2%A0co-living",
                 destination: "/",
                 permanent: true,
@@ -101,12 +96,6 @@ const nextConfig: NextConfig = {
             {
                 source: "/book-cameron-highlands-tours",
                 destination: "/tours",
-                permanent: true,
-            },
-            // External redirect to booking platform
-            {
-                source: "/booking",
-                destination: "https://booking.exely.com/en/oastel/",
                 permanent: true,
             },
             // Redirect old service page to specific tour
