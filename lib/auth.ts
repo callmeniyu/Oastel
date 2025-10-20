@@ -14,29 +14,40 @@ export const authOptions = {
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                await dbConnect()
+                try {
+                    // Add timeout to database operations
+                    await Promise.race([
+                        dbConnect(),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Database connection timeout')), 5000)
+                        )
+                    ]);
 
-                // Check if user exists
-                const user = await User.findOne({ email: credentials?.email })
+                    // Check if user exists
+                    const user = await User.findOne({ email: credentials?.email })
 
-                if (!user) {
-                    throw new Error("No user found with this email")
-                }
-
-                // Check if password is correct
-                if (user.passwordHash) {
-                    const isValid = await bcrypt.compare(credentials?.password || "", user.passwordHash)
-
-                    if (!isValid) {
-                        throw new Error("Invalid password")
+                    if (!user) {
+                        throw new Error("No user found with this email")
                     }
-                }
 
-                return {
-                    id: user._id.toString(),
-                    email: user.email,
-                    name: user.name,
-                    image: user.image,
+                    // Check if password is correct
+                    if (user.passwordHash) {
+                        const isValid = await bcrypt.compare(credentials?.password || "", user.passwordHash)
+
+                        if (!isValid) {
+                            throw new Error("Invalid password")
+                        }
+                    }
+
+                    return {
+                        id: user._id.toString(),
+                        email: user.email,
+                        name: user.name,
+                        image: user.image,
+                    }
+                } catch (error) {
+                    console.error("Auth error:", error);
+                    throw error;
                 }
             },
         }),
@@ -54,42 +65,54 @@ export const authOptions = {
             credentials?: Record<string, unknown>
         }) {
             const { user, account, profile } = params
-            await dbConnect()
+            
+            try {
+                // Add timeout to database connection
+                await Promise.race([
+                    dbConnect(),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Database connection timeout')), 5000)
+                    )
+                ]);
 
-            if (account?.provider === "google") {
-                const existingUser = await User.findOne({ email: profile?.email })
+                if (account?.provider === "google") {
+                    const existingUser = await User.findOne({ email: profile?.email })
 
-                if (!existingUser) {
-                    // Create new user with complete UserType schema
-                    try {
-                        await User.create({
-                            name: profile?.name,
-                            email: profile?.email,
-                            passwordHash: "",
-                            image: profile?.picture || "",
-                            location: "",
-                            bio: "",
-                            address: {
-                                whatsapp: "",
-                                phone: "",
-                                pickupAddresses: [],
-                            },
-                            // Schema expects a string for bookings (use empty string as default)
-                            bookings: "",
-                            provider: "google",
-                            googleId: profile?.sub,
-                        })
-                    } catch (err) {
-                        console.error("Failed to create user on Google sign-in:", err)
-                        // Redirect to a clearer error page for server-side failures
-                        return "/auth/error?error=server_error"
+                    if (!existingUser) {
+                        // Create new user with complete UserType schema
+                        try {
+                            await User.create({
+                                name: profile?.name,
+                                email: profile?.email,
+                                passwordHash: "",
+                                image: profile?.picture || "",
+                                location: "",
+                                bio: "",
+                                address: {
+                                    whatsapp: "",
+                                    phone: "",
+                                    pickupAddresses: [],
+                                },
+                                // Schema expects a string for bookings (use empty string as default)
+                                bookings: "",
+                                provider: "google",
+                                googleId: profile?.sub,
+                            })
+                        } catch (err) {
+                            console.error("Failed to create user on Google sign-in:", err)
+                            // Redirect to a clearer error page for server-side failures
+                            return "/auth/error?error=server_error"
+                        }
+                    } else if (existingUser.provider !== "google") {
+                        return "/auth/error?error=email-already-in-use"
                     }
-                } else if (existingUser.provider !== "google") {
-                    return "/auth/error?error=email-already-in-use"
                 }
-            }
 
-            return true
+                return true
+            } catch (error) {
+                console.error("SignIn callback error:", error);
+                return "/auth/error?error=callback_error"
+            }
         },
         async jwt({ token, user, account }: { token: Record<string, any>; user?: Record<string, any>; account?: any }) {
             if (user) {
@@ -112,18 +135,22 @@ export const authOptions = {
         signIn: "/auth/login",
         error: "/auth/error",
     },
-    // Enable verbose debug logging to diagnose Google login failures
-    debug: true,
-    // Lightweight logger to surface next-auth internals in the server console
+    // Disable debug logging in production to improve performance
+    debug: process.env.NODE_ENV === 'development',
+    // Lightweight logger only for errors in production
     logger: {
         error(code: string, ...metadata: any[]) {
             console.error("[next-auth][error]", code, ...metadata)
         },
         warn(code: string) {
-            console.warn("[next-auth][warn]", code)
+            if (process.env.NODE_ENV === 'development') {
+                console.warn("[next-auth][warn]", code)
+            }
         },
         debug(code: string, ...metadata: any[]) {
-            console.debug("[next-auth][debug]", code, ...metadata)
+            if (process.env.NODE_ENV === 'development') {
+                console.debug("[next-auth][debug]", code, ...metadata)
+            }
         },
     },
     // Event hooks to log signIn attempts and errors

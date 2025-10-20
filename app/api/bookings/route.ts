@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Timeout wrapper for API calls
+const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+    return Promise.race([
+        promise,
+        new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+        )
+    ]);
+};
+
 export async function POST(request: NextRequest) {
     try {
         const bookingData = await request.json();
         
-        // Call your backend API to create booking
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/bookings`,
-            {
+        // Call your backend API to create booking with timeout
+        const response = await withTimeout(
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(bookingData)
-            }
+            }),
+            8000 // 8 second timeout
         );
 
         if (!response.ok) {
@@ -33,7 +43,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Error creating booking:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to create booking' },
+            { success: false, error: error instanceof Error && error.message === 'Request timeout' ? 'Request timed out' : 'Failed to create booking' },
             { status: 500 }
         );
     }
@@ -53,12 +63,15 @@ export async function GET(request: NextRequest) {
         if (date) url += `date=${date}&`;
         if (userId) url += `userId=${userId}&`;
 
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+        const response = await withTimeout(
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }),
+            8000 // 8 second timeout
+        );
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -78,7 +91,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Error fetching bookings:', error);
         return NextResponse.json(
-            { success: false, error: 'Failed to fetch bookings' },
+            { success: false, error: error instanceof Error && error.message === 'Request timeout' ? 'Request timed out' : 'Failed to fetch bookings' },
             { status: 500 }
         );
     }
