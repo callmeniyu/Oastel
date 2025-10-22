@@ -113,7 +113,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
             {/* Simple Links */}
             <Link
-              href="https://booking.exely.com/en/oastel/"
+              href="/"
               onClick={onClose}
               className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
             >

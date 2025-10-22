@@ -11,7 +11,7 @@ export default function HeroSection() {
       title: "Book Stay",
       description: "Reserve your perfect accommodation",
       icon: <IoHomeOutline className="text-2xl" />,
-      href: "https://booking.exely.com/en/oastel/",
+      href: "/",
       bgColor: "bg-[#FF7E33]",
     },
     {
