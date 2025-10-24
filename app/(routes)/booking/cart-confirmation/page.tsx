@@ -783,20 +783,20 @@ export default function CartConfirmationPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 text-center space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="mt-8 text-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={downloadPDF}
               disabled={isGeneratingPDF}
-              className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
             </button>
             <button
-              onClick={() => router.push("/profile")}
-              className="px-6 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors"
+              onClick={() => router.push("/recommendations")}
+              className="px-8 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 transition-colors"
             >
-              View All Bookings
+              Continue
             </button>
           </div>
         </div>

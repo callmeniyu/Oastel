@@ -70,6 +70,23 @@ export default function BookingConfirmationPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { isAuthenticated } = SessionHook();
 
+  // Only redirect to home if the user is still on this confirmation page.
+  // This prevents an in-flight booking fetch from navigating the user away
+  // after they clicked Continue (which routes to /recommendations).
+  const safeRedirectHome = () => {
+    try {
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname || "";
+        if (currentPath.includes(`/booking/confirmation/${bookingId}`)) {
+          router.push("/");
+        }
+      }
+    } catch (err) {
+      // Fallback: still attempt to navigate
+      router.push("/");
+    }
+  };
+
   const stripHtmlTags = (html: string): string => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
@@ -373,7 +390,7 @@ export default function BookingConfirmationPage() {
             title: "Error",
             message: data.error || "Booking not found",
           });
-          router.push("/");
+          safeRedirectHome();
         }
       } catch (error) {
         console.error("Error fetching booking:", error);
@@ -382,7 +399,7 @@ export default function BookingConfirmationPage() {
           title: "Error",
           message: "Failed to load booking details",
         });
-        router.push("/");
+        safeRedirectHome();
       } finally {
         setIsLoading(false);
       }
@@ -397,7 +414,7 @@ export default function BookingConfirmationPage() {
         title: "Error",
         message: "Invalid booking ID",
       });
-      router.push("/");
+      safeRedirectHome();
     }
   }, [bookingId, router, showToast]);
 
@@ -754,29 +771,24 @@ export default function BookingConfirmationPage() {
       </div>
 
       {/* Buttons */}
-      <div className="text-center space-y-4 mt-6">
-        <button
-          onClick={downloadPDF}
-          disabled={isGeneratingPDF}
-          className="px-6 py-2 mr-3 bg-primary_green text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
-        >
-          {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
-        </button>
-        <button
-          onClick={() => {
-            // View bookings: profile for authenticated users, else browse relevant listing
-            if (isAuthenticated) {
-              router.push("/profile");
-            } else if (booking.packageType === "tour") {
-              router.push("/tours");
-            } else {
-              router.push("/transfers");
-            }
-          }}
-          className="px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-poppins"
-        >
-          View bookings
-        </button>
+      <div className="text-center mt-6">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <button
+            onClick={downloadPDF}
+            disabled={isGeneratingPDF}
+            className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed font-poppins"
+          >
+            {isGeneratingPDF ? "Generating PDF..." : "Download PDF"}
+          </button>
+          <button
+            onClick={() => {
+              router.push("/recommendations");
+            }}
+            className="px-8 py-3 bg-primary_green text-white rounded-lg hover:bg-primary_green/90 font-poppins"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     </div>
   );
