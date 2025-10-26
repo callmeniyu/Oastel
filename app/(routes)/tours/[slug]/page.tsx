@@ -151,7 +151,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
           {/* ✅ Booking Panel for small screens */}
           <div className="block lg:hidden bg-white border rounded-md p-4 shadow-sm mt-6">
-            <div className="mb-4">
+            <div className="mb-4 flex flex-col gap-2">
               <p className="text-lg text-gray-400 line-through">
                 RM {tourDetails.oldPrice}
               </p>
@@ -161,17 +161,20 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                 </span>
                 {tourDetails.type === "private" ? " / group" : " / person"}
               </h2>
-              <div className="flex items-center gap-2">
-                <FaBookmark className="text-primary_green inline-block mr-1" />
-                <span className="font-semibold">
+              <div className="flex items-center w-full gap-3">
+                <FaBookmark className="text-xl text-primary_green" />
+                <span className="font-semibold text-lg">
                   {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
+
+              {/* Larger full-width booking button for small screens */}
             </div>
 
             <GreenBtn
               text="Book Now"
               action={`/booking/tour/${tourDetails.slug}`}
+              customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
 

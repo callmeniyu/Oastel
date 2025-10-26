@@ -340,16 +340,19 @@ export default function BookingInfoPage() {
 
     const totalGuests = adults + children;
 
-    // Check minimum adults requirement (children don't count toward minimum)
-    if (adults < selectedSlot.minimumPerson) {
-      showToast({
-        type: "error",
-        title: "Minimum adults required",
-        message: `Please select at least ${selectedSlot.minimumPerson} adult${
-          selectedSlot.minimumPerson > 1 ? "s" : ""
-        } for this time slot. Current adults: ${adults}`,
-      });
-      return;
+    // Skip minimum person validation for Private transfers (vehicle booking)
+    if (transferDetails?.type !== "Private") {
+      // Check minimum adults requirement (children don't count toward minimum)
+      if (adults < selectedSlot.minimumPerson) {
+        showToast({
+          type: "error",
+          title: "Minimum adults required",
+          message: `Please select at least ${selectedSlot.minimumPerson} adult${
+            selectedSlot.minimumPerson > 1 ? "s" : ""
+          } for this time slot. Current adults: ${adults}`,
+        });
+        return;
+      }
     }
 
     // Check capacity

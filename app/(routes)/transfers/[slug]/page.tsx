@@ -196,7 +196,7 @@ export default async function TransferDetailPage({
             <GreenBtn
               text="Book Now"
               action={`/booking/transfer/${transferDetails.slug}`}
-              customStyles=""
+              customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
 
