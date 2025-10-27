@@ -5,7 +5,6 @@ import {
   useStripe,
   useElements,
   PaymentElement,
-  AddressElement,
 } from "@stripe/react-stripe-js";
 import Image from "next/image";
 
@@ -117,24 +116,11 @@ export default function DeferredCheckoutForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Payment Element */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Payment Method</h3>
+        <h3 className="text-lg font-medium text-gray-900">Payment Details</h3>
         <div className="p-4 border border-gray-200 rounded-md">
           <PaymentElement
             options={{
               layout: "tabs",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Billing Address */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Billing Address</h3>
-        <div className="p-4 border border-gray-200 rounded-md">
-          <AddressElement
-            options={{
-              mode: "billing",
-              allowedCountries: ["MY"],
             }}
           />
         </div>

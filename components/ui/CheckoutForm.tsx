@@ -5,7 +5,6 @@ import {
   useStripe,
   useElements,
   PaymentElement,
-  AddressElement,
 } from "@stripe/react-stripe-js";
 import Image from "next/image";
 
@@ -117,20 +116,6 @@ export default function CheckoutForm({
           <PaymentElement
             options={{
               layout: "tabs",
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Address Element */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Billing Address
-        </label>
-        <div className="border rounded-md p-3">
-          <AddressElement
-            options={{
-              mode: "billing",
             }}
           />
         </div>
