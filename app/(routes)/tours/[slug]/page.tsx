@@ -17,10 +17,14 @@ import { transferApi } from "@/lib/transferApi";
 import { TourType } from "@/lib/types";
 import { resolveImageUrl } from "@/lib/imageUtils";
 import { formatBookedCount } from "@/lib/utils";
+import { calculateOfferPercentage } from "@/lib/utils";
 import {
   generateTourMetadata,
   generateTourStructuredData,
 } from "@/lib/seoUtils";
+
+// Enable dynamic routing for new tours
+export const dynamicParams = true;
 
 type TourDetailPageProps = {
   params: { slug: string };
@@ -31,8 +35,22 @@ export async function generateMetadata({
   params,
 }: TourDetailPageProps): Promise<Metadata> {
   try {
-    const response = await tourApi.getTourBySlug(params.slug);
-    const tour = response.data;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/tours/slug/${params.slug}`,
+      {
+        next: { revalidate: 300 },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        title: "Tour Not Found - Oastel",
+        description: "The requested tour could not be found.",
+      };
+    }
+
+    const data = await response.json();
+    const tour = data.data;
 
     if (!tour) {
       return {
@@ -54,10 +72,24 @@ export async function generateMetadata({
 // Generate static params for static generation
 export async function generateStaticParams() {
   try {
-    const response = await tourApi.getTours({ limit: 1000 });
-    return response.data.map((tour: any) => ({
-      slug: tour.slug,
-    }));
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/tours?limit=1000`,
+      {
+        next: { revalidate: 300 },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error generating static params:", response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    return (
+      data.data?.map((tour: any) => ({
+        slug: tour.slug,
+      })) || []
+    );
   } catch (error) {
     console.error("Error generating static params:", error);
     return [];
@@ -67,11 +99,23 @@ export async function generateStaticParams() {
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
   const { slug } = params;
 
-  // Fetch tour details
+  // Fetch tour details with cache revalidation
   let tourDetails: TourType | null = null;
   try {
-    const response = await tourApi.getTourBySlug(slug);
-    tourDetails = response.data;
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/tours/slug/${slug}`,
+      {
+        next: { revalidate: 300 }, // Revalidate every 5 minutes
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Error fetching tour:", response.status);
+      notFound();
+    }
+
+    const data = await response.json();
+    tourDetails = data.data;
   } catch (error) {
     console.error("Error fetching tour:", error);
     notFound();
@@ -81,19 +125,30 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
     notFound();
   }
 
+  const offerPercentage = calculateOfferPercentage(
+    tourDetails.oldPrice,
+    tourDetails.newPrice
+  );
+
   // Fetch other tours and transfers for recommendations
   let otherTours: any[] = [];
   try {
     const [allToursResponse, allTransfersResponse] = await Promise.all([
-      tourApi.getTours({ limit: 100 }),
-      transferApi.getTransfers({ limit: 100 }),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tours?limit=100`, {
+        next: { revalidate: 300 },
+      }),
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transfers?limit=100`, {
+        next: { revalidate: 300 },
+      }),
     ]);
 
+    const allToursData = await allToursResponse.json();
+    const allTransfersData = await allTransfersResponse.json();
+
     // Separate tours and transfers, exclude current tour
-    const availableTours = allToursResponse.data.filter(
-      (tour) => tour.slug !== slug
-    );
-    const availableTransfers = allTransfersResponse.data;
+    const availableTours =
+      allToursData.data?.filter((tour: any) => tour.slug !== slug) || [];
+    const availableTransfers = allTransfersData.data || [];
 
     const shuffle = (arr: any[]) => [...arr].sort(() => Math.random() - 0.5);
 
@@ -152,9 +207,16 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
           {/* ✅ Booking Panel for small screens */}
           <div className="block lg:hidden bg-white border rounded-md p-4 shadow-sm mt-6">
             <div className="mb-4 flex flex-col gap-2">
-              <p className="text-lg text-gray-400 line-through">
-                RM {tourDetails.oldPrice}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg text-gray-400 line-through">
+                  RM {tourDetails.oldPrice}
+                </p>
+                {offerPercentage > 0 && (
+                  <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                    {offerPercentage}% OFF
+                  </span>
+                )}
+              </div>
               <h2 className="text-lg">
                 <span className="text-3xl font-extrabold sm:font-bold">
                   RM {tourDetails.newPrice}
@@ -261,9 +323,16 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         <div className="w-full lg:w-80 shrink-0 hidden lg:block">
           <div className="bg-white border-2 border-primary_green rounded-xl shadow-lg p-6 flex flex-col gap-6">
             <div>
-              <p className="text-lg text-gray-400 line-through mb-1">
-                RM {tourDetails.oldPrice}
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-lg text-gray-400 line-through">
+                  RM {tourDetails.oldPrice}
+                </p>
+                {offerPercentage > 0 && (
+                  <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                    {offerPercentage}% OFF
+                  </span>
+                )}
+              </div>
               <h2 className="text-lg mb-2">
                 <span className="text-4xl font-extrabold">
                   RM {tourDetails.newPrice}

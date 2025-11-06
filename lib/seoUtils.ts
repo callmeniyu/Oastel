@@ -60,6 +60,8 @@ export const SEO_KEYWORDS = {
   
   // Transfer-specific keywords  
   transfers: [
+    // Core transfer services
+    'Cameron Highlands transfer service',
     'Minivan transfer Cameron Highlands to Kuala Besut',
     'Taman Negara to Perhentian Islands transfer',
     'Kuala Tahan minivan transfer',
@@ -71,7 +73,53 @@ export const SEO_KEYWORDS = {
     'Van ticket Cameron Highlands',
     'Taman Negara transfer van Cameron Highlands',
     'Kuala Besut jetty van transfer',
-    'Private tour from Kuala Lumpur to Cameron Highlands'
+    'Private tour from Kuala Lumpur to Cameron Highlands',
+    
+    // Popular routes and destinations
+    'Cameron Highlands to Kuala Lumpur transfer',
+    'Cameron Highlands to KLIA airport transfer',
+    'Cameron Highlands to KL Sentral transfer',
+    'Tanah Rata to Kuala Lumpur van',
+    'Brinchang to KL transfer service',
+    'Cameron Highlands to Georgetown Penang transfer',
+    'Cameron Highlands to Ipoh transfer',
+    'Cameron Highlands to Malacca transfer',
+    'Cameron Highlands to Genting Highlands transfer',
+    'Cameron Highlands to Cherating transfer',
+    'Cameron Highlands to Kuantan transfer',
+    'Cameron Highlands shuttle service',
+    
+    // Transport types and features
+    'air conditioned van Cameron Highlands',
+    'comfortable minivan transfer',
+    'door to door transfer Cameron Highlands',
+    'hotel pickup transfer Cameron Highlands',
+    'shared van transfer Malaysia',
+    'express transfer Cameron Highlands',
+    'budget transfer Cameron Highlands',
+    'reliable transfer service Malaysia',
+    'safe transfer Cameron Highlands',
+    'licensed transfer operator',
+    'experienced driver transfer',
+    'luggage included transfer',
+    
+    // Ferry combinations
+    'Cameron Highlands Perhentian ferry combo',
+    'mainland to island transfer package',
+    'Kuala Besut jetty ferry service',
+    'Perhentian fast boat booking',
+    'island hopping transfer',
+    'ferry schedule Cameron Highlands',
+    
+    // Booking and convenience
+    'online van booking Cameron Highlands',
+    'instant confirmation transfer',
+    'flexible transfer booking',
+    'last minute transfer Cameron Highlands',
+    'group transfer Cameron Highlands',
+    'family transfer service',
+    'backpacker transfer Cameron Highlands',
+    'tourist transfer Malaysia'
   ],
   
   // Service-related keywords
@@ -201,25 +249,84 @@ export function generateTourStructuredData(tour: any) {
 
 // Generate structured data for transfers
 export function generateTransferStructuredData(transfer: any) {
-  return {
+  const baseStructuredData: any = {
     '@context': 'https://schema.org',
-    '@type': 'TravelService',
+    '@type': ['TravelService', 'Service'],
     name: transfer.title,
     description: stripHtmlTags(transfer.description || transfer.desc),
-    image: transfer.image,
+    image: transfer.image ? resolveImageUrl(transfer.image) : `${SITE_CONFIG.url}/images/og-default.jpg`,
+    serviceType: 'Transportation Service',
+    category: transfer.type === 'Private' ? 'Private Transfer' : 
+              transfer.type === 'Van + Ferry' ? 'Combined Transport' : 'Shared Transfer',
     offers: {
       '@type': 'Offer',
       price: transfer.newPrice,
       priceCurrency: 'MYR',
-      availability: transfer.status === 'active' ? 'InStock' : 'OutOfStock'
+      availability: transfer.status === 'active' ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      priceValidUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year from now
+      seller: {
+        '@type': 'Organization',
+        name: SITE_CONFIG.name,
+        url: SITE_CONFIG.url
+      }
     },
     provider: {
       '@type': 'Organization',
       name: SITE_CONFIG.name,
-      url: SITE_CONFIG.url
+      url: SITE_CONFIG.url,
+      telephone: '+60196592141',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Cameron Highlands',
+        addressRegion: 'Pahang',
+        addressCountry: 'MY'
+      }
     },
-    serviceType: 'Transportation'
+    areaServed: [
+      {
+        '@type': 'Place',
+        name: transfer.from
+      },
+      {
+        '@type': 'Place',
+        name: transfer.to
+      }
+    ],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Transfer Services',
+      itemListElement: [
+        {
+          '@type': 'Offer',
+          itemOffered: {
+            '@type': 'Service',
+            name: transfer.title,
+            description: stripHtmlTags(transfer.description || transfer.desc)
+          }
+        }
+      ]
+    }
   };
+
+  // Add specific properties based on transfer type
+  if (transfer.type === 'Van + Ferry') {
+    baseStructuredData.additionalType = 'https://schema.org/TouristTrip';
+    baseStructuredData.includedInDataCatalog = {
+      '@type': 'DataCatalog',
+      name: 'Ferry and Van Services',
+      description: 'Combined transportation services including ferry transfers'
+    };
+  }
+
+  if (transfer.maximumPerson || transfer.seatCapacity) {
+    baseStructuredData.maximumAttendeeCapacity = transfer.maximumPerson || transfer.seatCapacity;
+  }
+
+  if (transfer.minimumPerson) {
+    baseStructuredData.minimumAttendeeCapacity = transfer.minimumPerson;
+  }
+
+  return baseStructuredData;
 }
 
 // Generate Open Graph metadata
@@ -323,21 +430,49 @@ function extractDestination(title: string, tags: string[] = []): string | null {
 
 // Main function to generate complete metadata for transfers
 export function generateTransferMetadata(transfer: any): Metadata {
-  const title = `${transfer.title} | ${transfer.from} to ${transfer.to} Transfer - Oastel`;
-  const description = truncateText(
-    stripHtmlTags(transfer.description || transfer.desc || `Comfortable ${transfer.type} transfer from ${transfer.from} to ${transfer.to}. Book your Cameron Highlands transfer with Oastel.`),
-    160
-  );
+  // Create more descriptive title based on transfer type and route
+  const transferType = transfer.type === 'Private' ? 'Private' : 
+                     transfer.type === 'Van + Ferry' ? 'Van + Ferry' : 'Shared Van';
+  
+  const title = `${transfer.title} | ${transferType} Transfer from ${transfer.from} to ${transfer.to} - Oastel`;
+  
+  // Enhanced description with route details and benefits
+  const baseDescription = stripHtmlTags(transfer.description || transfer.desc || '');
+  const routeInfo = `Comfortable ${transferType.toLowerCase()} transfer from ${transfer.from} to ${transfer.to}`;
+  const features = transfer.type === 'Private' ? 
+    'Private vehicle, flexible timing, door-to-door service' :
+    transfer.type === 'Van + Ferry' ?
+    'Combined van and ferry service, seamless island connection' :
+    'Shared van service, budget-friendly, reliable schedule';
+  
+  const description = baseDescription || 
+    `${routeInfo}. ${features}. Book your Cameron Highlands transfer with Oastel for a safe and comfortable journey.`;
+  
+  // Enhanced keywords based on route and type
+  const routeKeywords = [
+    `${transfer.from} to ${transfer.to} transfer`,
+    `${transfer.from} ${transfer.to} van`,
+    `transfer from ${transfer.from}`,
+    `${transfer.to} transfer service`,
+    `${transfer.from} transport`,
+    `${transfer.to} shuttle`,
+  ];
+  
+  const typeKeywords = transfer.type === 'Private' ? 
+    ['private transfer', 'private van', 'door to door transfer', 'flexible transfer'] :
+    transfer.type === 'Van + Ferry' ?
+    ['ferry transfer', 'island transfer', 'boat van combo', 'ferry van package'] :
+    ['shared van', 'budget transfer', 'economy transfer', 'group transfer'];
   
   const keywords = generateKeywords(
-    [transfer.title, transfer.from, transfer.to, ...(transfer.tags || [])],
+    [transfer.title, ...routeKeywords, ...typeKeywords, ...(transfer.tags || [])],
     'transfer',
     `${transfer.from} ${transfer.to}`
   );
 
   return {
-    title,
-    description,
+    title: truncateText(title, 60),
+    description: truncateText(description, 160),
     keywords: keywords.join(', '),
     authors: [{ name: SITE_CONFIG.author }],
     openGraph: generateOpenGraph(title, description, transfer.image),

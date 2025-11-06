@@ -19,6 +19,8 @@ import {
   generateTransferMetadata,
   generateTransferStructuredData,
 } from "@/lib/seoUtils";
+import TransferSEOLinks from "@/components/ui/TransferSEOLinks";
+import { calculateOfferPercentage } from "@/lib/utils";
 
 type TransferDetailPageProps = {
   params: { slug: string };
@@ -29,8 +31,16 @@ export async function generateMetadata({
   params,
 }: TransferDetailPageProps): Promise<Metadata> {
   try {
-    const response = await transferApi.getTransferBySlug(params.slug);
-    const transfer = response.data;
+    const response = await fetch(
+      `${
+        process.env.API_BASE_URL || "http://localhost:5000"
+      }/api/transfers/slug/${params.slug}`,
+      {
+        next: { revalidate: 300 }, // 5 minute revalidation
+      }
+    );
+    const data = await response.json();
+    const transfer = data.data;
 
     if (!transfer) {
       return {
@@ -49,6 +59,9 @@ export async function generateMetadata({
     };
   }
 }
+
+// Enable dynamic params for ISR
+export const dynamicParams = true;
 
 // Generate static params for static generation
 export async function generateStaticParams() {
@@ -69,10 +82,18 @@ export default async function TransferDetailPage({
   const { slug } = params;
 
   // Fetch transfer details
-  let transferDetails = null;
+  let transferDetails: any = null;
   try {
-    const response = await transferApi.getTransferBySlug(slug);
-    transferDetails = response.data;
+    const response = await fetch(
+      `${
+        process.env.API_BASE_URL || "http://localhost:5000"
+      }/api/transfers/slug/${slug}`,
+      {
+        next: { revalidate: 300 }, // 5 minute revalidation
+      }
+    );
+    const data = await response.json();
+    transferDetails = data.data;
   } catch (error) {
     console.error("Error fetching transfer by slug:", error);
     notFound();
@@ -81,6 +102,11 @@ export default async function TransferDetailPage({
   if (!transferDetails) {
     notFound();
   }
+
+  const offerPercentage = calculateOfferPercentage(
+    transferDetails.oldPrice,
+    transferDetails.newPrice
+  );
 
   // Utility to strip HTML tags
   const stripHtmlTags = (html: string) => {
@@ -110,14 +136,24 @@ export default async function TransferDetailPage({
   let otherPackages: any[] = [];
   try {
     const [transfersResponse, toursResponse] = await Promise.all([
-      transferApi.getTransfers({ limit: 100 }),
-      tourApi.getTours({ limit: 100 }),
+      fetch(
+        `${process.env.API_BASE_URL || "http://localhost:5000"}/api/transfers`,
+        {
+          next: { revalidate: 300 },
+        }
+      ).then((res) => res.json()),
+      fetch(
+        `${process.env.API_BASE_URL || "http://localhost:5000"}/api/tours`,
+        {
+          next: { revalidate: 300 },
+        }
+      ).then((res) => res.json()),
     ]);
 
     if (transfersResponse.success && toursResponse.success) {
       // Separate transfers and tours, exclude current transfer
       const availableTransfers = transfersResponse.data.filter(
-        (t) => t.slug !== slug
+        (t: any) => t.slug !== slug
       );
       const availableTours = toursResponse.data;
 
@@ -168,7 +204,7 @@ export default async function TransferDetailPage({
             </h1>
             <p className="text-desc_gray mt-2">{transferDetails.desc}</p>
             <div className="flex flex-wrap gap-2 mt-4">
-              {transferDetails.tags.map((tag, i) => (
+              {transferDetails.tags.map((tag: string, i: number) => (
                 <Tag key={i} tag={tag} />
               ))}
             </div>
@@ -177,9 +213,16 @@ export default async function TransferDetailPage({
           {/* ✅ Booking Panel for small screens */}
           <div className="block lg:hidden bg-white border rounded-md p-4 shadow-sm mt-6">
             <div className="mb-4">
-              <p className="text-lg text-gray-400 line-through">
-                RM {transferDetails.oldPrice}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg text-gray-400 line-through">
+                  RM {transferDetails.oldPrice}
+                </p>
+                {offerPercentage > 0 && (
+                  <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                    {offerPercentage}% OFF
+                  </span>
+                )}
+              </div>
               <h2 className="text-3xl font-extrabold sm:font-bold">
                 RM {transferDetails.newPrice}
                 <span className="">
@@ -246,7 +289,7 @@ export default async function TransferDetailPage({
                 </h5>
               </div>
               <ul className="mt-2 space-y-1">
-                {transferDetails.times.map((time, index) => (
+                {transferDetails.times.map((time: string, index: number) => (
                   <li key={index} className="text-sm text-desc_gray ml-5">
                     {time}
                   </li>
@@ -334,9 +377,16 @@ export default async function TransferDetailPage({
         <div className="w-full lg:w-80 shrink-0 hidden lg:block">
           <div className="bg-white border-2 border-primary_green rounded-xl shadow-lg p-6 flex flex-col gap-6">
             <div>
-              <p className="text-lg text-gray-400 line-through mb-1">
-                RM {transferDetails.oldPrice}
-              </p>
+              <div className="flex items-center gap-2 mb-1">
+                <p className="text-lg text-gray-400 line-through">
+                  RM {transferDetails.oldPrice}
+                </p>
+                {offerPercentage > 0 && (
+                  <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
+                    {offerPercentage}% OFF
+                  </span>
+                )}
+              </div>
               <h2 className="text-lg mb-2">
                 <span className="text-4xl font-extrabold">
                   RM {transferDetails.newPrice}
@@ -405,7 +455,7 @@ export default async function TransferDetailPage({
           <hr className="border-b-2 border-primary_green  w-full  md:flex" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {otherPackages.map((pkg, i) =>
+          {otherPackages.map((pkg: any, i: number) =>
             pkg.packageType === "transfer" ? (
               <TransferCard key={`transfer-${i}`} {...pkg} />
             ) : (
@@ -414,6 +464,19 @@ export default async function TransferDetailPage({
           )}
         </div>
       </section>
+
+      {/* SEO Internal Links */}
+      <TransferSEOLinks
+        currentTransfer={{
+          from: transferDetails.from,
+          to: transferDetails.to,
+          type: transferDetails.type,
+          slug: transferDetails.slug,
+        }}
+        relatedTransfers={otherPackages.filter(
+          (pkg) => pkg.packageType === "transfer"
+        )}
+      />
 
       {/* Structured Data */}
       <script

@@ -9,6 +9,7 @@ import { IoFlagSharp } from "react-icons/io5";
 import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
 import { formatBookedCount } from "@/lib/utils";
+import { calculateOfferPercentage } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import type { KeyboardEvent, MouseEvent } from "react";
 
@@ -82,6 +83,8 @@ export default function TransferCard({
     router.push(`/transfers/${slug}`);
   };
 
+  const offerPercentage = calculateOfferPercentage(oldPrice, newPrice);
+
   return (
     <div
       role="link"
@@ -98,6 +101,12 @@ export default function TransferCard({
           )}`}
         >
           {label}
+        </div>
+      )}
+      {/* Offer Badge */}
+      {oldPrice && newPrice && offerPercentage >= 0 && (
+        <div className="absolute top-2 right-2 z-20 px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-lg">
+          {offerPercentage}% OFF
         </div>
       )}
       <Image

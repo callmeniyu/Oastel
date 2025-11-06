@@ -34,3 +34,9 @@ export const formatBookedCount = (count: number | string) => {
 
     return String(n)
 }
+
+export const calculateOfferPercentage = (oldPrice: number, newPrice: number): number => {
+    if (!oldPrice || !newPrice || oldPrice <= 0 || newPrice < 0) return 0;
+    if (oldPrice <= newPrice) return 0;
+    return Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+}
