@@ -27,32 +27,19 @@ import {
 export const dynamicParams = true;
 
 type TourDetailPageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
 }: TourDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/tours/slug/${params.slug}`,
-      {
-        next: { revalidate: 300 },
-      }
-    );
+    const response = await tourApi.getTourBySlug(slug);
+    const tour = response.data;
 
-    if (!response.ok) {
-      return {
-        title: "Tour Not Found - Oastel",
-        description: "The requested tour could not be found.",
-      };
-    }
-
-    const data = await response.json();
-    const tour = data.data;
-
-    if (!tour) {
+    if (!tour || !response.success) {
       return {
         title: "Tour Not Found - Oastel",
         description: "The requested tour could not be found.",
@@ -72,21 +59,13 @@ export async function generateMetadata({
 // Generate static params for static generation
 export async function generateStaticParams() {
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/tours?limit=1000`,
-      {
-        next: { revalidate: 300 },
-      }
-    );
-
-    if (!response.ok) {
-      console.error("Error generating static params:", response.status);
+    const response = await tourApi.getTours({ limit: 1000 });
+    if (!response.success) {
+      console.error("Error generating static params:", response);
       return [];
     }
-
-    const data = await response.json();
     return (
-      data.data?.map((tour: any) => ({
+      response.data?.map((tour: any) => ({
         slug: tour.slug,
       })) || []
     );
@@ -97,25 +76,17 @@ export async function generateStaticParams() {
 }
 
 export default async function TourDetailPage({ params }: TourDetailPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Fetch tour details with cache revalidation
   let tourDetails: TourType | null = null;
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/tours/slug/${slug}`,
-      {
-        next: { revalidate: 300 }, // Revalidate every 5 minutes
-      }
-    );
-
-    if (!response.ok) {
-      console.error("Error fetching tour:", response.status);
+    const response = await tourApi.getTourBySlug(slug);
+    if (!response.success) {
+      console.error("Error fetching tour:", response);
       notFound();
     }
-
-    const data = await response.json();
-    tourDetails = data.data;
+    tourDetails = response.data;
   } catch (error) {
     console.error("Error fetching tour:", error);
     notFound();
@@ -134,16 +105,12 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
   let otherTours: any[] = [];
   try {
     const [allToursResponse, allTransfersResponse] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tours?limit=100`, {
-        next: { revalidate: 300 },
-      }),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transfers?limit=100`, {
-        next: { revalidate: 300 },
-      }),
+      tourApi.getTours({ limit: 100 }),
+      transferApi.getTransfers({ limit: 100 }),
     ]);
 
-    const allToursData = await allToursResponse.json();
-    const allTransfersData = await allTransfersResponse.json();
+    const allToursData = allToursResponse;
+    const allTransfersData = allTransfersResponse;
 
     // Separate tours and transfers, exclude current tour
     const availableTours =

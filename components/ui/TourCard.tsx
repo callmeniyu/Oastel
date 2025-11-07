@@ -89,8 +89,8 @@ export default function TourCard({
         </div>
       )}
       {/* Offer Badge */}
-      {oldPrice && newPrice && offerPercentage >= 0 && (
-        <div className="absolute top-2 right-2 z-20 px-2 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-lg">
+      {oldPrice && newPrice && offerPercentage > 0 && (
+        <div className="absolute top-2 right-2 z-30 px-3 py-1 rounded-full text-xs font-bold bg-red-500 text-white shadow-lg border border-red-600">
           {offerPercentage}% OFF
         </div>
       )}

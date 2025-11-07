@@ -23,33 +23,24 @@ import TransferSEOLinks from "@/components/ui/TransferSEOLinks";
 import { calculateOfferPercentage } from "@/lib/utils";
 
 type TransferDetailPageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
 }: TransferDetailPageProps): Promise<Metadata> {
+  const { slug } = await params;
   try {
-    const response = await fetch(
-      `${
-        process.env.API_BASE_URL || "http://localhost:5000"
-      }/api/transfers/slug/${params.slug}`,
-      {
-        next: { revalidate: 300 }, // 5 minute revalidation
-      }
-    );
-    const data = await response.json();
-    const transfer = data.data;
-
-    if (!transfer) {
+    const response = await transferApi.getTransferBySlug(slug);
+    if (!response.success || !response.data) {
       return {
         title: "Transfer Not Found - Oastel",
         description: "The requested transfer could not be found.",
       };
     }
 
-    return generateTransferMetadata(transfer);
+    return generateTransferMetadata(response.data);
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
@@ -79,21 +70,17 @@ export async function generateStaticParams() {
 export default async function TransferDetailPage({
   params,
 }: TransferDetailPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Fetch transfer details
   let transferDetails: any = null;
   try {
-    const response = await fetch(
-      `${
-        process.env.API_BASE_URL || "http://localhost:5000"
-      }/api/transfers/slug/${slug}`,
-      {
-        next: { revalidate: 300 }, // 5 minute revalidation
-      }
-    );
-    const data = await response.json();
-    transferDetails = data.data;
+    const response = await transferApi.getTransferBySlug(slug);
+    if (!response.success) {
+      console.error("Error fetching transfer by slug:", response);
+      notFound();
+    }
+    transferDetails = response.data;
   } catch (error) {
     console.error("Error fetching transfer by slug:", error);
     notFound();
@@ -136,18 +123,8 @@ export default async function TransferDetailPage({
   let otherPackages: any[] = [];
   try {
     const [transfersResponse, toursResponse] = await Promise.all([
-      fetch(
-        `${process.env.API_BASE_URL || "http://localhost:5000"}/api/transfers`,
-        {
-          next: { revalidate: 300 },
-        }
-      ).then((res) => res.json()),
-      fetch(
-        `${process.env.API_BASE_URL || "http://localhost:5000"}/api/tours`,
-        {
-          next: { revalidate: 300 },
-        }
-      ).then((res) => res.json()),
+      transferApi.getTransfers({ limit: 100 }),
+      tourApi.getTours({ limit: 100 }),
     ]);
 
     if (transfersResponse.success && toursResponse.success) {
