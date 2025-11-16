@@ -26,6 +26,9 @@ import {
 // Enable dynamic routing for new tours
 export const dynamicParams = true;
 
+// Enable ISR with 5 minute revalidation for fresh data
+export const revalidate = 300;
+
 type TourDetailPageProps = {
   params: Promise<{ slug: string }>;
 };

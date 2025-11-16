@@ -22,6 +22,9 @@ import {
 import TransferSEOLinks from "@/components/ui/TransferSEOLinks";
 import { calculateOfferPercentage } from "@/lib/utils";
 
+// Enable ISR with 5 minute revalidation for fresh data
+export const revalidate = 300;
+
 type TransferDetailPageProps = {
   params: Promise<{ slug: string }>;
 };

@@ -60,6 +60,16 @@ export const SEO_KEYWORDS = {
   
   // Transfer-specific keywords  
   transfers: [
+    // Priority route keywords (most searched)
+    'Bus from Cameron Highlands to Taman Negara',
+    'Transfer from Cameron Highlands to Taman Negara',
+    'Bus from Taman Negara to Cameron Highlands',
+    'Transfer from Taman Negara to Cameron Highlands',
+    'Bus from Kuala Besut Jetty to Cameron Highlands',
+    'Transfer from Kuala Besut Jetty to Cameron Highlands',
+    'Cameron Highlands to Perhentian Islands transfer',
+    'Cameron Highlands to Perhentian Islands bus',
+    
     // Core transfer services
     'Cameron Highlands transfer service',
     'Minivan transfer Cameron Highlands to Kuala Besut',
