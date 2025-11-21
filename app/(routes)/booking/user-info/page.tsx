@@ -78,42 +78,90 @@ export default function BookingUserInfoPage() {
   }, [booking, cart, isCartBooking, router]);
 
   useEffect(() => {
-    async function loadCountries() {
-      try {
-        const res = await fetch(
-          "https://restcountries.com/v3.1/all?fields=name,cca2,idd"
-        );
-        const data = await res.json();
-        interface RestCountry {
-          name: { common: string };
-          cca2: string;
-          idd?: { root?: string; suffixes?: string[] };
-        }
+    // Comprehensive country list with all major countries (sorted with Malaysia first)
+    const allCountries: Country[] = [
+      { name: "Malaysia", cca2: "MY", callingCode: "+60" },
+      { name: "Afghanistan", cca2: "AF", callingCode: "+93" },
+      { name: "Albania", cca2: "AL", callingCode: "+355" },
+      { name: "Algeria", cca2: "DZ", callingCode: "+213" },
+      { name: "Argentina", cca2: "AR", callingCode: "+54" },
+      { name: "Australia", cca2: "AU", callingCode: "+61" },
+      { name: "Austria", cca2: "AT", callingCode: "+43" },
+      { name: "Bahrain", cca2: "BH", callingCode: "+973" },
+      { name: "Bangladesh", cca2: "BD", callingCode: "+880" },
+      { name: "Belgium", cca2: "BE", callingCode: "+32" },
+      { name: "Brazil", cca2: "BR", callingCode: "+55" },
+      { name: "Brunei", cca2: "BN", callingCode: "+673" },
+      { name: "Cambodia", cca2: "KH", callingCode: "+855" },
+      { name: "Canada", cca2: "CA", callingCode: "+1" },
+      { name: "Chile", cca2: "CL", callingCode: "+56" },
+      { name: "China", cca2: "CN", callingCode: "+86" },
+      { name: "Colombia", cca2: "CO", callingCode: "+57" },
+      { name: "Czech Republic", cca2: "CZ", callingCode: "+420" },
+      { name: "Denmark", cca2: "DK", callingCode: "+45" },
+      { name: "Egypt", cca2: "EG", callingCode: "+20" },
+      { name: "Finland", cca2: "FI", callingCode: "+358" },
+      { name: "France", cca2: "FR", callingCode: "+33" },
+      { name: "Germany", cca2: "DE", callingCode: "+49" },
+      { name: "Greece", cca2: "GR", callingCode: "+30" },
+      { name: "Hong Kong", cca2: "HK", callingCode: "+852" },
+      { name: "Hungary", cca2: "HU", callingCode: "+36" },
+      { name: "Iceland", cca2: "IS", callingCode: "+354" },
+      { name: "India", cca2: "IN", callingCode: "+91" },
+      { name: "Indonesia", cca2: "ID", callingCode: "+62" },
+      { name: "Iran", cca2: "IR", callingCode: "+98" },
+      { name: "Iraq", cca2: "IQ", callingCode: "+964" },
+      { name: "Ireland", cca2: "IE", callingCode: "+353" },
+      { name: "Israel", cca2: "IL", callingCode: "+972" },
+      { name: "Italy", cca2: "IT", callingCode: "+39" },
+      { name: "Japan", cca2: "JP", callingCode: "+81" },
+      { name: "Jordan", cca2: "JO", callingCode: "+962" },
+      { name: "Kazakhstan", cca2: "KZ", callingCode: "+7" },
+      { name: "Kenya", cca2: "KE", callingCode: "+254" },
+      { name: "Kuwait", cca2: "KW", callingCode: "+965" },
+      { name: "Laos", cca2: "LA", callingCode: "+856" },
+      { name: "Lebanon", cca2: "LB", callingCode: "+961" },
+      { name: "Libya", cca2: "LY", callingCode: "+218" },
+      { name: "Luxembourg", cca2: "LU", callingCode: "+352" },
+      { name: "Macao", cca2: "MO", callingCode: "+853" },
+      { name: "Mexico", cca2: "MX", callingCode: "+52" },
+      { name: "Morocco", cca2: "MA", callingCode: "+212" },
+      { name: "Myanmar", cca2: "MM", callingCode: "+95" },
+      { name: "Nepal", cca2: "NP", callingCode: "+977" },
+      { name: "Netherlands", cca2: "NL", callingCode: "+31" },
+      { name: "New Zealand", cca2: "NZ", callingCode: "+64" },
+      { name: "Nigeria", cca2: "NG", callingCode: "+234" },
+      { name: "Norway", cca2: "NO", callingCode: "+47" },
+      { name: "Oman", cca2: "OM", callingCode: "+968" },
+      { name: "Pakistan", cca2: "PK", callingCode: "+92" },
+      { name: "Peru", cca2: "PE", callingCode: "+51" },
+      { name: "Philippines", cca2: "PH", callingCode: "+63" },
+      { name: "Poland", cca2: "PL", callingCode: "+48" },
+      { name: "Portugal", cca2: "PT", callingCode: "+351" },
+      { name: "Qatar", cca2: "QA", callingCode: "+974" },
+      { name: "Romania", cca2: "RO", callingCode: "+40" },
+      { name: "Russia", cca2: "RU", callingCode: "+7" },
+      { name: "Saudi Arabia", cca2: "SA", callingCode: "+966" },
+      { name: "Singapore", cca2: "SG", callingCode: "+65" },
+      { name: "South Africa", cca2: "ZA", callingCode: "+27" },
+      { name: "South Korea", cca2: "KR", callingCode: "+82" },
+      { name: "Spain", cca2: "ES", callingCode: "+34" },
+      { name: "Sri Lanka", cca2: "LK", callingCode: "+94" },
+      { name: "Sweden", cca2: "SE", callingCode: "+46" },
+      { name: "Switzerland", cca2: "CH", callingCode: "+41" },
+      { name: "Taiwan", cca2: "TW", callingCode: "+886" },
+      { name: "Tanzania", cca2: "TZ", callingCode: "+255" },
+      { name: "Thailand", cca2: "TH", callingCode: "+66" },
+      { name: "Turkey", cca2: "TR", callingCode: "+90" },
+      { name: "Ukraine", cca2: "UA", callingCode: "+380" },
+      { name: "United Arab Emirates", cca2: "AE", callingCode: "+971" },
+      { name: "United Kingdom", cca2: "GB", callingCode: "+44" },
+      { name: "United States", cca2: "US", callingCode: "+1" },
+      { name: "Vietnam", cca2: "VN", callingCode: "+84" },
+      { name: "Yemen", cca2: "YE", callingCode: "+967" },
+    ];
 
-        const mapped: Country[] = (data as RestCountry[])
-          .map((c: RestCountry) => {
-            const code =
-              c.idd?.root && c.idd?.suffixes?.[0]
-                ? `${c.idd.root}${c.idd.suffixes[0]}`
-                : null;
-            return code
-              ? { name: c.name.common, cca2: c.cca2, callingCode: code }
-              : null;
-          })
-          .filter((c: Country | null): c is Country => !!c)
-          .sort((a, b) => {
-            // Put Malaysia first, then sort the rest alphabetically
-            if (a.name === "Malaysia") return -1;
-            if (b.name === "Malaysia") return 1;
-            return a.name.localeCompare(b.name);
-          });
-        setCountries(mapped);
-      } catch (err) {
-        console.error("Could not load country codes", err);
-      }
-    }
-
-    loadCountries();
+    setCountries(allCountries);
   }, []);
 
   const handleChange = (
