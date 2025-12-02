@@ -1,12 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/context/ToastContext";
+import { tourApi } from "@/lib/tourApi";
+import { transferApi } from "@/lib/transferApi";
 
 type BookNowButtonProps = {
   bookingUrl: string;
   isAvailable: boolean;
+  packageSlug?: string;
+  packageType?: "tour" | "transfer";
   packageName: string;
   customStyles?: string;
   text?: string;
@@ -15,6 +19,8 @@ type BookNowButtonProps = {
 export default function BookNowButton({
   bookingUrl,
   isAvailable,
+  packageSlug,
+  packageType,
   packageName,
   customStyles = "",
   text = "Book Now",
@@ -22,11 +28,17 @@ export default function BookNowButton({
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const { showToast } = useToast();
+  const [currentAvailable, setCurrentAvailable] =
+    useState<boolean>(isAvailable);
 
   const handleClick = () => {
     if (isProcessing) return;
 
-    if (!isAvailable) {
+    // Use latest fetched availability when available
+    const available =
+      currentAvailable !== undefined ? currentAvailable : isAvailable;
+
+    if (!available) {
       showToast({
         type: "error",
         title: "Unavailable",
@@ -38,6 +50,34 @@ export default function BookNowButton({
     setIsProcessing(true);
     router.push(bookingUrl);
   };
+
+  useEffect(() => {
+    // If a slug is provided, fetch the latest availability client-side
+    let mounted = true;
+    const fetchAvailability = async () => {
+      try {
+        if (!packageSlug || !packageType) return;
+        if (packageType === "tour") {
+          const res = await tourApi.getTourBySlug(packageSlug);
+          if (res?.success && res.data && mounted) {
+            setCurrentAvailable(res.data.isAvailable !== false);
+          }
+        } else if (packageType === "transfer") {
+          const res = await transferApi.getTransferBySlug(packageSlug);
+          if (res?.success && res.data && mounted) {
+            setCurrentAvailable(res.data.isAvailable !== false);
+          }
+        }
+      } catch (e) {
+        // ignore - keep initial availability
+      }
+    };
+
+    fetchAvailability();
+    return () => {
+      mounted = false;
+    };
+  }, [packageSlug, packageType]);
 
   return (
     <button

@@ -223,6 +223,8 @@ export default async function TransferDetailPage({
               packageName={transferDetails.title}
               text="Book Now"
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
+              packageSlug={transferDetails.slug}
+              packageType="transfer"
             />
           </div>
 
@@ -391,6 +393,8 @@ export default async function TransferDetailPage({
               packageName={transferDetails.title}
               text="Book Now"
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
+              packageSlug={transferDetails.slug}
+              packageType="transfer"
             />
           </div>
         </div>
@@ -429,6 +433,8 @@ export default async function TransferDetailPage({
           isAvailable={transferDetails.isAvailable !== false}
           packageName={transferDetails.title}
           text="Book this transfer"
+          packageSlug={transferDetails.slug}
+          packageType="transfer"
         />
       </div>
 

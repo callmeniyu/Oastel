@@ -210,6 +210,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
               packageName={tourDetails.title}
               text="Book Now"
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
+              packageSlug={tourDetails.slug}
+              packageType="tour"
             />
           </div>
 
@@ -327,6 +329,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
               packageName={tourDetails.title}
               text="Book Now"
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
+              packageSlug={tourDetails.slug}
+              packageType="tour"
             />
           </div>
         </div>
@@ -366,6 +370,8 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
           packageName={tourDetails.title}
           text="Book this tour"
           customStyles="w-72 py-5 text-xl font-medium"
+          packageSlug={tourDetails.slug}
+          packageType="tour"
         />
       </div>
 
