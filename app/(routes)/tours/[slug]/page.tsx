@@ -22,6 +22,7 @@ import {
   generateTourMetadata,
   generateTourStructuredData,
 } from "@/lib/seoUtils";
+import BookNowButton from "@/components/ui/BookNowButton";
 
 // Enable dynamic routing for new tours
 export const dynamicParams = true;
@@ -203,9 +204,11 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
               {/* Larger full-width booking button for small screens */}
             </div>
 
-            <GreenBtn
+            <BookNowButton
+              bookingUrl={`/booking/tour/${tourDetails.slug}`}
+              isAvailable={tourDetails.isAvailable !== false}
+              packageName={tourDetails.title}
               text="Book Now"
-              action={`/booking/tour/${tourDetails.slug}`}
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
@@ -318,9 +321,11 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                 </span>
               </div>
             </div>
-            <GreenBtn
+            <BookNowButton
+              bookingUrl={`/booking/tour/${tourDetails.slug}`}
+              isAvailable={tourDetails.isAvailable !== false}
+              packageName={tourDetails.title}
               text="Book Now"
-              action={`/booking/tour/${tourDetails.slug}`}
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
@@ -355,10 +360,12 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
       {/* Book Button */}
       <div className="text-center">
-        <GreenBtn
+        <BookNowButton
+          bookingUrl={`/booking/tour/${tourDetails.slug}`}
+          isAvailable={tourDetails.isAvailable !== false}
+          packageName={tourDetails.title}
           text="Book this tour"
-          action={`/booking/tour/${tourDetails.slug}`}
-          customStyles="w-72 py-5 text-xl font-medium "
+          customStyles="w-72 py-5 text-xl font-medium"
         />
       </div>
 

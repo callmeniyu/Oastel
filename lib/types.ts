@@ -55,6 +55,7 @@ export type TourType = {
     seatCapacity?: number
     departureTimes: string[]
     label?: "Recommended" | "Popular" | "Best Value" | "Best seller" | null
+    isAvailable?: boolean
     details: TourDetailsType
     createdAt: Date
     updatedAt: Date
@@ -94,6 +95,7 @@ export interface TransferType {
     times: string[]
     label?: "Recommended" | "Popular" | "Best Value" | "Best seller"
     status: "active" | "sold"
+    isAvailable?: boolean
     details: TransferDetails
     createdAt: Date
     updatedAt: Date

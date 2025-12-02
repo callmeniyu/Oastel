@@ -6,6 +6,7 @@ import TourCard from "@/components/ui/TourCard";
 import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
+import BookNowButton from "@/components/ui/BookNowButton";
 import { FaBookmark } from "react-icons/fa";
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FaClock } from "react-icons/fa6";
@@ -216,9 +217,11 @@ export default async function TransferDetailPage({
                 </span>
               </div>
             </div>
-            <GreenBtn
+            <BookNowButton
+              bookingUrl={`/booking/transfer/${transferDetails.slug}`}
+              isAvailable={transferDetails.isAvailable !== false}
+              packageName={transferDetails.title}
               text="Book Now"
-              action={`/booking/transfer/${transferDetails.slug}`}
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
@@ -382,9 +385,11 @@ export default async function TransferDetailPage({
                 </span>
               </div>
             </div>
-            <GreenBtn
+            <BookNowButton
+              bookingUrl={`/booking/transfer/${transferDetails.slug}`}
+              isAvailable={transferDetails.isAvailable !== false}
+              packageName={transferDetails.title}
               text="Book Now"
-              action={`/booking/transfer/${transferDetails.slug}`}
               customStyles="w-full py-4 text-lg font-bold rounded-lg"
             />
           </div>
@@ -419,9 +424,11 @@ export default async function TransferDetailPage({
 
       {/* Book Button */}
       <div className="text-center">
-        <GreenBtn
+        <BookNowButton
+          bookingUrl={`/booking/transfer/${transferDetails.slug}`}
+          isAvailable={transferDetails.isAvailable !== false}
+          packageName={transferDetails.title}
           text="Book this transfer"
-          action={`/booking/transfer/${transferDetails.slug}`}
         />
       </div>
 
