@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useStripe,
   useElements,
@@ -25,6 +25,21 @@ export default function DeferredCheckoutForm({
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
+
+  // Track when PaymentElement is fully loaded and ready
+  useEffect(() => {
+    if (!elements) return;
+
+    // Listen for when the PaymentElement is fully loaded
+    const paymentElement = elements.getElement("payment");
+    if (paymentElement) {
+      paymentElement.on("ready", () => {
+        console.log("[DEFERRED_CHECKOUT] PaymentElement is ready");
+        setIsPaymentElementReady(true);
+      });
+    }
+  }, [elements]);
 
   const handleSubmit = async (event?: React.FormEvent) => {
     // If invoked as a submit handler, prevent the default browser submit.
@@ -117,10 +132,24 @@ export default function DeferredCheckoutForm({
       {/* Payment Element */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">Payment Details</h3>
-        <div className="p-4 border border-gray-200 rounded-md">
+        <div className="p-4 border border-gray-200 rounded-md relative">
+          {!isPaymentElementReady && (
+            <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-md">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary_green mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Loading payment form...</p>
+              </div>
+            </div>
+          )}
           <PaymentElement
             options={{
               layout: "tabs",
+            }}
+            onReady={() => {
+              console.log(
+                "[DEFERRED_CHECKOUT] PaymentElement onReady callback"
+              );
+              setIsPaymentElementReady(true);
             }}
           />
         </div>
@@ -157,14 +186,19 @@ export default function DeferredCheckoutForm({
       <button
         type="button"
         onClick={() => handleSubmit()}
-        disabled={!stripe || loading}
+        disabled={!stripe || !isPaymentElementReady || loading}
         className={`w-full px-6 py-3 text-white font-semibold rounded-md transition-colors ${
-          loading || !stripe
+          loading || !stripe || !isPaymentElementReady
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary_green hover:bg-primary_green/90"
         }`}
       >
-        {loading ? (
+        {!isPaymentElementReady ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+            Loading payment form...
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
             Processing Payment...

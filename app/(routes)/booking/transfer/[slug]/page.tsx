@@ -572,11 +572,6 @@ export default function BookingInfoPage() {
                       </span>{" "}
                       {selectedSlot.minimumPerson} adult
                       {selectedSlot.minimumPerson > 1 ? "s" : ""} |
-                      <span className="font-medium"> Available:</span>{" "}
-                      {selectedSlot.capacity - selectedSlot.bookedCount}{" "}
-                      {(transferDetails?.type as string) === "Private"
-                        ? "units"
-                        : "seats"}
                     </p>
                     <p className="text-xs text-green-600 mt-1">
                       Children don't count toward the minimum requirement - you

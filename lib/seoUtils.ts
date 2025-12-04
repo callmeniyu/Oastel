@@ -60,15 +60,46 @@ export const SEO_KEYWORDS = {
   
   // Transfer-specific keywords  
   transfers: [
-    // Priority route keywords (most searched)
+    // Priority route keywords (most searched) - UPDATED WITH ALL VARIATIONS
+    // Cameron Highlands to Taman Negara
     'Bus from Cameron Highlands to Taman Negara',
     'Transfer from Cameron Highlands to Taman Negara',
+    'Cameron Highlands to Taman Negara bus',
+    'Cameron Highlands to Taman Negara transfer',
+    'Cameron Highlands Taman Negara transport',
+    'Van from Cameron Highlands to Taman Negara',
+    'Minivan Cameron Highlands to Taman Negara',
+    
+    // Taman Negara to Cameron Highlands (reverse)
     'Bus from Taman Negara to Cameron Highlands',
     'Transfer from Taman Negara to Cameron Highlands',
+    'Taman Negara to Cameron Highlands bus',
+    'Taman Negara to Cameron Highlands transfer',
+    'Taman Negara Cameron Highlands transport',
+    'Van from Taman Negara to Cameron Highlands',
+    
+    // Kuala Besut to Cameron Highlands
     'Bus from Kuala Besut Jetty to Cameron Highlands',
     'Transfer from Kuala Besut Jetty to Cameron Highlands',
+    'Kuala Besut to Cameron Highlands bus',
+    'Kuala Besut to Cameron Highlands transfer',
+    'Kuala Besut Cameron Highlands transport',
+    'Van from Kuala Besut to Cameron Highlands',
+    'Kuala Besut jetty transfer',
+    
+    // Cameron Highlands to Perhentian Islands
     'Cameron Highlands to Perhentian Islands transfer',
     'Cameron Highlands to Perhentian Islands bus',
+    'Cameron Highlands Perhentian Islands transport',
+    'How to get from Cameron Highlands to Perhentian',
+    'Cameron Highlands to Perhentian ferry',
+    'Van and ferry Cameron Highlands to Perhentian',
+    'Transfer from Cameron Highlands to Perhentian',
+    
+    // Cameron Highlands to Kuala Besut (for Perhentian connection)
+    'Cameron Highlands to Kuala Besut transfer',
+    'Cameron Highlands to Kuala Besut bus',
+    'Cameron Highlands to Kuala Besut jetty',
     
     // Core transfer services
     'Cameron Highlands transfer service',
@@ -261,13 +292,27 @@ export function generateTourStructuredData(tour: any) {
 export function generateTransferStructuredData(transfer: any) {
   const baseStructuredData: any = {
     '@context': 'https://schema.org',
-    '@type': ['TravelService', 'Service'],
+    '@type': ['TravelService', 'Service', 'BusTrip'],
     name: transfer.title,
+    alternateName: [
+      `Bus from ${transfer.from} to ${transfer.to}`,
+      `Transfer from ${transfer.from} to ${transfer.to}`,
+      `${transfer.from} to ${transfer.to} bus`,
+      `${transfer.from} to ${transfer.to} transfer`,
+    ],
     description: stripHtmlTags(transfer.description || transfer.desc),
     image: transfer.image ? resolveImageUrl(transfer.image) : `${SITE_CONFIG.url}/images/og-default.jpg`,
     serviceType: 'Transportation Service',
     category: transfer.type === 'Private' ? 'Private Transfer' : 
               transfer.type === 'Van + Ferry' ? 'Combined Transport' : 'Shared Transfer',
+    keywords: [
+      `bus ${transfer.from} ${transfer.to}`,
+      `transfer ${transfer.from} ${transfer.to}`,
+      `van ${transfer.from} ${transfer.to}`,
+      'Cameron Highlands transport',
+      'Taman Negara bus',
+      'Kuala Besut transfer',
+    ].join(', '),
     offers: {
       '@type': 'Offer',
       price: transfer.newPrice,
@@ -444,6 +489,14 @@ export function generateTransferMetadata(transfer: any): Metadata {
   const transferType = transfer.type === 'Private' ? 'Private' : 
                      transfer.type === 'Van + Ferry' ? 'Van + Ferry' : 'Shared Van';
   
+  // Generate search-optimized title variations
+  const routeVariations = [
+    `Bus from ${transfer.from} to ${transfer.to}`,
+    `Transfer from ${transfer.from} to ${transfer.to}`,
+    `${transfer.from} to ${transfer.to} bus`,
+    `${transfer.from} to ${transfer.to} transfer`,
+  ];
+  
   const title = `${transfer.title} | ${transferType} Transfer from ${transfer.from} to ${transfer.to} - Oastel`;
   
   // Enhanced description with route details and benefits
@@ -458,21 +511,24 @@ export function generateTransferMetadata(transfer: any): Metadata {
   const description = baseDescription || 
     `${routeInfo}. ${features}. Book your Cameron Highlands transfer with Oastel for a safe and comfortable journey.`;
   
-  // Enhanced keywords based on route and type
+  // Enhanced keywords based on route and type - NOW INCLUDING HIGH-PRIORITY SEARCH TERMS
   const routeKeywords = [
-    `${transfer.from} to ${transfer.to} transfer`,
-    `${transfer.from} ${transfer.to} van`,
-    `transfer from ${transfer.from}`,
+    ...routeVariations, // Include all search variations
+    `${transfer.from} to ${transfer.to} van`,
+    `${transfer.from} ${transfer.to} minivan`,
+    `transport from ${transfer.from}`,
     `${transfer.to} transfer service`,
     `${transfer.from} transport`,
     `${transfer.to} shuttle`,
+    `${transfer.from} ${transfer.to} taxi`,
+    `${transfer.from} ${transfer.to} shuttle service`,
   ];
   
   const typeKeywords = transfer.type === 'Private' ? 
-    ['private transfer', 'private van', 'door to door transfer', 'flexible transfer'] :
+    ['private transfer', 'private van', 'door to door transfer', 'flexible transfer', 'private minivan'] :
     transfer.type === 'Van + Ferry' ?
-    ['ferry transfer', 'island transfer', 'boat van combo', 'ferry van package'] :
-    ['shared van', 'budget transfer', 'economy transfer', 'group transfer'];
+    ['ferry transfer', 'island transfer', 'boat van combo', 'ferry van package', 'van ferry service', 'combined transport'] :
+    ['shared van', 'budget transfer', 'economy transfer', 'group transfer', 'shared minivan'];
   
   const keywords = generateKeywords(
     [transfer.title, ...routeKeywords, ...typeKeywords, ...(transfer.tags || [])],
