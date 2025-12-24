@@ -23,6 +23,7 @@ export default function PaymentPage() {
   const [bookingData, setBookingData] = useState<any>(null);
   const [isCartBooking, setIsCartBooking] = useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = useState(false);
+  const [isConfirmingBooking, setIsConfirmingBooking] = useState(false);
 
   useEffect(() => {
     const validatePaymentData = async () => {
@@ -144,6 +145,7 @@ export default function PaymentPage() {
   const handlePaymentSuccess = async (paymentIntent: any) => {
     try {
       setIsNavigatingAway(true);
+      setIsConfirmingBooking(true);
 
       console.log(
         "[PAYMENT_PAGE] Payment successful, confirming...",
@@ -195,7 +197,9 @@ export default function PaymentPage() {
           "Payment was successful but booking creation failed. Please contact support.",
       });
 
-      router.push("/contact");
+      finally {
+      setIsConfirmingBooking(false);
+    } router.push("/contact");
     }
   };
 
@@ -268,6 +272,33 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
+      {/* Full-screen overlay during booking confirmation */}
+      {isConfirmingBooking && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center shadow-2xl">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary_green mx-auto mb-4"></div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              ✅ Payment Successful!
+            </h2>
+            <h3 className="text-lg font-semibold text-yellow-700 mb-3">
+              Creating Your Booking...
+            </h3>
+            <div className="bg-yellow-50 border-2 border-yellow-400 rounded-md p-4 mb-4">
+              <p className="text-sm font-bold text-yellow-900 mb-2">
+                ⚠️ IMPORTANT: DO NOT CLOSE THIS WINDOW
+              </p>
+              <p className="text-xs text-yellow-800">
+                Your payment was successful. We are now confirming your booking and preparing your confirmation email.
+              </p>
+            </div>
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
+              <div className="animate-pulse">⏳</div>
+              <span>Please wait a moment...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <div className="text-center mb-6">
