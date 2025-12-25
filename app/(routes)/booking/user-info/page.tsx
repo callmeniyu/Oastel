@@ -247,15 +247,18 @@ export default function BookingUserInfoPage() {
         itemCount: cart.items.length,
       });
 
-      // Redirect to payment page with cart data
-      const paymentUrl = `/payment?${new URLSearchParams({
-        amount: totalAmount.toFixed(2),
-        cartData: JSON.stringify(cartData),
-        contactInfo: JSON.stringify(contactInfo),
-      })}`;
+      // Save payment data to sessionStorage
+      const paymentData = {
+        type: "cart",
+        amount: totalAmount,
+        cartData,
+        contactInfo,
+      };
+      sessionStorage.setItem("paymentPendingData", JSON.stringify(paymentData));
 
-      console.log("[CART_PAYMENT] Redirecting to payment:", paymentUrl);
-      router.push(paymentUrl);
+      // Redirect to payment page
+      console.log("[CART_PAYMENT] Redirecting to payment page");
+      router.push("/payment");
     } catch (error: any) {
       console.error("Cart payment preparation error:", error);
       showToast({
@@ -344,14 +347,17 @@ export default function BookingUserInfoPage() {
         packageType: booking.packageType,
       });
 
-      // Redirect to payment page with booking data
-      const paymentUrl = `/payment?${new URLSearchParams({
-        amount: totalAmount.toFixed(2),
-        bookingData: JSON.stringify(bookingData),
-      })}`;
+      // Save payment data to sessionStorage
+      const paymentData = {
+        type: "single",
+        amount: totalAmount,
+        ...bookingData,
+      };
+      sessionStorage.setItem("paymentPendingData", JSON.stringify(paymentData));
 
-      console.log("[SINGLE_PAYMENT] Redirecting to payment:", paymentUrl);
-      router.push(paymentUrl);
+      // Redirect to payment page
+      console.log("[SINGLE_PAYMENT] Redirecting to payment page");
+      router.push("/payment");
     } catch (error: any) {
       console.error("Single booking payment preparation error:", error);
       showToast({
@@ -364,8 +370,8 @@ export default function BookingUserInfoPage() {
     }
   };
 
-  const goToCheckout = async () => {
-    await handleConfirmBooking();
+  const goToCheckout = () => {
+    handleConfirmBooking();
   };
 
   // Calculate total for cart bookings

@@ -27,46 +27,85 @@ export default function PaymentPage() {
 
   useEffect(() => {
     const validatePaymentData = async () => {
+      // Don't re-validate if we're already navigating away or confirming booking
+      if (isNavigatingAway || isConfirmingBooking) {
+        console.log(
+          "[PAYMENT_PAGE] Skipping validation - navigation in progress"
+        );
+        return;
+      }
+
       try {
         console.log("[PAYMENT_PAGE] Validating payment data...");
 
-        // Get payment data from URL params
+        // Strategy 1: Check sessionStorage (New Approach)
+        const storedData = sessionStorage.getItem("paymentPendingData");
+
+        if (storedData) {
+          console.log("[PAYMENT_PAGE] Found pending payment data in storage");
+          const parsedData = JSON.parse(storedData);
+
+          if (parsedData.type === "cart") {
+            console.log("[PAYMENT_PAGE] Processing cart booking payment");
+            setIsCartBooking(true);
+            setBookingData({
+              cartData: parsedData.cartData,
+              contactInfo: parsedData.contactInfo,
+              amount: parsedData.amount,
+            });
+          } else {
+            console.log("[PAYMENT_PAGE] Processing single booking payment");
+            setIsCartBooking(false);
+            setBookingData(parsedData);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Strategy 2: Check URL Params (Legacy/Fallback)
         const bookingDataParam = searchParams.get("bookingData");
         const cartDataParam = searchParams.get("cartData");
         const contactInfoParam = searchParams.get("contactInfo");
         const amountParam = searchParams.get("amount");
 
-        if (!amountParam) {
-          throw new Error("Payment amount is missing");
-        }
+        if (amountParam) {
+          if (cartDataParam && contactInfoParam) {
+            // Cart booking flow
+            console.log(
+              "[PAYMENT_PAGE] Processing cart booking payment from URL"
+            );
+            setIsCartBooking(true);
 
-        if (cartDataParam && contactInfoParam) {
-          // Cart booking flow
-          console.log("[PAYMENT_PAGE] Processing cart booking payment");
-          setIsCartBooking(true);
+            const cartData = JSON.parse(decodeURIComponent(cartDataParam));
+            const contactInfo = JSON.parse(
+              decodeURIComponent(contactInfoParam)
+            );
 
-          const cartData = JSON.parse(decodeURIComponent(cartDataParam));
-          const contactInfo = JSON.parse(decodeURIComponent(contactInfoParam));
+            setBookingData({
+              cartData,
+              contactInfo,
+              amount: parseFloat(amountParam),
+            });
+          } else if (bookingDataParam) {
+            // Single booking flow
+            console.log(
+              "[PAYMENT_PAGE] Processing single booking payment from URL"
+            );
+            setIsCartBooking(false);
 
-          setBookingData({
-            cartData,
-            contactInfo,
-            amount: parseFloat(amountParam),
-          });
-        } else if (bookingDataParam) {
-          // Single booking flow
-          console.log("[PAYMENT_PAGE] Processing single booking payment");
-          setIsCartBooking(false);
-
-          const parsedBookingData = JSON.parse(
-            decodeURIComponent(bookingDataParam)
-          );
-          setBookingData({
-            ...parsedBookingData,
-            amount: parseFloat(amountParam),
-          });
+            const parsedBookingData = JSON.parse(
+              decodeURIComponent(bookingDataParam)
+            );
+            setBookingData({
+              ...parsedBookingData,
+              amount: parseFloat(amountParam),
+            });
+          } else {
+            throw new Error("Missing booking data");
+          }
         } else {
-          throw new Error("Missing booking data");
+          // If no storage and no URL params, it's an error
+          throw new Error("No payment data found");
         }
 
         console.log("[PAYMENT_PAGE] Payment data validated successfully");
@@ -84,7 +123,7 @@ export default function PaymentPage() {
     };
 
     validatePaymentData();
-  }, [searchParams, showToast]);
+  }, [searchParams, showToast, isNavigatingAway, isConfirmingBooking]);
 
   // Create payment intent on demand when user submits form
   const createPaymentIntentOnSubmit = async (): Promise<string> => {
@@ -164,6 +203,9 @@ export default function PaymentPage() {
           response.data.bookingIds
         );
 
+        // Clear payment data from storage on success
+        sessionStorage.removeItem("paymentPendingData");
+
         showToast({
           type: "success",
           title: "Payment Successful!",
@@ -197,9 +239,10 @@ export default function PaymentPage() {
           "Payment was successful but booking creation failed. Please contact support.",
       });
 
-      finally {
+      router.push("/contact");
+    } finally {
       setIsConfirmingBooking(false);
-    } router.push("/contact");
+      sessionStorage.removeItem("paymentPendingData");
     }
   };
 
@@ -255,6 +298,18 @@ export default function PaymentPage() {
     );
   }
 
+  // Additional safety check - don't render until bookingData is available
+  if (!bookingData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary_green mx-auto mb-4"></div>
+          <p className="text-gray-600">Preparing payment...</p>
+        </div>
+      </div>
+    );
+  }
+
   const appearance = {
     theme: "stripe" as const,
     variables: {
@@ -263,6 +318,7 @@ export default function PaymentPage() {
   };
 
   // Use Elements without client secret - payment intent will be created on submit
+  // bookingData is guaranteed to exist here due to early return check above
   const options = {
     mode: "payment" as const,
     amount: Math.round(bookingData.amount * 100), // Convert to cents
@@ -288,7 +344,8 @@ export default function PaymentPage() {
                 ⚠️ IMPORTANT: DO NOT CLOSE THIS WINDOW
               </p>
               <p className="text-xs text-yellow-800">
-                Your payment was successful. We are now confirming your booking and preparing your confirmation email.
+                Your payment was successful. We are now confirming your booking
+                and preparing your confirmation email.
               </p>
             </div>
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
