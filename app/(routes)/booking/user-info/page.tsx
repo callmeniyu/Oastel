@@ -250,8 +250,8 @@ export default function BookingUserInfoPage() {
       // Redirect to payment page with cart data
       const paymentUrl = `/payment?${new URLSearchParams({
         amount: totalAmount.toFixed(2),
-        cartData: encodeURIComponent(JSON.stringify(cartData)),
-        contactInfo: encodeURIComponent(JSON.stringify(contactInfo)),
+        cartData: JSON.stringify(cartData),
+        contactInfo: JSON.stringify(contactInfo),
       })}`;
 
       console.log("[CART_PAYMENT] Redirecting to payment:", paymentUrl);
@@ -347,7 +347,7 @@ export default function BookingUserInfoPage() {
       // Redirect to payment page with booking data
       const paymentUrl = `/payment?${new URLSearchParams({
         amount: totalAmount.toFixed(2),
-        bookingData: encodeURIComponent(JSON.stringify(bookingData)),
+        bookingData: JSON.stringify(bookingData),
       })}`;
 
       console.log("[SINGLE_PAYMENT] Redirecting to payment:", paymentUrl);
@@ -364,8 +364,8 @@ export default function BookingUserInfoPage() {
     }
   };
 
-  const goToCheckout = () => {
-    handleConfirmBooking();
+  const goToCheckout = async () => {
+    await handleConfirmBooking();
   };
 
   // Calculate total for cart bookings
