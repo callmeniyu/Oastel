@@ -6,7 +6,7 @@ import TourCard from "@/components/ui/TourCard";
 import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
-import { FaBookmark } from "react-icons/fa";
+import { FaBookmark, FaStar } from "react-icons/fa";
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FaClock } from "react-icons/fa6";
 import { RiRouteFill } from "react-icons/ri";
@@ -102,7 +102,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
 
   const offerPercentage = calculateOfferPercentage(
     tourDetails.oldPrice,
-    tourDetails.newPrice
+    tourDetails.newPrice,
   );
 
   // Fetch other tours and transfers for recommendations
@@ -200,6 +200,14 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
+              {(tourDetails.reviewCount || 0) > 0 && (
+                <div className="flex items-center w-full gap-3">
+                  <FaStar className="text-xl text-yellow-400" />
+                  <span className="font-semibold text-lg">
+                    {tourDetails.rating} ({tourDetails.reviewCount} Reviews)
+                  </span>
+                </div>
+              )}
 
               {/* Larger full-width booking button for small screens */}
             </div>
@@ -322,6 +330,14 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
+              {(tourDetails.reviewCount || 0) > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <FaStar className="text-yellow-400 inline-block mr-1" />
+                  <span className="font-semibold text-desc_gray">
+                    {tourDetails.rating} ({tourDetails.reviewCount} Reviews)
+                  </span>
+                </div>
+              )}
             </div>
             <BookNowButton
               bookingUrl={`/booking/tour/${tourDetails.slug}`}
@@ -356,7 +372,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
         <div className="flex justify-center md:w-1/2">
           <GreenBtn
             text="📄 See T&C"
-            action={"/privacy-policy"}
+            action={"/terms-and-conditions"}
             customStyles="w-32"
           />
         </div>
@@ -391,7 +407,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
               <TransferCard key={i} {...packageItem} />
             ) : (
               <TourCard key={i} {...packageItem} />
-            )
+            ),
           )}
         </div>
       </section>

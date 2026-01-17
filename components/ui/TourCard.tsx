@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { MdAccessTimeFilled } from "react-icons/md";
-import { FaBookmark } from "react-icons/fa";
+import { FaBookmark, FaStar } from "react-icons/fa";
 import Tag from "./Tag";
 import GreenBtn from "./GreenBtn";
 import { resolveImageUrl } from "@/lib/imageUtils";
@@ -24,6 +24,8 @@ type TourCardProps = {
   newPrice: number;
   type: string;
   label?: string | null;
+  reviewCount?: number;
+  rating?: number;
 };
 
 export default function TourCard({
@@ -39,6 +41,8 @@ export default function TourCard({
   newPrice,
   type,
   label,
+  reviewCount = 0,
+  rating = 5,
 }: TourCardProps) {
   // Label styling based on type
   const getLabelStyles = (labelType: string) => {
@@ -133,6 +137,14 @@ export default function TourCard({
             <p className="text-sm">{formatBookedCount(bookedCount)} Booked</p>
           </div>
         </div>
+        {(reviewCount || 0) > 0 && (
+          <div className="flex gap-2 items-center font-semibold">
+            <FaStar className="text-yellow-400 text-md" />
+            <p className="text-sm">
+              {rating} ({reviewCount})
+            </p>
+          </div>
+        )}
         <div className="flex justify-between items-center mt-2">
           <div className="flex flex-col items-start">
             <p className="text-gray-400 line-through font-poppins text-base ">

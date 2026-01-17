@@ -7,7 +7,7 @@ import TransferCard from "@/components/ui/TransferCard";
 import FAQSection from "@/components/sections/FAQSection";
 import GreenBtn from "@/components/ui/GreenBtn";
 import BookNowButton from "@/components/ui/BookNowButton";
-import { FaBookmark } from "react-icons/fa";
+import { FaBookmark, FaStar } from "react-icons/fa";
 import { BsInfoCircleFill } from "react-icons/bs";
 import { FaClock } from "react-icons/fa6";
 import { RiRouteFill } from "react-icons/ri";
@@ -96,7 +96,7 @@ export default async function TransferDetailPage({
 
   const offerPercentage = calculateOfferPercentage(
     transferDetails.oldPrice,
-    transferDetails.newPrice
+    transferDetails.newPrice,
   );
 
   // Utility to strip HTML tags
@@ -134,7 +134,7 @@ export default async function TransferDetailPage({
     if (transfersResponse.success && toursResponse.success) {
       // Separate transfers and tours, exclude current transfer
       const availableTransfers = transfersResponse.data.filter(
-        (t: any) => t.slug !== slug
+        (t: any) => t.slug !== slug,
       );
       const availableTours = toursResponse.data;
 
@@ -216,6 +216,15 @@ export default async function TransferDetailPage({
                   {transferDetails.bookedCount} Booked
                 </span>
               </div>
+              {(transferDetails.reviewCount || 0) > 0 && (
+                <div className="flex items-center gap-2 mt-1">
+                  <FaStar className="text-yellow-400 inline-block mr-1" />
+                  <span className="font-semibold text-lg">
+                    {transferDetails.rating} ({transferDetails.reviewCount}{" "}
+                    Reviews)
+                  </span>
+                </div>
+              )}
             </div>
             <BookNowButton
               bookingUrl={`/booking/transfer/${transferDetails.slug}`}
@@ -386,6 +395,15 @@ export default async function TransferDetailPage({
                   {transferDetails.bookedCount} Booked
                 </span>
               </div>
+              {(transferDetails.reviewCount || 0) > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <FaStar className="text-yellow-400 inline-block mr-1" />
+                  <span className="font-semibold text-desc_gray">
+                    {transferDetails.rating} ({transferDetails.reviewCount}{" "}
+                    Reviews)
+                  </span>
+                </div>
+              )}
             </div>
             <BookNowButton
               bookingUrl={`/booking/transfer/${transferDetails.slug}`}
@@ -420,7 +438,7 @@ export default async function TransferDetailPage({
         <div className="flex justify-center md:w-1/2">
           <GreenBtn
             text="📄 See T&C"
-            action={"/privacy-policy"}
+            action={"/terms-and-conditions"}
             customStyles="w-32"
           />
         </div>
@@ -453,7 +471,7 @@ export default async function TransferDetailPage({
               <TransferCard key={`transfer-${i}`} {...pkg} />
             ) : (
               <TourCard key={`tour-${i}`} {...pkg} />
-            )
+            ),
           )}
         </div>
       </section>
@@ -467,7 +485,7 @@ export default async function TransferDetailPage({
           slug: transferDetails.slug,
         }}
         relatedTransfers={otherPackages.filter(
-          (pkg) => pkg.packageType === "transfer"
+          (pkg) => pkg.packageType === "transfer",
         )}
       />
 
@@ -476,7 +494,7 @@ export default async function TransferDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
-            generateTransferStructuredData(transferDetails)
+            generateTransferStructuredData(transferDetails),
           ),
         }}
       />

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { MdAccessTimeFilled } from "react-icons/md";
-import { FaBookmark } from "react-icons/fa";
+import { FaBookmark, FaStar } from "react-icons/fa";
 import { FiMapPin } from "react-icons/fi";
 import { IoFlagSharp } from "react-icons/io5";
 
@@ -29,6 +29,8 @@ type TransferCardProps = {
   from: string;
   to: string;
   label?: "Recommended" | "Popular" | "Best Value" | "Best seller" | null;
+  reviewCount?: number;
+  rating?: number;
 };
 
 export default function TransferCard({
@@ -47,6 +49,8 @@ export default function TransferCard({
   from,
   to,
   label,
+  reviewCount = 0,
+  rating = 5,
 }: TransferCardProps) {
   // Label styling based on type
   const getLabelStyles = (labelType: string) => {
@@ -160,6 +164,14 @@ export default function TransferCard({
             </div>
           </div>
         </div>
+        {(reviewCount || 0) > 0 && (
+          <div className="flex gap-2 items-center font-semibold mt-2">
+            <FaStar className="text-yellow-400 text-md" />
+            <p className="text-sm">
+              {rating} ({reviewCount})
+            </p>
+          </div>
+        )}
         <div className="flex justify-between items-center mt-2">
           <div className="flex flex-col items-start">
             <p className="text-gray-400 line-through font-poppins text-base ">

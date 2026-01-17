@@ -18,7 +18,7 @@ export interface UserType {
 }
 
 export type FAQType = {
-    id?:number | string
+    id?: number | string
     question: string
     answer: string
     category?: string
@@ -46,6 +46,8 @@ export type TourType = {
     duration: string
     period: "Half-Day" | "Full-Day"
     bookedCount: string | number
+    reviewCount?: number
+    rating?: number
     oldPrice: number
     newPrice: number
     childPrice: number
@@ -86,6 +88,8 @@ export interface TransferType {
     packageType: "transfer"
     duration: string
     bookedCount: number | string
+    reviewCount?: number
+    rating?: number
     oldPrice: number
     newPrice: number
     childPrice: number

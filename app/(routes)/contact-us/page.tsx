@@ -147,6 +147,38 @@ export default function ContactPage() {
           </div>
         </div>
 
+        {/* Contact Information Section */}
+        <div className="bg-gray-50 p-8 rounded-lg max-w-4xl mx-auto mb-16">
+          <h2 className="text-3xl font-bold text-primary_green mb-6 text-center">
+            Contact Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-xl font-semibold text-title_black mb-4">
+                Oastel
+              </h3>
+              <div className="space-y-3 text-desc_gray">
+                <p>
+                  <strong>Address:</strong>
+                  <br />
+                  A3A­-1-2 THE QUINTET, APARTMENT COMPLEX, JALAN PMCJ, 9, JALAN
+                  TENGKOLOK, 39000 TANAH RATA PAHANG MALAYSIA
+                </p>
+                <p>
+                  <strong>Email:</strong>
+                  <br />
+                  oastel.com@gmail.com
+                </p>
+                <p>
+                  <strong>Phone:</strong>
+                  <br />
+                  +60 19-659 2141
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h2
           id="feedback"
           className="text-3xl py-4 pt-8 font-bold text-primary_green mb-6 text-center"

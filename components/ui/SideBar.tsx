@@ -219,11 +219,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             <Link
-              href="/privacy-policy"
+              href="/terms-and-conditions"
               onClick={onClose}
               className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
             >
               Terms & Conditions
+            </Link>
+            <Link
+              href="/privacy-policy"
+              onClick={onClose}
+              className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
+            >
+              Privacy Policy
             </Link>
           </div>
         </nav>
