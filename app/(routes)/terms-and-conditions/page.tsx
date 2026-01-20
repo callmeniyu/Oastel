@@ -92,6 +92,14 @@ export default function TermsAndConditions() {
       ],
       id: "notes",
     },
+    {
+      title: "Governing Law and Jurisdiction",
+      content: [
+        "These Terms and Conditions shall be governed by and construed in accordance with the laws of Malaysia.",
+        "Any disputes arising under or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Malaysia.",
+      ],
+      id: "governing-law",
+    },
   ];
 
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>(

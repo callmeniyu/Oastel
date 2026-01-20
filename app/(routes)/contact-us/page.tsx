@@ -161,8 +161,10 @@ export default function ContactPage() {
                 <p>
                   <strong>Address:</strong>
                   <br />
-                  A3A­-1-2 THE QUINTET, APARTMENT COMPLEX, JALAN PMCJ, 9, JALAN
-                  TENGKOLOK, 39000 TANAH RATA PAHANG MALAYSIA
+                  C-1-19A CAMERON FAIR
+ALAN CAMELIA CAMERON HIGHLANDS
+39000 TANAH RATA
+PAHANG MALAYSIA
                 </p>
                 <p>
                   <strong>Email:</strong>
