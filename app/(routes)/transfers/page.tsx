@@ -26,13 +26,13 @@ export default function Transfers() {
 
   // Filter transfers by type
   const vanTransfers = allTransfers.filter(
-    (transfer) => transfer.type.toLowerCase() === "van"
+    (transfer) => transfer.type.toLowerCase() === "van",
   );
   const ferryTransfers = allTransfers.filter(
-    (transfer) => transfer.type.toLowerCase() === "van + ferry"
+    (transfer) => transfer.type.toLowerCase() === "van + ferry",
   );
   const privateTransfers = allTransfers.filter(
-    (transfer) => transfer.type.toLowerCase() === "private"
+    (transfer) => transfer.type.toLowerCase() === "private",
   );
 
   // Generate dynamic location options from transfer data with proper deduplication
@@ -64,7 +64,7 @@ export default function Transfers() {
   });
 
   const [filteredTransfers, setFilteredTransfers] = useState<TransferType[]>(
-    []
+    [],
   );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
@@ -72,9 +72,9 @@ export default function Transfers() {
 
   // Sort helper: labeled items come first, then ascending by newPrice
   const sortByLabelAndPrice = <
-    T extends { label?: string | null; newPrice?: number }
+    T extends { label?: string | null; newPrice?: number },
   >(
-    items: T[]
+    items: T[],
   ) => {
     return [...items].sort((a, b) => {
       const aHas = !!a.label;
@@ -97,7 +97,7 @@ export default function Transfers() {
           transfer.from.toLowerCase().includes(searchLower) ||
           transfer.to.toLowerCase().includes(searchLower) ||
           transfer.tags.some((tag) =>
-            tag.toLowerCase().includes(searchLower)
+            tag.toLowerCase().includes(searchLower),
           ) ||
           transfer.desc.toLowerCase().includes(searchLower)
         );
@@ -107,7 +107,7 @@ export default function Transfers() {
     }
   }, [searchTerm, allTransfers]);
 
-  // Fetch transfers data on component mount
+  // Fetch transfers data on component mount and handle URL parameters
   useEffect(() => {
     const fetchTransfers = async () => {
       try {
@@ -117,6 +117,21 @@ export default function Transfers() {
         setAllTransfers(sorted);
         setFilteredTransfers(sorted);
         setError(null);
+
+        // Check for URL parameters from hero section
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromParam = urlParams.get("from");
+        const toParam = urlParams.get("to");
+
+        if (fromParam || toParam) {
+          setFilters((prev) => ({
+            ...prev,
+            from: fromParam || "",
+            to: toParam || "",
+          }));
+          // Auto-apply filters if params exist
+          setFiltersApplied(true);
+        }
       } catch (err) {
         console.error("Error fetching transfers:", err);
         setError("Failed to load transfers. Please try again later.");
@@ -128,9 +143,20 @@ export default function Transfers() {
     fetchTransfers();
   }, []);
 
+  // Auto-apply filters when they change from URL parameters
+  useEffect(() => {
+    if (
+      (filters.from || filters.to) &&
+      allTransfers.length > 0 &&
+      filtersApplied
+    ) {
+      handleApply();
+    }
+  }, [filters.from, filters.to, allTransfers]);
+
   const handleFilterChange = (
     field: keyof FilterState,
-    value: string | string[]
+    value: string | string[],
   ) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
   };
