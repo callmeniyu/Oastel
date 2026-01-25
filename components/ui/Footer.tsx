@@ -1,3 +1,4 @@
+"use client";
 import { FaFacebookF } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
@@ -5,8 +6,20 @@ import { FaXTwitter } from "react-icons/fa6";
 import { FaTiktok } from "react-icons/fa";
 import { FaTelegramPlane } from "react-icons/fa";
 import Link from "next/link";
+import { useToast } from "@/context/ToastContext";
 
 export default function Footer() {
+  const { showToast } = useToast();
+
+  const handleStayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    showToast({
+      type: "info",
+      title: "Stays Currently Unavailable",
+      message:
+        "We're currently updating our booking system. You can book our stays on Hostelworld or Booking.com. Thank you for your understanding!",
+    });
+  };
   return (
     <footer className="bg-primary_green text-white px-4 pt-10 pb-2 md:pr-16">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:justify-between gap-10">
@@ -40,7 +53,12 @@ export default function Footer() {
                   <a href="/transfers">Transfers</a>
                 </li>
                 <li>
-                  <a href="https://booking.exely.com/en/oastel/">Stays</a>
+                  <button
+                    onClick={handleStayClick}
+                    className="text-left hover:underline"
+                  >
+                    Stays
+                  </button>
                 </li>
               </ul>
             </div>

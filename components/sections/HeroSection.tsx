@@ -12,8 +12,10 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { transferApi } from "@/lib/transferApi";
 import { TransferType } from "@/lib/types";
+import { useToast } from "@/context/ToastContext";
 
 export default function HeroSection() {
+  const { showToast } = useToast();
   const [fromDropdownOpen, setFromDropdownOpen] = useState(false);
   const [toDropdownOpen, setToDropdownOpen] = useState(false);
   const [fromLocation, setFromLocation] = useState("");
@@ -77,6 +79,16 @@ export default function HeroSection() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleStayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    showToast({
+      type: "info",
+      title: "Stays Currently Unavailable",
+      message:
+        "We're currently updating our booking system. You can book our stays on Hostelworld or Booking.com. Thank you for your understanding!",
+    });
+  };
+
   const handleSearchTransfer = () => {
     const params = new URLSearchParams();
     if (fromLocation) params.append("from", fromLocation);
@@ -85,7 +97,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-visible">
       {/* Background with overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -141,9 +153,9 @@ export default function HeroSection() {
                 </div>
               </Link>
 
-              <Link
-                href="https://booking.exely.com/en/oastel/"
-                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30"
+              <button
+                onClick={handleStayClick}
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30 w-full cursor-pointer"
               >
                 {/* Glassmorphism overlay with subtle color hint */}
                 <div className="absolute inset-0 bg-[#FF7E33]/5 group-hover:bg-[#FF7E33]/10 transition-all duration-300" />
@@ -163,7 +175,7 @@ export default function HeroSection() {
                     Get started <IoArrowForward className="animate-pulse" />
                   </div>
                 </div>
-              </Link>
+              </button>
             </div>
 
             {/* Tours & Stays Buttons - Mobile */}
@@ -186,9 +198,9 @@ export default function HeroSection() {
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
 
-              <Link
-                href="https://booking.exely.com/en/oastel/"
-                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px]"
+              <button
+                onClick={handleStayClick}
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px] w-full cursor-pointer"
               >
                 <div className="bg-[#FF7E33]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
                   <IoHomeOutline className="text-3xl text-white" />
@@ -202,12 +214,12 @@ export default function HeroSection() {
                   </p>
                 </div>
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
+              </button>
             </div>
 
             {/* Transfer Booking Section */}
-            <div className="w-full md:max-w-4xl md:mx-auto relative z-30">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
+            <div className="w-full md:max-w-4xl md:mx-auto relative z-30 overflow-visible">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl overflow-visible">
                 {/* Transfer Header */}
                 <div className="flex items-center gap-3 mb-6">
                   <div className="bg-[#2196F3]/20 p-3 rounded-full backdrop-blur-sm border border-white/20">
@@ -226,7 +238,10 @@ export default function HeroSection() {
                 {/* Transfer Form */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* From Location */}
-                  <div className="relative" ref={fromDropdownRef}>
+                  <div
+                    className="relative overflow-visible"
+                    ref={fromDropdownRef}
+                  >
                     <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-sm">
                       <FaBus className="inline mr-2 text-white" />
                       From
@@ -252,7 +267,7 @@ export default function HeroSection() {
                       />
                     </button>
                     {fromDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-[100] overflow-hidden">
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-white/30 rounded-xl shadow-xl z-[100] overflow-hidden">
                         {locationOptions.from.map((location) => (
                           <button
                             key={location}
@@ -271,7 +286,10 @@ export default function HeroSection() {
                   </div>
 
                   {/* To Location */}
-                  <div className="relative" ref={toDropdownRef}>
+                  <div
+                    className="relative overflow-visible"
+                    ref={toDropdownRef}
+                  >
                     <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-sm">
                       <FaWalking className="inline mr-2 text-white" />
                       To
@@ -297,7 +315,7 @@ export default function HeroSection() {
                       />
                     </button>
                     {toDropdownOpen && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white backdrop-blur-md border border-white/30 rounded-xl shadow-xl z-[100] overflow-hidden">
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-white/30 rounded-xl shadow-xl z-[100] overflow-hidden">
                         {locationOptions.to.map((location) => (
                           <button
                             key={location}
@@ -333,7 +351,7 @@ export default function HeroSection() {
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black/20 to-transparent z-10"></div>
+      <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black/20 to-transparent z-0 pointer-events-none"></div>
     </section>
   );
 }
