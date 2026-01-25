@@ -101,6 +101,18 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 pt-24 md:pt-32 pb-10 md:pb-16 px-4 md:px-8 lg:px-28">
         <div className="max-w-7xl mx-auto">
+          {/* Hero Text - Above Actions */}
+          <div className="max-w-5xl mx-auto text-center mb-8 md:mb-12">
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+              Hello Backpackers. <br />
+              Selamat Datang to Cameron Highlands!
+            </h1>
+            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
+              Stay cozy at Oastel · Wander the Mossy Forest · Sip Highland Tea ·
+              Find the Rafflesia
+            </p>
+          </div>
+
           {/* Main Booking Actions - Priority Section */}
           <div className="mb-8 md:mb-12">
             {/* Tours & Stays Buttons - Desktop */}
@@ -114,11 +126,11 @@ export default function HeroSection() {
 
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white z-10">
-                  <div className="bg-[#4CAF50]/20 p-4 rounded-full backdrop-blur-sm group-hover:bg-[#4CAF50]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
+                  <div className="p-4 rounded-full backdrop-blur-sm group-hover:bg-[#4CAF50]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
                     <FiMapPin className="text-3xl" />
                   </div>
                   <h3 className="text-3xl font-extrabold mt-4 drop-shadow-sm">
-                    Explore Tours
+                    Book Tours
                   </h3>
                   <p className="mt-2 opacity-90 drop-shadow-sm">
                     Discover curated highland adventures
@@ -138,7 +150,7 @@ export default function HeroSection() {
 
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white z-10">
-                  <div className="bg-[#FF7E33]/20 p-4 rounded-full backdrop-blur-sm group-hover:bg-[#FF7E33]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
+                  <div className="p-4 rounded-full backdrop-blur-sm group-hover:bg-[#FF7E33]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
                     <IoHomeOutline className="text-3xl" />
                   </div>
                   <h3 className="text-3xl font-bold mt-4 drop-shadow-sm">
@@ -155,36 +167,46 @@ export default function HeroSection() {
             </div>
 
             {/* Tours & Stays Buttons - Mobile */}
-            <div className="md:hidden bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 shadow-lg max-w-md mx-auto mb-6">
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/tours"
-                  className="flex flex-col items-center p-3 rounded-xl hover:bg-white/20 backdrop-blur-sm border border-white/10 hover:border-white/30 transition-all duration-300"
-                >
-                  <div className="p-3 rounded-full bg-[#4CAF50]/20 backdrop-blur-sm border border-white/20 text-white mb-2">
-                    <FiMapPin className="text-xl" />
-                  </div>
-                  <span className="text-sm font-bold text-center text-white drop-shadow-sm">
+            <div className="md:hidden space-y-6 mb-8">
+              <Link
+                href="/tours"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px]"
+              >
+                <div className="bg-[#4CAF50]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
+                  <FiMapPin className="text-3xl text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-white mb-1">
                     Explore Tours
-                  </span>
-                </Link>
+                  </h3>
+                  <p className="text-white/90 text-base">
+                    Highland adventures await
+                  </p>
+                </div>
+                <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
 
-                <Link
-                  href="https://booking.exely.com/en/oastel/"
-                  className="flex flex-col items-center p-3 rounded-xl hover:bg-white/20 backdrop-blur-sm border border-white/10 hover:border-white/30 transition-all duration-300"
-                >
-                  <div className="p-3 rounded-full bg-[#FF7E33]/20 backdrop-blur-sm border border-white/20 text-white mb-2">
-                    <IoHomeOutline className="text-xl" />
-                  </div>
-                  <span className="text-sm font-bold text-center text-white drop-shadow-sm">
+              <Link
+                href="https://booking.exely.com/en/oastel/"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px]"
+              >
+                <div className="bg-[#FF7E33]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
+                  <IoHomeOutline className="text-3xl text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-white mb-1">
                     Book Your Stay
-                  </span>
-                </Link>
-              </div>
+                  </h3>
+                  <p className="text-white/90 text-base">
+                    Cozy accommodation ready
+                  </p>
+                </div>
+                <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
             </div>
 
             {/* Transfer Booking Section */}
-            <div className="max-w-4xl mx-auto relative z-30">
+            <div className="w-full md:max-w-4xl md:mx-auto relative z-30">
               <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 md:p-8 shadow-xl">
                 {/* Transfer Header */}
                 <div className="flex items-center gap-3 mb-6">
@@ -306,18 +328,6 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Hero Text - Now Below Actions */}
-          <div className="max-w-5xl mx-auto text-center relative z-10">
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
-              Hello Backpackers. <br />
-              Selamat Datang to Cameron Highlands!
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
-              Stay cozy at Oastel · Wander the Mossy Forest · Sip Highland Tea ·
-              Find the Rafflesia
-            </p>
           </div>
         </div>
       </div>
