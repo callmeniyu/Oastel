@@ -4,6 +4,7 @@ import {
   IoArrowForward,
   IoSearchOutline,
 } from "react-icons/io5";
+import { LiaMountainSolid } from "react-icons/lia";
 import { FiMapPin } from "react-icons/fi";
 import { LiaShuttleVanSolid } from "react-icons/lia";
 import { FaBus, FaWalking, FaChevronDown } from "react-icons/fa";
@@ -139,7 +140,7 @@ export default function HeroSection() {
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white z-10">
                   <div className="p-4 rounded-full backdrop-blur-sm group-hover:bg-[#4CAF50]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
-                    <FiMapPin className="text-3xl" />
+                    <LiaMountainSolid className="text-3xl" />
                   </div>
                   <h3 className="text-3xl font-extrabold mt-4 drop-shadow-sm">
                     Book Tours
@@ -185,7 +186,7 @@ export default function HeroSection() {
                 className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px]"
               >
                 <div className="bg-[#4CAF50]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
-                  <FiMapPin className="text-3xl text-white" />
+                  <LiaMountainSolid className="text-3xl text-white" />
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-xl font-bold text-white mb-1">
