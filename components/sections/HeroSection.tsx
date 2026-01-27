@@ -142,7 +142,7 @@ export default function HeroSection() {
                     <FiMapPin className="text-3xl" />
                   </div>
                   <h3 className="text-3xl font-extrabold mt-4 drop-shadow-sm">
-                    Book Tours & Experiences
+                    Book Tours
                   </h3>
                   <p className="mt-2 opacity-90 drop-shadow-sm">
                     Discover curated highland adventures
@@ -189,7 +189,7 @@ export default function HeroSection() {
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="text-xl font-bold text-white mb-1">
-                    Book Tours & Experiences
+                    Book Tours
                   </h3>
                   <p className="text-white/90 text-base">
                     Highland adventures await
