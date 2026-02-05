@@ -27,6 +27,7 @@ export default function DeferredCheckoutForm({
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isPaymentElementReady, setIsPaymentElementReady] = useState(false);
   const [isPaymentInProgress, setIsPaymentInProgress] = useState(false);
+  const [hasSubmittedOnce, setHasSubmittedOnce] = useState(false);
 
   // Track when PaymentElement is fully loaded and ready
   useEffect(() => {
@@ -68,6 +69,15 @@ export default function DeferredCheckoutForm({
       return;
     }
 
+    // Prevent duplicate submissions
+    if (hasSubmittedOnce || isPaymentInProgress) {
+      console.warn(
+        "[DEFERRED_CHECKOUT] Payment already in progress or completed",
+      );
+      return;
+    }
+
+    setHasSubmittedOnce(true);
     setLoading(true);
     setErrorMessage("");
     setIsPaymentInProgress(true);
@@ -80,10 +90,10 @@ export default function DeferredCheckoutForm({
       if (submitError) {
         console.error(
           "[DEFERRED_CHECKOUT] Form validation error:",
-          submitError
+          submitError,
         );
         setErrorMessage(
-          submitError.message || "Please fill in all required fields"
+          submitError.message || "Please fill in all required fields",
         );
         setLoading(false);
         onError(submitError);
@@ -96,7 +106,7 @@ export default function DeferredCheckoutForm({
       const clientSecret = await createPaymentIntentOnSubmit();
 
       console.log(
-        "[DEFERRED_CHECKOUT] Payment intent created, processing payment..."
+        "[DEFERRED_CHECKOUT] Payment intent created, processing payment...",
       );
 
       // Confirm payment with the newly created payment intent
@@ -112,12 +122,13 @@ export default function DeferredCheckoutForm({
       if (error) {
         console.error("[DEFERRED_CHECKOUT] Payment failed:", error);
         setErrorMessage(error.message || "Payment failed");
+        setHasSubmittedOnce(false); // Allow retry on error
         onError(error);
       } else if (paymentIntent) {
         console.log(
           "[DEFERRED_CHECKOUT] Payment successful:",
           paymentIntent.id,
-          paymentIntent.status
+          paymentIntent.status,
         );
 
         if (paymentIntent.status === "succeeded") {
@@ -125,19 +136,21 @@ export default function DeferredCheckoutForm({
         } else {
           console.error(
             "[DEFERRED_CHECKOUT] Payment not successful:",
-            paymentIntent.status
+            paymentIntent.status,
           );
           const statusError = {
             message: `Payment status: ${paymentIntent.status}`,
             type: "card_error",
           };
           setErrorMessage(statusError.message);
+          setHasSubmittedOnce(false); // Allow retry on non-success status
           onError(statusError);
         }
       }
     } catch (error: any) {
       console.error("[DEFERRED_CHECKOUT] Error during payment process:", error);
       setErrorMessage(error.message || "Payment processing failed");
+      setHasSubmittedOnce(false); // Allow retry on error
       onError(error);
     } finally {
       setLoading(false);
@@ -216,7 +229,7 @@ export default function DeferredCheckoutForm({
             }}
             onReady={() => {
               console.log(
-                "[DEFERRED_CHECKOUT] PaymentElement onReady callback"
+                "[DEFERRED_CHECKOUT] PaymentElement onReady callback",
               );
               setIsPaymentElementReady(true);
             }}
@@ -255,9 +268,11 @@ export default function DeferredCheckoutForm({
       <button
         type="button"
         onClick={() => handleSubmit()}
-        disabled={!stripe || !isPaymentElementReady || loading}
+        disabled={
+          !stripe || !isPaymentElementReady || loading || hasSubmittedOnce
+        }
         className={`w-full px-6 py-3 text-white font-semibold rounded-md transition-colors ${
-          loading || !stripe || !isPaymentElementReady
+          loading || !stripe || !isPaymentElementReady || hasSubmittedOnce
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-primary_green hover:bg-primary_green/90"
         }`}

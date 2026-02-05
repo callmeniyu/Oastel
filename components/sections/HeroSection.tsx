@@ -170,7 +170,7 @@ export default function HeroSection() {
                     Book Your Stay
                   </h3>
                   <p className="mt-2 opacity-90 drop-shadow-sm">
-                    Reserve your perfect accommodation
+                    Cozy Co-Living stays
                   </p>
                   <div className="mt-4 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     Get started <IoArrowForward className="animate-pulse" />
@@ -211,7 +211,7 @@ export default function HeroSection() {
                     Book Your Stay
                   </h3>
                   <p className="text-white/90 text-base">
-                    Cozy accommodation ready
+                    Cozy Co-Living stays
                   </p>
                 </div>
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
@@ -228,7 +228,7 @@ export default function HeroSection() {
                   </div>
                   <div>
                     <h3 className="text-xl md:text-2xl font-bold text-white drop-shadow-sm">
-                      Book Your Transfer
+                      Arrange Transportation
                     </h3>
                     <p className="text-white/80 text-sm">
                       Seamless transfers between destinations
