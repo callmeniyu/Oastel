@@ -53,12 +53,13 @@ export default function Footer() {
                   <a href="/transfers">Transfers</a>
                 </li>
                 <li>
-                  <button
+                  <a href="/booking">Stays</a>
+                  {/*<button
                     onClick={handleStayClick}
                     className="text-left hover:underline"
                   >
                     Stays
-                  </button>
+                  </button>*/}
                 </li>
               </ul>
             </div>
