@@ -13,10 +13,8 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { transferApi } from "@/lib/transferApi";
 import { TransferType } from "@/lib/types";
-import { useToast } from "@/context/ToastContext";
 
 export default function HeroSection() {
-  const { showToast } = useToast();
   const [fromDropdownOpen, setFromDropdownOpen] = useState(false);
   const [toDropdownOpen, setToDropdownOpen] = useState(false);
   const [fromLocation, setFromLocation] = useState("");
@@ -79,16 +77,6 @@ export default function HeroSection() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleStayClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    showToast({
-      type: "info",
-      title: "Stays Currently Unavailable",
-      message:
-        "We're currently updating our booking system. You can book our stays on Hostelworld or Booking.com. Thank you for your understanding!",
-    });
-  };
 
   const handleSearchTransfer = () => {
     const params = new URLSearchParams();
@@ -154,9 +142,9 @@ export default function HeroSection() {
                 </div>
               </Link>
 
-              <button
-                onClick={handleStayClick}
-                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30 w-full cursor-pointer"
+              <Link
+                href="/stays"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30"
               >
                 {/* Glassmorphism overlay with subtle color hint */}
                 <div className="absolute inset-0 bg-[#FF7E33]/5 group-hover:bg-[#FF7E33]/10 transition-all duration-300" />
@@ -176,7 +164,7 @@ export default function HeroSection() {
                     Get started <IoArrowForward className="animate-pulse" />
                   </div>
                 </div>
-              </button>
+              </Link>
             </div>
 
             {/* Tours & Stays Buttons - Mobile */}
@@ -199,9 +187,9 @@ export default function HeroSection() {
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
 
-              <button
-                onClick={handleStayClick}
-                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px] w-full cursor-pointer"
+              <Link
+                href="/stays"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px] w-full"
               >
                 <div className="bg-[#FF7E33]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
                   <IoHomeOutline className="text-3xl text-white" />
@@ -215,7 +203,7 @@ export default function HeroSection() {
                   </p>
                 </div>
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+              </Link>
             </div>
 
             {/* Transfer Booking Section */}

@@ -3,7 +3,6 @@ import { IoClose } from "react-icons/io5";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { useToast } from "@/context/ToastContext";
 
 type SidebarProps = {
   isOpen: boolean;
@@ -18,17 +17,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     support: false,
     transports: true,
   });
-
-  const { showToast } = useToast();
-
-  const handleStayClick = () => {
-    showToast({
-      title: "Stays Currently Unavailable",
-      message:
-        "We're currently updating our booking system. You can book our stays on Hostelworld or Booking.com. Thank you for your understanding!",
-      type: "info",
-    });
-  };
 
   // Disable scroll on open
   useEffect(() => {
@@ -124,12 +112,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Simple Links */}
-            <button
-              onClick={handleStayClick}
+            <Link
+              href="/stays"
+              onClick={onClose}
               className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
             >
               Stays
-            </button>
+            </Link>
             <Link
               href="/tours"
               onClick={onClose}
