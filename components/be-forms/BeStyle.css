@@ -1,0 +1,8 @@
+#be-booking-form {
+    max-width: 1152px;
+    margin: 0 auto;
+}
+
+#tl-booking-cart {
+    z-index: 1 !important;
+}

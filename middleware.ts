@@ -11,6 +11,7 @@ const ALLOWED_PREFIXES = [
   "/sitemap.xml",
   "/robots.txt",
   "/faqs",
+  "/stays",
   "/tours",
   "/transfers",
   "/booking",
