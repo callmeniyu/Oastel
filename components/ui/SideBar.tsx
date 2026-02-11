@@ -124,12 +124,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
 
             {/* Simple Links */}
-            <button
+            {/*<button
               onClick={handleStayClick}
               className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
             >
               Stays
-            </button>
+            </button>*/}
+            <Link
+              href="/booking"
+              onClick={onClose}
+              className="block px-3 py-3 rounded-lg hover:bg-primary_green/5 text-title_black font-medium transition-colors"
+            >
+              Stays
+            </Link>
             <Link
               href="/tours"
               onClick={onClose}

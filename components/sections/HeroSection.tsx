@@ -154,9 +154,9 @@ export default function HeroSection() {
                 </div>
               </Link>
 
-              <button
-                onClick={handleStayClick}
-                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30 w-full cursor-pointer"
+              <Link
+                href="/booking"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30"
               >
                 {/* Glassmorphism overlay with subtle color hint */}
                 <div className="absolute inset-0 bg-[#FF7E33]/5 group-hover:bg-[#FF7E33]/10 transition-all duration-300" />
@@ -176,7 +176,31 @@ export default function HeroSection() {
                     Get started <IoArrowForward className="animate-pulse" />
                   </div>
                 </div>
-              </button>
+              </Link>
+
+              {/*<button
+                onClick={handleStayClick}
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 h-48 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 hover:border-white/30 w-full cursor-pointer"
+              >
+                 Glassmorphism overlay with subtle color hint
+                <div className="absolute inset-0 bg-[#FF7E33]/5 group-hover:bg-[#FF7E33]/10 transition-all duration-300" />
+
+                 Content
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-white z-10">
+                  <div className="p-4 rounded-full backdrop-blur-sm group-hover:bg-[#FF7E33]/30 border border-white/20 group-hover:border-white/40 transition-all duration-300">
+                    <IoHomeOutline className="text-3xl" />
+                  </div>
+                  <h3 className="text-3xl font-bold mt-4 drop-shadow-sm">
+                    Book Your Stay
+                  </h3>
+                  <p className="mt-2 opacity-90 drop-shadow-sm">
+                    Cozy Co-Living stays
+                  </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Get started <IoArrowForward className="animate-pulse" />
+                  </div>
+                </div>
+              </button>*/}
             </div>
 
             {/* Tours & Stays Buttons - Mobile */}
@@ -199,7 +223,25 @@ export default function HeroSection() {
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
 
-              <button
+              <Link
+                href="/booking"
+                className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px]"
+              >
+                <div className="bg-[#FF7E33]/20 p-4 rounded-xl backdrop-blur-sm border border-white/20">
+                  <IoHomeOutline className="text-3xl text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    Book Your Stay
+                  </h3>
+                  <p className="text-white/90 text-base">
+                    Cozy Co-Living stays
+                  </p>
+                </div>
+                <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+
+              {/*<button
                 onClick={handleStayClick}
                 className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white/20 hover:border-white/30 p-6 flex items-center gap-4 min-h-[80px] w-full cursor-pointer"
               >
@@ -215,7 +257,7 @@ export default function HeroSection() {
                   </p>
                 </div>
                 <IoArrowForward className="text-2xl text-white group-hover:translate-x-1 transition-transform duration-300" />
-              </button>
+              </button>*/}
             </div>
 
             {/* Transfer Booking Section */}
