@@ -76,7 +76,7 @@ export default function CartConfirmationPage() {
 
       const pagePaddingMm = 12;
       const targetPxWidth = Math.round(
-        (pdfWidthMm - pagePaddingMm * 2) * pxPerMm
+        (pdfWidthMm - pagePaddingMm * 2) * pxPerMm,
       );
 
       const wrapper = document.createElement("div");
@@ -97,7 +97,7 @@ export default function CartConfirmationPage() {
       const sanitizeNode = (node: HTMLElement) => {
         node
           .querySelectorAll(
-            '[style*="backdrop-filter"], [style*="-webkit-backdrop-filter"], .pointer-events-none, .blur-lg, .blur-sm'
+            '[style*="backdrop-filter"], [style*="-webkit-backdrop-filter"], .pointer-events-none, .blur-lg, .blur-sm',
           )
           .forEach((el) => {
             try {
@@ -105,7 +105,7 @@ export default function CartConfirmationPage() {
               try {
                 (el as HTMLElement).style.setProperty(
                   "-webkit-backdrop-filter",
-                  "none"
+                  "none",
                 );
               } catch (_) {}
               (el as HTMLElement).style.filter = "none";
@@ -179,7 +179,7 @@ export default function CartConfirmationPage() {
           0,
           0,
           sCanvas.width,
-          sCanvas.height
+          sCanvas.height,
         );
 
         const pageImgData = sCanvas.toDataURL("image/png");
@@ -198,7 +198,7 @@ export default function CartConfirmationPage() {
           const pagePxWidth = canvas.width;
           const pagePxHeight = Math.min(
             canvas.height - sY,
-            Math.round((pdfHeightMm * (dpi * scale)) / 25.4)
+            Math.round((pdfHeightMm * (dpi * scale)) / 25.4),
           );
           pageCanvas.width = pagePxWidth;
           pageCanvas.height = pagePxHeight;
@@ -215,7 +215,7 @@ export default function CartConfirmationPage() {
             0,
             0,
             pageCanvas.width,
-            pageCanvas.height
+            pageCanvas.height,
           );
 
           const pageImgData = pageCanvas.toDataURL("image/png");
@@ -230,7 +230,7 @@ export default function CartConfirmationPage() {
             x,
             y,
             pageImgWidthMm,
-            pageImgHeightMm
+            pageImgHeightMm,
           );
           if (i < pages - 1) pdf.addPage();
         }
@@ -283,7 +283,7 @@ export default function CartConfirmationPage() {
       const bookingPromises = bookingIds.map(async (id) => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${id}`
+            `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${id}`,
           );
           const result = await response.json();
           if (!result.success) throw new Error(`Failed to fetch booking ${id}`);
@@ -302,8 +302,10 @@ export default function CartConfirmationPage() {
             selectedDate: data.selectedDate
               ? data.selectedDate
               : data.date
-              ? new Date(data.date).toISOString().split("T")[0]
-              : "",
+                ? new Date(data.date).toLocaleDateString("en-CA", {
+                    timeZone: "Asia/Kuala_Lumpur",
+                  })
+                : "",
             selectedTime: data.selectedTime || data.time || "",
             adults: Number(data.adults) || 1,
             children: Number(data.children) || 0,
@@ -331,7 +333,7 @@ export default function CartConfirmationPage() {
 
       const settled = await Promise.all(bookingPromises);
       const bookingDetails = settled.filter(
-        (b) => b !== null
+        (b) => b !== null,
       ) as BookingDetails[];
       setBookings(bookingDetails);
     } catch (error) {
@@ -383,7 +385,7 @@ export default function CartConfirmationPage() {
   const getTotalAmount = () => {
     return bookings.reduce(
       (total, booking) => total + (Number(booking.totalPrice) || 0),
-      0
+      0,
     );
   };
 

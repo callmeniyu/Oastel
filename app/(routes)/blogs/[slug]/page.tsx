@@ -106,6 +106,7 @@ export default async function BlogDetailsPage({ params }: Props) {
       day: "numeric",
       month: "long",
       year: "numeric",
+      timeZone: "Asia/Kuala_Lumpur",
     });
   } catch (dateError) {
     console.warn("Date formatting error:", dateError);

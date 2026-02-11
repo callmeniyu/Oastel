@@ -103,6 +103,7 @@ export default function BookingConfirmationPage() {
         year: "numeric",
         month: "long",
         day: "numeric",
+        timeZone: "Asia/Kuala_Lumpur",
       });
     } catch {
       return "Invalid Date";
@@ -126,7 +127,7 @@ export default function BookingConfirmationPage() {
       // Compute target pixel width for A4 at chosen DPI, minus small page padding
       const pagePaddingMm = 12; // mm
       const targetPxWidth = Math.round(
-        (pdfWidthMm - pagePaddingMm * 2) * pxPerMm
+        (pdfWidthMm - pagePaddingMm * 2) * pxPerMm,
       );
 
       // Create offscreen wrapper forced to A4 pixel width so html2canvas captures consistent layout
@@ -151,7 +152,7 @@ export default function BookingConfirmationPage() {
         // Handle backdrop-blur elements - replace with solid backgrounds instead of removing
         node
           .querySelectorAll(
-            '.backdrop-blur-sm, .backdrop-blur-lg, [style*="backdrop-filter"]'
+            '.backdrop-blur-sm, .backdrop-blur-lg, [style*="backdrop-filter"]',
           )
           .forEach((el) => {
             const element = el as HTMLElement;
@@ -174,7 +175,7 @@ export default function BookingConfirmationPage() {
         // Remove problematic decorative overlays (absolute positioned circles and patterns)
         node
           .querySelectorAll(
-            ".absolute.inset-0, .absolute.top-0, .absolute.bottom-0"
+            ".absolute.inset-0, .absolute.top-0, .absolute.bottom-0",
           )
           .forEach((el) => {
             const element = el as HTMLElement;
@@ -284,7 +285,7 @@ export default function BookingConfirmationPage() {
           0,
           0,
           sCanvas.width,
-          sCanvas.height
+          sCanvas.height,
         );
 
         const pageImgData = sCanvas.toDataURL("image/png");
@@ -304,7 +305,7 @@ export default function BookingConfirmationPage() {
           const pagePxWidth = canvas.width;
           const pagePxHeight = Math.min(
             canvas.height - sY,
-            Math.round((pdfHeightMm * (dpi * scale)) / 25.4)
+            Math.round((pdfHeightMm * (dpi * scale)) / 25.4),
           );
           pageCanvas.width = pagePxWidth;
           pageCanvas.height = pagePxHeight;
@@ -321,7 +322,7 @@ export default function BookingConfirmationPage() {
             0,
             0,
             pageCanvas.width,
-            pageCanvas.height
+            pageCanvas.height,
           );
 
           const pageImgData = pageCanvas.toDataURL("image/png");
@@ -336,7 +337,7 @@ export default function BookingConfirmationPage() {
             x,
             y,
             pageImgWidthMm,
-            pageImgHeightMm
+            pageImgHeightMm,
           );
           if (i < pages - 1) pdf.addPage();
         }
@@ -365,7 +366,7 @@ export default function BookingConfirmationPage() {
     const fetchBooking = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${bookingId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${bookingId}`,
         );
         const data = await response.json();
 

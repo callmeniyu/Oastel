@@ -101,7 +101,7 @@ export default function TransferCard({
       {label && (
         <div
           className={`absolute top-3 left-3 z-10 px-3 py-1 rounded-full text-xs font-semibold ${getLabelStyles(
-            label
+            label,
           )}`}
         >
           {label}
@@ -164,6 +164,7 @@ export default function TransferCard({
             </div>
           </div>
         </div>
+        {/* Review count and rating display removed - not needed
         {(reviewCount || 0) > 0 && (
           <div className="flex gap-2 items-center font-semibold mt-2">
             <FaStar className="text-yellow-400 text-md" />
@@ -172,6 +173,7 @@ export default function TransferCard({
             </p>
           </div>
         )}
+        */}
         <div className="flex justify-between items-center mt-2">
           <div className="flex flex-col items-start">
             <p className="text-gray-400 line-through font-poppins text-base ">

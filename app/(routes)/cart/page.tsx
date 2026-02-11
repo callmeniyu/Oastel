@@ -69,7 +69,7 @@ export default function CartPage() {
   >({});
   const [validatingItems, setValidatingItems] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(
-    null
+    null,
   );
 
   // Utility function to strip HTML tags from text
@@ -158,7 +158,7 @@ export default function CartPage() {
       packageId,
       formattedDate,
       time,
-      guests
+      guests,
     );
   };
 
@@ -185,19 +185,42 @@ export default function CartPage() {
     }
   };
 
-  const formatDate = (dateString: string): string => {
-    if (!dateString) return "-";
+  const formatDate = (dateInput: any): string => {
+    if (!dateInput) return "-";
+
+    const MALAYSIA_TZ = "Asia/Kuala_Lumpur";
+    const fmtOpts: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      timeZone: MALAYSIA_TZ,
+    };
 
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
+      // If it's already a Date object
+      if (dateInput instanceof Date) {
+        return dateInput.toLocaleDateString("en-US", fmtOpts);
+      }
+
+      const s = String(dateInput);
+
+      // YYYY-MM-DD (no timezone) -> parse as Malaysia date similar to server
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const [year, month, day] = s.split("-").map(Number);
+        const malaysiaOffsetMs = 8 * 60 * 60 * 1000;
+        const utcMs =
+          Date.UTC(year, month - 1, day, 0, 0, 0, 0) - malaysiaOffsetMs;
+        const d = new Date(utcMs);
+        return d.toLocaleDateString("en-US", fmtOpts);
+      }
+
+      // ISO / full datetime string -> create Date and format in Malaysia timezone
+      const parsed = new Date(s);
+      if (isNaN(parsed.getTime())) return s;
+      return parsed.toLocaleDateString("en-US", fmtOpts);
     } catch {
-      return dateString;
+      return String(dateInput);
     }
   };
 
@@ -248,6 +271,17 @@ export default function CartPage() {
         return;
       }
 
+      // Prevent booking if there are any expired or invalid items
+      if (invalidItems.length > 0) {
+        showToast({
+          type: "error",
+          title: "Invalid Items in Cart",
+          message:
+            "Please remove all expired or unavailable items from your cart before proceeding to booking.",
+        });
+        return;
+      }
+
       // Navigate to user-info page with cart booking context
       router.push("/booking/user-info?from=cart");
     } catch (error: any) {
@@ -290,7 +324,7 @@ export default function CartPage() {
 
   const subtotal = validItems.reduce(
     (total: number, item: CartItem) => total + (item.totalPrice || 0),
-    0
+    0,
   );
   const tax = Math.round(subtotal * 0.028 * 100) / 100;
   const total = Math.round((subtotal + tax) * 100) / 100;

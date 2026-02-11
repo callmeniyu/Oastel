@@ -200,6 +200,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
+              {/* Review count and rating removed - not needed
               {(tourDetails.reviewCount || 0) > 0 && (
                 <div className="flex items-center w-full gap-3">
                   <FaStar className="text-xl text-yellow-400" />
@@ -208,6 +209,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   </span>
                 </div>
               )}
+              */}
 
               {/* Larger full-width booking button for small screens */}
             </div>
@@ -330,6 +332,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   {formatBookedCount(tourDetails.bookedCount)} Booked
                 </span>
               </div>
+              {/* Review count and rating removed - not needed
               {(tourDetails.reviewCount || 0) > 0 && (
                 <div className="flex items-center gap-2 mb-2">
                   <FaStar className="text-yellow-400 inline-block mr-1" />
@@ -338,6 +341,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   </span>
                 </div>
               )}
+              */}
             </div>
             <BookNowButton
               bookingUrl={`/booking/tour/${tourDetails.slug}`}

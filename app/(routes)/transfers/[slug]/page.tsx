@@ -216,6 +216,7 @@ export default async function TransferDetailPage({
                   {transferDetails.bookedCount} Booked
                 </span>
               </div>
+              {/* Review count and rating removed - not needed
               {(transferDetails.reviewCount || 0) > 0 && (
                 <div className="flex items-center gap-2 mt-1">
                   <FaStar className="text-yellow-400 inline-block mr-1" />
@@ -225,6 +226,7 @@ export default async function TransferDetailPage({
                   </span>
                 </div>
               )}
+              */}
             </div>
             <BookNowButton
               bookingUrl={`/booking/transfer/${transferDetails.slug}`}
@@ -395,6 +397,7 @@ export default async function TransferDetailPage({
                   {transferDetails.bookedCount} Booked
                 </span>
               </div>
+              {/* Review count and rating removed - not needed
               {(transferDetails.reviewCount || 0) > 0 && (
                 <div className="flex items-center gap-2 mb-2">
                   <FaStar className="text-yellow-400 inline-block mr-1" />
@@ -404,6 +407,7 @@ export default async function TransferDetailPage({
                   </span>
                 </div>
               )}
+              */}
             </div>
             <BookNowButton
               bookingUrl={`/booking/transfer/${transferDetails.slug}`}
