@@ -19,7 +19,7 @@ export default function Booking() {
             <h1 className="text-3xl md:text-7xl font-bold mb-6 text-white drop-shadow-lg">
               Oastel Co-Living
             </h1>
-            <p className="text-lg md:text-2xl font-light leading-relaxed drop-shadow-md max-w-2xl mx-auto">
+            <p className="text-lg text-gray-300 md:text-2xl font-light italic leading-6 drop-shadow-md max-w-2xl mx-auto">
               Where modern living meets mountain vibes. Built for digital
               nomads, backpackers and ambitious minds seeking more than just a
               room.
