@@ -177,7 +177,7 @@ export default async function TransferDetailPage({
             alt={transferDetails.title}
             width={700}
             height={500}
-            className="rounded-xl sm:w-full sm:h-[25rem] object-cover"
+            className="rounded-xl sm:w-full sm:h-[25rem]object-cover"
           />
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold sm:font-bold text-primary_green">
@@ -316,7 +316,7 @@ export default async function TransferDetailPage({
                 <h5 className="font-semibold text-primary_green">
                   {transferDetails.details.pickupOption === "user"
                     ? "Pickup Guidelines"
-                    : "Pickup Location"}
+                    : "Pickup & Drop-off Locations"}
                 </h5>
               </div>
               <div className="prose max-w-none text-sm text-desc_gray mt-2">

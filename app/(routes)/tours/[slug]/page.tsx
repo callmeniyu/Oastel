@@ -276,7 +276,7 @@ export default async function TourDetailPage({ params }: TourDetailPageProps) {
                   <RiMapPinLine className="text-lg text-white" />
                 </div>
                 <h5 className="font-semibold text-primary_green">
-                  Pickup Location
+                  Pickup & Drop-off Locations
                 </h5>
               </div>
               <div

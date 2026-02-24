@@ -37,9 +37,9 @@ export default function ToursPage() {
 
   // Sort helper: labeled items (has label) come first, then ascending by newPrice
   const sortByLabelAndPrice = <
-    T extends { label?: string | null; newPrice?: number }
+    T extends { label?: string | null; newPrice?: number },
   >(
-    items: T[]
+    items: T[],
   ) => {
     return [...items].sort((a, b) => {
       const aHas = !!a.label;
@@ -95,7 +95,7 @@ export default function ToursPage() {
             .toLowerCase()
             .includes(searchTerm.toLowerCase().trim()) ||
           tour.tags.some((tag: string) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase().trim())
+            tag.toLowerCase().includes(searchTerm.toLowerCase().trim()),
           );
 
         return matchSearch;
@@ -105,7 +105,7 @@ export default function ToursPage() {
       console.log(
         "Search results:",
         result.length,
-        "tours match the search criteria"
+        "tours match the search criteria",
       );
 
       // Check if search is active
@@ -114,7 +114,7 @@ export default function ToursPage() {
         hasActiveSearch ||
           filters.type !== "All" ||
           filters.prices.length > 0 ||
-          filters.durations.length > 0
+          filters.durations.length > 0,
       );
     };
 
@@ -136,7 +136,7 @@ export default function ToursPage() {
         tour.type.toLowerCase() === type.toLowerCase() ||
         tour.packageType.toLowerCase() === type.toLowerCase() ||
         tour.tags.some(
-          (tag: string) => tag.toLowerCase() === type.toLowerCase()
+          (tag: string) => tag.toLowerCase() === type.toLowerCase(),
         );
 
       const matchPrice =
@@ -155,7 +155,7 @@ export default function ToursPage() {
             tour.period &&
             tour.period.toLowerCase().includes(dur.toLowerCase());
           const tagMatch = tour.tags.some((tag: string) =>
-            tag.toLowerCase().includes(dur.toLowerCase())
+            tag.toLowerCase().includes(dur.toLowerCase()),
           );
           return periodMatch || tagMatch;
         });
@@ -167,7 +167,7 @@ export default function ToursPage() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase().trim()) ||
         tour.tags.some((tag: string) =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase().trim())
+          tag.toLowerCase().includes(searchTerm.toLowerCase().trim()),
         );
 
       return matchType && matchPrice && matchDuration && matchSearch;
@@ -243,7 +243,7 @@ export default function ToursPage() {
 
   return (
     <div>
-      <div className="relative h-96 md:h-[90vh] pt-16 overflow-hidden">
+      <div className="relative h-96 md:h-[75vh] pt-16 overflow-hidden">
         {/* Background Image */}
         <Image
           src="/images/tour_main.png"

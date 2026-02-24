@@ -107,35 +107,6 @@ export default function Footer() {
             <p className="text-sm font-semibold mb-1">OASTEL SDN. BHD.</p>
             <p className="text-xs text-gray-300">202401034459 (1580306-V)</p>
           </div>
-
-          {/* Payment Partners */}
-          <div className="text-center">
-            <h4 className="text-sm font-semibold mb-4 text-gray-200">
-              Trusted Payment Partners
-            </h4>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-xs">
-              {/* Stripe */}
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/images/stripe-seeklogo.png"
-                  alt="Stripe"
-                  width={60}
-                  height={20}
-                  className="h-5 w-auto"
-                />
-                <span className="text-gray-300">Secure Online Payments</span>
-              </div>
-
-              {/* Banking Partners */}
-              <div className="flex items-center gap-2">
-                <BsBank2 className="w-4 h-4" />
-
-                <span className="text-gray-300">
-                  Public Bank & Alliance Bank
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -288,7 +288,7 @@ export default function Transfers() {
   return (
     <div>
       {/* Hero */}
-      <div className="relative h-96 md:h-[100vh] pt-16 overflow-hidden">
+      <div className="relative h-96 md:h-[75vh] pt-16 overflow-hidden">
         {/* Background Image */}
         <Image
           src="/images/transfer-main.jpg"
@@ -357,7 +357,7 @@ export default function Transfers() {
       {!loading && !error && (
         <>
           {/* Search & Filter Toggle */}
-          <div className="flex gap-3 items-center justify-between px-5 mt-8">
+          <div className="flex gap-3 items-center justify-between px-5 mt-4">
             <hr className="border-b-2 border-primary_green w-full hidden md:flex" />
             <SearchInput
               customeStyles=""
@@ -410,7 +410,7 @@ export default function Transfers() {
           </div>
 
           {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col sm:flex-row gap-4 relative">
+          <div className="max-w-7xl mx-auto px-4 pt-2 pb-10 flex flex-col sm:flex-row gap-4 relative">
             {/* Sidebar */}
             <div className="hidden sm:block sticky-filter">
               <TransferFilterBar
@@ -451,11 +451,11 @@ export default function Transfers() {
             )}
 
             {/* Transfers */}
-            <div className="space-y-8 w-full">
+            <div className="space-y-0 w-full">
               {searchTerm.trim() !== "" ? (
                 // Show search results when searching
                 <div>
-                  <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
                     <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
                     <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
                       Search Results
@@ -485,7 +485,7 @@ export default function Transfers() {
               ) : filtersApplied ? (
                 // Show filtered results under "Your Results"
                 <div>
-                  <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
                     <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
                     <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
                       Your Results
@@ -518,7 +518,7 @@ export default function Transfers() {
                   {/* Van Transfers */}
                   {vanTransfers.length > 0 && (
                     <div id="van">
-                      <div className="flex items-center gap-2 mb-6">
+                      <div className="flex items-center gap-2 mb-2">
                         <hr className="border-b-2 border-primary_green w-16 sm:w-40 md:flex" />
                         <h2 className="text-3xl font-extrabold sm:font-semibold text-primary_green mb-4 pt-2 min-w-max">
                           Minivan Shuttle
