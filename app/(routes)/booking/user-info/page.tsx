@@ -39,10 +39,21 @@ export default function BookingUserInfoPage() {
 
   // Form validation function
   const isFormValid = () => {
+    // Name must be at least 5 characters
+    const nameValid = form.name.trim().length >= 5;
+
+    // Email must be in valid format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailValid = emailRegex.test(form.email.trim());
+
+    // Phone must be at least 7 characters
+    const phoneValid = form.phone.trim().length >= 7;
+
+    // Country code must be selected
+    const countryCodeValid = form.countryCode.trim() !== "";
+
     const basicFieldsValid =
-      form.name.trim() !== "" &&
-      form.email.trim() !== "" &&
-      form.phone.trim() !== "";
+      nameValid && emailValid && phoneValid && countryCodeValid;
 
     if (isCartBooking) {
       // For cart bookings, pickup location is handled per item
@@ -57,8 +68,8 @@ export default function BookingUserInfoPage() {
       return basicFieldsValid;
     }
 
-    // For all other cases (tours or user-defined pickup), require pickup location
-    return basicFieldsValid && form.pickupLocation.trim() !== "";
+    // For all other cases (tours or user-defined pickup), require pickup location (minimum 10 characters)
+    return basicFieldsValid && form.pickupLocation.trim().length >= 10;
   };
 
   useEffect(() => {
@@ -165,7 +176,7 @@ export default function BookingUserInfoPage() {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setForm((prev) => {
@@ -179,14 +190,64 @@ export default function BookingUserInfoPage() {
   };
 
   const handleConfirmBooking = async () => {
-    // Validate form
-    if (!form.name || !form.email || !form.phone) {
+    // Validate name - minimum 5 characters
+    if (!form.name || form.name.trim().length < 5) {
       showToast({
         type: "error",
-        title: "Missing Information",
-        message: "Please fill in all required fields",
+        title: "Invalid Name",
+        message: "Name must be at least 5 characters long",
       });
       return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email || !emailRegex.test(form.email.trim())) {
+      showToast({
+        type: "error",
+        title: "Invalid Email",
+        message: "Please enter a valid email address",
+      });
+      return;
+    }
+
+    // Validate phone number - minimum 7 characters (including country code will be added)
+    if (!form.phone || form.phone.trim().length < 7) {
+      showToast({
+        type: "error",
+        title: "Invalid Phone Number",
+        message: "Phone number must be at least 7 characters",
+      });
+      return;
+    }
+
+    // Validate country code is selected
+    if (!form.countryCode) {
+      showToast({
+        type: "error",
+        title: "Missing Country Code",
+        message: "Please select your country code",
+      });
+      return;
+    }
+
+    // Validate pickup location if required (minimum 10 characters)
+    if (!isCartBooking) {
+      const requiresPickupLocation =
+        booking?.packageType !== "transfer" ||
+        booking?.pickupOption !== "admin";
+
+      if (
+        requiresPickupLocation &&
+        (!form.pickupLocation || form.pickupLocation.trim().length < 10)
+      ) {
+        showToast({
+          type: "error",
+          title: "Invalid Pickup Location",
+          message: "Pickup location must be at least 10 characters",
+        });
+        return;
+      }
     }
 
     if (isCartBooking) {
@@ -379,7 +440,7 @@ export default function BookingUserInfoPage() {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce(
       (total, item) => total + (item.totalPrice || 0),
-      0
+      0,
     );
   };
 
@@ -594,8 +655,8 @@ export default function BookingUserInfoPage() {
               ? "Creating Bookings..."
               : "Creating Booking..."
             : isCartBooking
-            ? "Confirm Cart Booking"
-            : "Confirm Booking"}
+              ? "Confirm Cart Booking"
+              : "Confirm Booking"}
         </button>
       </div>
 

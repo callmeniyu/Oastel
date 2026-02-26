@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import TransferFilterBar from "@/components/ui/TransferFilterBar";
 import SearchInput from "@/components/ui/SearchInput";
 import TransferCard from "@/components/ui/TransferCard";
@@ -69,6 +69,7 @@ export default function Transfers() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filtersApplied, setFiltersApplied] = useState(false);
   const [showFilterTip, setShowFilterTip] = useState(false);
+  const sidebarWrapperRef = useRef<HTMLDivElement | null>(null);
 
   // Sort helper: labeled items come first, then ascending by newPrice
   const sortByLabelAndPrice = <
@@ -269,6 +270,52 @@ export default function Transfers() {
     }
   }, []);
 
+  // Sync sidebar internal scroll with window scroll (proportional)
+  useEffect(() => {
+    const wrapper = (sidebarWrapperRef as any).current as HTMLDivElement | null;
+    if (!wrapper) return;
+    const aside =
+      wrapper.querySelector &&
+      (wrapper.querySelector("aside") as HTMLElement | null);
+    if (!aside) return;
+
+    let rafId = 0;
+
+    const sync = () => {
+      const pageScrollMax =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const pageScroll = window.scrollY || window.pageYOffset || 0;
+      if (pageScrollMax <= 0) {
+        aside.scrollTop = 0;
+        return;
+      }
+      const ratio = pageScroll / pageScrollMax;
+      const sidebarMax = Math.max(0, aside.scrollHeight - aside.clientHeight);
+      aside.scrollTop = Math.round(ratio * sidebarMax);
+    };
+
+    const onScroll = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(() => {
+          sync();
+          rafId = 0;
+        });
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+
+    // initial sync
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   const dismissFilterTip = () => {
     try {
       localStorage.setItem("transferFilterTipDismissed", "true");
@@ -412,14 +459,25 @@ export default function Transfers() {
           {/* Main Content */}
           <div className="max-w-7xl mx-auto px-4 pt-2 pb-10 flex flex-col sm:flex-row gap-4 relative">
             {/* Sidebar */}
-            <div className="hidden sm:block sticky-filter">
-              <TransferFilterBar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onApply={handleApply}
-                onClear={handleClearFilters}
-                locationOptions={locationOptions}
-              />
+            <div
+              className="hidden sm:block sticky-filter"
+              ref={(el) => {
+                /* placeholder ref set below */
+              }}
+            >
+              <div
+                ref={(node) => {
+                  (sidebarWrapperRef as any).current = node;
+                }}
+              >
+                <TransferFilterBar
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onApply={handleApply}
+                  onClear={handleClearFilters}
+                  locationOptions={locationOptions}
+                />
+              </div>
             </div>
 
             {/* Mobile Filter */}

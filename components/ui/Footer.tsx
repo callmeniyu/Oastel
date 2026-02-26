@@ -1,8 +1,5 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
-import { BsBank2 } from "react-icons/bs";
-
 export default function Footer() {
   return (
     <footer className="bg-primary_green text-white px-4 pt-10 pb-2 md:pr-16">
@@ -95,17 +92,6 @@ export default function Footer() {
               className="w-9 h-8 md:w-11 md:h-10"
               alt="footer_payment"
             />
-          </div>
-        </div>
-      </div>
-
-      {/* Company Registration & Payment Partners */}
-      <div className="mt-10 pt-8 border-t border-white/20">
-        <div className="max-w-7xl mx-auto">
-          {/* Company Registration */}
-          <div className="text-center mb-8">
-            <p className="text-sm font-semibold mb-1">OASTEL SDN. BHD.</p>
-            <p className="text-xs text-gray-300">202401034459 (1580306-V)</p>
           </div>
         </div>
       </div>

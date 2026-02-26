@@ -16,7 +16,7 @@ export default function Booking() {
         {/* Content */}
         <div className="relative z-10 flex items-center justify-center h-full px-4 text-center text-white">
           <div className="max-w-4xl pt-16 md:pt-0">
-            <h1 className="text-3xl md:text-7xl font-bold mb-6 text-white drop-shadow-lg">
+            <h1 className="text-3xl md:text-6xl font-bold mb-6 text-white drop-shadow-lg">
               Oastel Co-Living
             </h1>
             <p className="text-lg text-gray-300 md:text-2xl font-light italic leading-6 drop-shadow-md max-w-2xl mx-auto">

@@ -42,6 +42,11 @@ export default function BlogCard({
     router.push(`/blogs/${blogSlug}`);
   };
 
+  const truncate = (s?: string, n = 140) => {
+    if (!s) return "";
+    return s.length > n ? s.slice(0, n).trimEnd() + "…" : s;
+  };
+
   return (
     <div
       role="button"
@@ -50,7 +55,7 @@ export default function BlogCard({
       onKeyDown={(e) => {
         if (e.key === "Enter") handleCardClick();
       }}
-      className="rounded-xl overflow-hidden shadow-lg bg-white flex flex-col hover:shadow-xl transition-shadow cursor-pointer"
+      className="rounded-xl overflow-hidden shadow-lg bg-white flex flex-col h-full hover:shadow-xl transition-shadow cursor-pointer"
     >
       <Image
         src={image}
@@ -59,12 +64,17 @@ export default function BlogCard({
         height={300}
         className="h-48 w-full object-cover"
       />
-      <div className="p-4 flex flex-col justify-between flex-grow">
+      <div className="p-4 flex flex-col justify-between flex-1">
         <div>
           <h3 className="text-title_black font-semibold font-poppins text-base mb-2">
             {title}
           </h3>
-          <p className="text-desc_gray text-sm font-poppins">{description}</p>
+          <p
+            className="text-desc_gray text-sm font-poppins"
+            title={description}
+          >
+            {truncate(description, 140)}
+          </p>
         </div>
         <div className="mt-4 flex justify-between items-center">
           <div className="flex flex-col">

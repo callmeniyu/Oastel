@@ -8,3 +8,6 @@ npm i date-fns
 
 NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
+
+#To find server logs related to a specific keyword
+grep -n -C 20 "Olivia Roper" /root/.pm2/logs/backend-out.log

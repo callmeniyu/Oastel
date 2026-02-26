@@ -95,7 +95,7 @@ export default function TransferCard({
       tabIndex={0}
       onClick={(e) => navigate(e)}
       onKeyDown={(e) => navigate(e)}
-      className="rounded-xl shadow-lg bg-white flex flex-col flex-grow justify-between relative cursor-pointer"
+      className="rounded-xl shadow-lg bg-white flex flex-col h-full relative cursor-pointer"
     >
       {/* Label Badge */}
       {label && (
@@ -127,7 +127,7 @@ export default function TransferCard({
           }
         }}
       />
-      <div className="p-4 flex flex-col justify-between gap-2 self-start">
+      <div className="p-4 flex flex-col justify-between gap-2 flex-1">
         <h3 className="text-primary_green font-semibold font-poppins text-base">
           {title}
         </h3>
