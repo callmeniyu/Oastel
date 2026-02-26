@@ -348,7 +348,7 @@ export default function BookingInfoPanel({
         ) : (
           // Booking details page - show Add to Cart and Continue buttons
           <>
-            <button
+            {/* <button
               onClick={handleAddToCart}
               type="button"
               disabled={disabled || cartLoading}
@@ -360,7 +360,7 @@ export default function BookingInfoPanel({
             >
               <IoCartOutline className="inline mr-2 text-2xl" />
               <p>{cartLoading ? "Adding..." : "Add to Cart"}</p>
-            </button>
+            </button> */}
             <div
               onClick={disabled ? undefined : onClick}
               className={`${
