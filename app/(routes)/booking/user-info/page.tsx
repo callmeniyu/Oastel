@@ -46,8 +46,8 @@ export default function BookingUserInfoPage() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const emailValid = emailRegex.test(form.email.trim());
 
-    // Phone must be at least 7 characters
-    const phoneValid = form.phone.trim().length >= 7;
+    // Phone must be at least 5 characters
+    const phoneValid = form.phone.trim().length >= 5;
 
     // Country code must be selected
     const countryCodeValid = form.countryCode.trim() !== "";
@@ -211,12 +211,12 @@ export default function BookingUserInfoPage() {
       return;
     }
 
-    // Validate phone number - minimum 7 characters (including country code will be added)
-    if (!form.phone || form.phone.trim().length < 7) {
+    // Validate phone number - minimum 5 characters (including country code will be added)
+    if (!form.phone || form.phone.trim().length < 5) {
       showToast({
         type: "error",
         title: "Invalid Phone Number",
-        message: "Phone number must be at least 7 characters",
+        message: "Phone number must be at least 5 characters",
       });
       return;
     }
@@ -647,7 +647,7 @@ export default function BookingUserInfoPage() {
 
         <button
           onClick={goToCheckout}
-          disabled={isLoading || !isFormValid()}
+          disabled={isLoading}
           className="mt-6 w-full sm:w-auto px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading
@@ -694,7 +694,7 @@ export default function BookingUserInfoPage() {
 
             <button
               onClick={goToCheckout}
-              disabled={isLoading || !isFormValid()}
+              disabled={isLoading}
               className="w-full mt-4 px-4 py-2 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Processing..." : "Confirm Booking"}
