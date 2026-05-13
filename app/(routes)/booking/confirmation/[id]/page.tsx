@@ -563,7 +563,7 @@ export default function BookingConfirmationPage() {
         {/* Important Notes */}
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-6">
           <h3 className="text-lg font-semibold mb-2">Important Information:</h3>
-          <ul className="list-disc list-inside text-gray-700 space-y-1">
+          <ul className="list-disc list-outside pl-5 text-gray-700 space-y-1">
             <li>
               Be ready at your hotel’s main gate 5 minutes before pick-up.
             </li>
@@ -574,7 +574,7 @@ export default function BookingConfirmationPage() {
             <li>Pick-up times and locations may vary for each booking.</li>
             <li>
               Cancellation Policy:
-              <ul className="list-disc list-inside ml-5 text-gray-700 space-y-1 mt-1">
+              <ul className="list-disc list-outside ml-5 pl-5 text-gray-700 space-y-1 mt-1">
                 <li>Cancel at least 72 hours in advance for a full refund.</li>
                 <li>
                   No refund, cancellation, or date change within 72 hours.
