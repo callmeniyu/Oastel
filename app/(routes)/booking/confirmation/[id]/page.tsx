@@ -575,9 +575,9 @@ export default function BookingConfirmationPage() {
             <li>
               Cancellation Policy:
               <ul className="list-disc list-outside ml-5 pl-5 text-gray-700 space-y-1 mt-1">
-                <li>Cancel at least 72 hours in advance for a full refund.</li>
+                <li>Cancel at least 24 hours in advance for a 95% refund (5% processing fee deducted).</li>
                 <li>
-                  No refund, cancellation, or date change within 72 hours.
+                  No refund, cancellation, or date change within 24 hours.
                 </li>
               </ul>
             </li>

@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/context/ToastContext";
+import { formatMalaysianDateForDisplay, parseFlexibleDate } from "@/lib/dateUtils";
 import {
   FaRegCalendarAlt as Calendar,
   FaRegClock as Clock,
@@ -351,9 +352,9 @@ export default function CartConfirmationPage() {
   const formatDate = (dateString: string) => {
     try {
       if (!dateString) return "Invalid Date";
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return "Invalid Date";
-      return date.toLocaleDateString("en-US", {
+      const date = parseFlexibleDate(dateString);
+      if (!date) return "Invalid Date";
+      return formatMalaysianDateForDisplay(date, {
         weekday: "long",
         year: "numeric",
         month: "long",
@@ -620,10 +621,10 @@ export default function CartConfirmationPage() {
                 • Cancellation Policy:
                 <ul className="list-disc list-inside ml-5 text-yellow-700 space-y-1 mt-1">
                   <li>
-                    • Cancel at least 72 hours in advance for a full refund.
+                    • Cancel at least 24 hours in advance for a 95% refund (5% processing fee deducted).
                   </li>
                   <li>
-                    • No refund, cancellation, or date change within 72 hours.
+                    • No refund, cancellation, or date change within 24 hours.
                   </li>
                 </ul>
               </li>
