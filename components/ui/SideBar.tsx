@@ -191,7 +191,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </button>
               <div
                 className={`pl-4 space-y-1 overflow-hidden transition-all duration-300 ${
-                  expandedSections.support ? "max-h-40 mt-2" : "max-h-0"
+                  expandedSections.support ? "max-h-48 mt-2" : "max-h-0"
                 }`}
               >
                 <Link
@@ -214,6 +214,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   className="block px-3 py-2 text-desc_gray rounded-lg hover:bg-primary_green/5 hover:text-primary_green transition-colors"
                 >
                   FAQ
+                </Link>
+                <Link
+                  href="/tutorials"
+                  onClick={onClose}
+                  className="block px-3 py-2 text-desc_gray rounded-lg hover:bg-primary_green/5 hover:text-primary_green transition-colors"
+                >
+                  Tutorials
                 </Link>
               </div>
             </div>
