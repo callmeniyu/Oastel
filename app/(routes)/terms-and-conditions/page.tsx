@@ -24,10 +24,9 @@ export default function TermsAndConditions() {
     {
       title: "Cancellation Policy",
       content: [
-        "For accommodation bookings with Oastel, cancellations must be requested in writing through email or the official booking platform used at the time of reservation.",
-        "Refund eligibility depends on the type of booking, the cancellation period, and the terms agreed upon during reservation. Some bookings may be non-refundable.",
+        "For transfer and Tours tickets booked through Oastel, cancellations must be requested at least 24 hours prior to the scheduled starting time via the website's Manage Booking section.",
+        "No cancellation can be made within 24 hours prior to the scheduled starting time, and no refund will be provided. This is because tour guide slots, transportation vehicles, operator schedules, and local permits are fully finalized and locked in 24 hours in advance to guarantee service delivery.",
         "No-shows without prior notice will be charged the full booking amount.",
-        "For transfer and Tours tickets booked through oastel, all cancellations, rescheduling, and refund requests must be handled directly via the oastel website under the Manage Booking section. Oastel is not responsible for refunds or changes to oastel bookings.",
         "Oastel does not cover costs related to cancellations caused by weather, transportation delays, or unforeseen circumstances beyond its control.",
       ],
       id: "cancellation",
@@ -35,13 +34,11 @@ export default function TermsAndConditions() {
     {
       title: "Refund Policy",
       content: [
-        "Oastel offers a 5-day early cancellation refund policy for  bookings",
-        "Full refunds are available when cancellations are made at least 5 days before the scheduled check-in date or tour departure time.",
-        "Refunds will be issued using the same payment method originally used for the booking, unless otherwise agreed upon with the guest.",
-        "Processing fees, bank charges, or third-party service fees may apply and will be deducted from the refund amount where applicable.",
-        "Refunds are not available for no-shows, late cancellations (within 5 days of service), or cancellations due to force majeure events under our control.",
-        "All refund requests must be submitted in writing through our official channels, and approval is subject to verification of booking details and eligibility.",
-        "For questions about refunds or to initiate a refund request, please contact us.",
+        "Eligible cancellations made at least 24 hours before the scheduled departure time are entitled to a 95% refund of the paid booking amount.",
+        "A 5% deduction (processing and administrative fee) is applied to all eligible refunds. This fee covers Stripe's non-refundable payment gateway transaction charges and administrative processing overhead.",
+        "Refunds will be issued automatically to the same payment method originally used for the booking, and may take 5 to 10 business days to reflect in your account.",
+        "For manually registered office bookings done by an admin at the office, no automatic Stripe refund will be processed. Customers must collect cash refunds directly from our physical office.",
+        "All refund requests are subject to verification of booking details and eligibility under these Terms.",
       ],
       id: "refund",
     },

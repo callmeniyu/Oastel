@@ -259,7 +259,7 @@ export default function CancellationReceiptPage() {
                     </tr>
                     <tr className="border-b border-gray-100">
                       <td className="p-4 font-medium text-red-600">
-                        {isRefunded ? "Processing Fee (5%)" : "Cancellation Fee (100% - Non-Refundable)"}
+                        {isRefunded ? "Processing & Administrative Fee (5%)" : "Cancellation Fee (100% - Non-Refundable)"}
                       </td>
                       <td className="p-4 text-right text-red-600 font-semibold">- RM {fee.toFixed(2)}</td>
                     </tr>
@@ -318,8 +318,8 @@ export default function CancellationReceiptPage() {
 
           {/* Footer Receipt Notice */}
           <div className="bg-gray-50 p-6 border-t border-gray-100 text-center text-xs text-gray-400">
-            <p>Thank you for traveling with Cameron Highlands Tours.</p>
-            <p className="mt-1">For support, email us at support@oastel.com</p>
+            <p>Thank you for traveling with Oastel.</p>
+            <p className="mt-1">For support, email us at oastel.com@gmail.com</p>
           </div>
         </div>
       </div>

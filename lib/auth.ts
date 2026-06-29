@@ -31,12 +31,14 @@ export const authOptions = {
                     }
 
                     // Check if password is correct
-                    if (user.passwordHash) {
-                        const isValid = await bcrypt.compare(credentials?.password || "", user.passwordHash)
+                    if (!user.passwordHash) {
+                        throw new Error("This account is registered via Google. Please log in with Google.")
+                    }
 
-                        if (!isValid) {
-                            throw new Error("Invalid password")
-                        }
+                    const isValid = await bcrypt.compare(credentials?.password || "", user.passwordHash)
+
+                    if (!isValid) {
+                        throw new Error("Invalid password")
                     }
 
                     return {
