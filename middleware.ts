@@ -31,6 +31,7 @@ const ALLOWED_PREFIXES = [
   "/profile",
   "/cart",
   "/recommendations",
+  "/tutorials"
 ];
 
 // Additional explicitly allowed exact paths
@@ -48,22 +49,22 @@ export function middleware(req: NextRequest) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
-    
+
     if (pathname === "/service-page/private-guided-mossy-forest-highlands-day-trip") {
       url.pathname = "/tours/private-full-day-highlands-mossy-forest-discovery";
       return NextResponse.redirect(url);
     }
-    
+
     if (pathname === "/service-page/full-day-private-land-rover-tour-your-own-group") {
       url.pathname = "/tours/mossy-forest-full-day-highland-discovery";
       return NextResponse.redirect(url);
     }
-    
+
     if (pathname === "/service-page/private-highland-escape") {
       url.pathname = "/tours/private-full-day-highlands-mossy-forest-discovery";
       return NextResponse.redirect(url);
     }
-    
+
     if (pathname === "/service-page/half-day-land-rover-tour-to-mossy-forest") {
       url.pathname = "/tours/half-day-mossy-forest-land-rover-trip";
       return NextResponse.redirect(url);

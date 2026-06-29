@@ -48,6 +48,9 @@ export default function Footer() {
                 <li>
                   <a href="contact-us#feedback">Feedback</a>
                 </li>
+                <li>
+                  <Link href="/tutorials">Tutorials</Link>
+                </li>
               </ul>
             </div>
 
