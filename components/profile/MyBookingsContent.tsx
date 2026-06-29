@@ -104,7 +104,7 @@ export default function MyBookingsContent() {
   const getHoursToDeparture = (dateStr: string, timeStr: string): number => {
     try {
       const bookingDate = new Date(dateStr);
-      const datePartStr = bookingDate.toISOString().split("T")[0];
+      const datePartStr = formatDateAsMYT(bookingDate);
       
       let hour24 = 0;
       let minutes = 0;
@@ -328,21 +328,21 @@ export default function MyBookingsContent() {
 
           {/* Booking Details */}
           <div className="flex-1 p-6">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-4 gap-2">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-1.5">
                   <FiPackage className="text-primary_green text-sm" />
                   <span className="text-sm text-primary_green font-semibold uppercase tracking-wide">
                     {booking.packageType}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 leading-snug">
                   {booking.packageDetails?.title || `${booking.packageType} Package`}
                 </h3>
                 <p className="text-xs text-gray-400">ID: #{booking._id}</p>
               </div>
-              <div className="text-right ml-4">
-                <p className="text-2xl font-bold text-primary_green">
+              <div className="text-left sm:text-right mt-1 sm:mt-0">
+                <p className="text-xl sm:text-2xl font-bold text-primary_green">
                   RM {booking.total.toFixed(2)}
                 </p>
               </div>
@@ -377,23 +377,23 @@ export default function MyBookingsContent() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-2 pt-4 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-100">
 
               <button
                 onClick={() => handleViewReceipt(booking)}
-                className="flex items-center gap-3 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
               >
-                <FiFileText size={16} />
-                Get Receipt
+                <FiFileText size={16} className="flex-shrink-0" />
+                <span>Get Receipt</span>
               </button>
 
               {showCancelButton && (
                 <button
                   onClick={() => handleCancelClick(booking)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200 text-sm sm:text-base"
                 >
-                  <FiX size={16} />
-                  Cancel Booking
+                  <FiX size={16} className="flex-shrink-0" />
+                  <span>Cancel Booking</span>
                 </button>
               )}
             </div>
@@ -404,7 +404,7 @@ export default function MyBookingsContent() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 font-poppins relative">
+    <div className="max-w-6xl mx-auto px-4 py-6 sm:p-3 font-poppins relative">
       {/* Full-screen Loading Overlay for Cancellation */}
       {cancelling && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white">
@@ -419,7 +419,6 @@ export default function MyBookingsContent() {
       {/* Header section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Bookings</h1>
-        <p className="text-gray-600">Track and manage your upcoming and historic bookings.</p>
       </div>
 
       {/* Guest Search Component */}
@@ -429,7 +428,7 @@ export default function MyBookingsContent() {
           Find Guest Booking
         </h2>
         <p className="text-sm text-gray-600 mb-4">
-          Did you book without logging in? Enter your Booking ID and Email below to view and manage it.
+          Did you book without logging in? Enter your Booking ID(without #) and Email below to view and manage it.
         </p>
         
         <form onSubmit={handleGuestSearch} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -537,30 +536,30 @@ export default function MyBookingsContent() {
       ) : (
         <>
           {/* Tab Navigation */}
-          <div className="flex border-b border-gray-200 mb-8">
+          <div className="flex border-b border-gray-200 mb-8 w-full">
             <button
               onClick={() => setActiveTab("upcoming")}
-              className={`px-6 py-4 font-semibold text-lg relative ${
+              className={`flex-1 sm:flex-initial text-center px-4 sm:px-6 py-4 font-semibold text-base sm:text-lg relative ${
                 activeTab === "upcoming"
                   ? "text-primary_green border-b-2 border-primary_green"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               Upcoming
-              <span className="ml-2 bg-primary_green text-white text-sm px-2 py-1 rounded-full">
+              <span className="ml-2 bg-primary_green text-white text-xs px-2 py-0.5 rounded-full">
                 {upcomingBookings.length}
               </span>
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`px-6 py-4 font-semibold text-lg relative ${
+              className={`flex-1 sm:flex-initial text-center px-4 sm:px-6 py-4 font-semibold text-base sm:text-lg relative ${
                 activeTab === "history"
                   ? "text-primary_green border-b-2 border-primary_green"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               History
-              <span className="ml-2 bg-gray-500 text-white text-sm px-2 py-1 rounded-full">
+              <span className="ml-2 bg-gray-500 text-white text-xs px-2 py-0.5 rounded-full">
                 {pastBookings.length}
               </span>
             </button>
@@ -637,8 +636,8 @@ export default function MyBookingsContent() {
                     ) : (
                       <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl space-y-2 text-xs text-gray-700">
                         <p className="font-semibold text-gray-900 text-sm mb-1">Cancellation Rules:</p>
-                        <p>• <strong>Cancel before 24 hours:</strong> 95% refund (5% processing fee deducted)</p>
-                        <p>• <strong>Cancel within 24 hours:</strong> No refund will be made</p>
+                        <p>• <strong>Cancel before 24 hours:</strong> 95% refund (5% processing and administrative fee deducted)</p>
+                        <p>• <strong>Cancel within 24 hours:</strong> No cancellation can be made within 24 hours, since the booking has been finalized before 24 hours</p>
                       </div>
                     )}
 
@@ -646,7 +645,7 @@ export default function MyBookingsContent() {
                     {!isEligible && (
                       <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl text-xs font-bold flex items-center gap-2">
                         <FiAlertTriangle className="flex-shrink-0 text-sm" />
-                        <span>Cancellation is not possible within 24 hours prior to starting time.</span>
+                        <span>No cancellation can be made within 24 hours, since the booking has been finalized before 24 hours.</span>
                       </div>
                     )}
 
@@ -658,7 +657,7 @@ export default function MyBookingsContent() {
                       </div>
                       <div className="flex justify-between text-sm py-1 border-b border-gray-200 pb-2">
                         <span className="text-gray-600">
-                          {isAdmin ? "Cancellation Fee (100%)" : (isEligible ? "Stripe Processing Fee (5%)" : "Cancellation Fee (100%)")}
+                          {isAdmin ? "Cancellation Fee (100%)" : (isEligible ? "Stripe Processing & Admin Fee (5%)" : "Cancellation Fee (100%)")}
                         </span>
                         <span className="font-semibold text-red-600">- RM {fee.toFixed(2)}</span>
                       </div>
@@ -678,7 +677,9 @@ export default function MyBookingsContent() {
                           className="mt-1 accent-red-600 rounded"
                         />
                         <span className="text-xs text-gray-600 leading-normal">
-                          I understand that this cancellation is irreversible. The seat slots will be released instantly. Refund details are subject to Stripe's processing policies.
+                          {isAdmin
+                            ? "I understand that this cancellation is irreversible. The seat slots will be released instantly, and no refund will be processed via Stripe."
+                            : "I understand that this cancellation is irreversible. The seat slots will be released instantly. Refund details are subject to Stripe's processing policies."}
                         </span>
                       </label>
                     )}
@@ -686,17 +687,17 @@ export default function MyBookingsContent() {
                 );
               })()}
 
-              <div className="mt-6 flex gap-3">
+              <div className="mt-6 flex flex-col-reverse sm:flex-row gap-3">
                 <button
                   onClick={() => setShowCancelModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                  className="w-full sm:flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold text-sm sm:text-base"
                 >
                   Keep Booking
                 </button>
                 <button
                   onClick={handleConfirmCancellation}
                   disabled={!agreeTerms || getHoursToDeparture(selectedBooking.date, selectedBooking.time) < 24}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-red-300"
+                  className="w-full sm:flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-red-300 text-sm sm:text-base"
                 >
                   Confirm Cancel
                 </button>

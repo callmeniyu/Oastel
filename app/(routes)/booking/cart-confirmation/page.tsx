@@ -621,10 +621,10 @@ export default function CartConfirmationPage() {
                 • Cancellation Policy:
                 <ul className="list-disc list-inside ml-5 text-yellow-700 space-y-1 mt-1">
                   <li>
-                    • Cancel at least 24 hours in advance for a 95% refund (5% processing fee deducted).
+                    • Cancel at least 24 hours in advance for a 95% refund (5% processing and administrative fee deducted).
                   </li>
                   <li>
-                    • No refund, cancellation, or date change within 24 hours.
+                    • No cancellation can be made within 24 hours, since the booking has been finalized before 24 hours.
                   </li>
                 </ul>
               </li>
