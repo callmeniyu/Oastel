@@ -3,6 +3,7 @@ import { FiEdit } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import { useToast } from "@/context/ToastContext";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 
 interface ProfileContentProps {
@@ -23,6 +24,7 @@ export default function ProfileContent({
   image,
 }: ProfileContentProps) {
   const { showToast } = useToast();
+  const { update } = useSession();
   const [userData, setUserData] = useState({
     username: "",
     email: "",
@@ -110,7 +112,7 @@ export default function ProfileContent({
             name: userData.username,
             location: userData.location,
             bio: userData.bio,
-            image: profileImage || userData.image,
+            image: profileImage,
           }),
         }
       );
@@ -118,6 +120,12 @@ export default function ProfileContent({
       const result = await response.json();
 
       if (result.success) {
+        // Update next-auth session token with the Cloudinary URL to update navbar dropdown layout
+        await update({
+          name: userData.username,
+          image: result.data?.image || null,
+        });
+
         showToast({
           type: "success",
           title: "Success",

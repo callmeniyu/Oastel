@@ -3,11 +3,12 @@
 import { useSession } from "next-auth/react";
 
 export default function SessionHook() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   return {
     user: session?.user,
     isLoading: status === "loading",
     isAuthenticated: status === "authenticated",
+    update,
   };
 }
