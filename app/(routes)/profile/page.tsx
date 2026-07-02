@@ -116,13 +116,21 @@ export default function ProfilePage() {
     if (file) {
       // Validate file type
       if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file");
+        showToast({
+          type: "error",
+          title: "Invalid File",
+          message: "Please select a valid image file.",
+        });
         return;
       }
 
-      // Validate file size (5MB limit)
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should be less than 5MB");
+      // Validate file size (3MB limit)
+      if (file.size > 3 * 1024 * 1024) {
+        showToast({
+          type: "error",
+          title: "File Too Large",
+          message: "Image size should be less than 3MB.",
+        });
         return;
       }
 
@@ -133,7 +141,11 @@ export default function ProfilePage() {
         }
       };
       reader.onerror = () => {
-        alert("Error reading file");
+        showToast({
+          type: "error",
+          title: "Upload Failed",
+          message: "Error reading image file.",
+        });
       };
       reader.readAsDataURL(file);
     }

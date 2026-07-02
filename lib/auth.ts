@@ -116,12 +116,16 @@ export const authOptions = {
                 return "/auth/error?error=callback_error"
             }
         },
-        async jwt({ token, user, account }: { token: Record<string, any>; user?: Record<string, any>; account?: any }) {
+        async jwt({ token, user, account, trigger, session }: { token: Record<string, any>; user?: Record<string, any>; account?: any; trigger?: string; session?: any }) {
             if (user) {
                 token.id = user.id
             }
             if (account?.provider) {
                 token.provider = account.provider
+            }
+            if (trigger === "update" && session) {
+                if (session.name !== undefined) token.name = session.name
+                if (session.image !== undefined) token.picture = session.image
             }
             return token
         },
@@ -129,6 +133,8 @@ export const authOptions = {
             if (session.user) {
                 session.user.id = token.id as string
                 session.user.provider = token.provider
+                if (token.name) session.user.name = token.name
+                if (token.picture) session.user.image = token.picture
             }
             return session
         },
