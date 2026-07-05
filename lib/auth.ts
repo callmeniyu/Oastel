@@ -32,7 +32,11 @@ export const authOptions = {
 
                     // Check if password is correct
                     if (!user.passwordHash) {
-                        throw new Error("This account is registered via Google. Please log in with Google.")
+                        if (user.provider === "google") {
+                            throw new Error("This account is registered via Google. Please log in with Google.")
+                        } else {
+                            throw new Error("This email is associated with a guest booking. Please sign up to set a password and access your account.")
+                        }
                     }
 
                     const isValid = await bcrypt.compare(credentials?.password || "", user.passwordHash)
@@ -95,8 +99,7 @@ export const authOptions = {
                                     phone: "",
                                     pickupAddresses: [],
                                 },
-                                // Schema expects a string for bookings (use empty string as default)
-                                bookings: "",
+                                bookings: [],
                                 provider: "google",
                                 googleId: profile?.sub,
                             })
