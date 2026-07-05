@@ -1,5 +1,4 @@
-import mongoose, { Document } from "mongoose"
-import dbConnect from "@/lib/dbConnect"
+import mongoose, { Document, Schema, Types } from "mongoose"
 
 export interface IUser extends Document {
     name: string
@@ -13,8 +12,9 @@ export interface IUser extends Document {
         phone?: string
         pickupAddresses?: string[]
     }
-    bookings: string
-    provider?: "credentials" | "google"
+    cartId?: Types.ObjectId
+    bookings: Types.ObjectId[]
+    provider?: string
     googleId?: string
     createdAt: Date
     updatedAt: Date
@@ -36,8 +36,9 @@ const userSchema = new mongoose.Schema<IUser>(
             },
             default: {},
         },
-        bookings: { type: String, default: "" },
-        provider: { type: String, required: true, enum: ["credentials", "google"] },
+        cartId: { type: Schema.Types.ObjectId, ref: "Cart" },
+        bookings: [{ type: Schema.Types.ObjectId, ref: "Booking" }],
+        provider: { type: String },
         googleId: { type: String },
     },
     { timestamps: true }

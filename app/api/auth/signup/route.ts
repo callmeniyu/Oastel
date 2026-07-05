@@ -11,7 +11,23 @@ export async function POST(request: Request) {
         const existingUser = await User.findOne({ email })
 
         if (existingUser) {
-            return NextResponse.json({ error: "Email already in use, Please try login" }, { status: 400 })
+            if (existingUser.passwordHash) {
+                return NextResponse.json({ error: "Email already in use, Please try login" }, { status: 400 })
+            }
+            if (existingUser.provider === "google") {
+                return NextResponse.json({ error: "This email is already registered via Google. Please sign in using Google." }, { status: 400 })
+            }
+
+            // Upgrade the guest user account to a credentials account
+            const hashedPassword = await bcrypt.hash(password, 12)
+            existingUser.passwordHash = hashedPassword
+            if (username) {
+                existingUser.name = username
+            }
+            existingUser.provider = "credentials"
+            await existingUser.save()
+
+            return NextResponse.json({ message: "Guest account upgraded successfully", user: existingUser }, { status: 201 })
         }
 
         const hashedPassword = await bcrypt.hash(password, 12)
@@ -28,8 +44,7 @@ export async function POST(request: Request) {
                 phone: "",
                 pickupAddresses: [],
             },
-            cartId: "",
-            bookings: "",
+            bookings: [],
             provider: "credentials",
         })
 

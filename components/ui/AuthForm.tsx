@@ -56,6 +56,21 @@ export default function AuthForm({ isLogin }: Props) {
                 })
                 router.push("/")
             } else {
+                // Pre-flight check registration method to show proper toast message
+                const checkRes = await fetch(`/api/auth/check-method?email=${encodeURIComponent(email)}`)
+                if (checkRes.ok) {
+                    const checkData = await checkRes.json()
+                    if (checkData.success) {
+                        if (checkData.method === "not_found") {
+                            throw new Error("No user found with this email.")
+                        } else if (checkData.method === "google") {
+                            throw new Error("This account is registered via Google. Please log in with Google.")
+                        } else if (checkData.method === "guest") {
+                            throw new Error("This email is associated with a guest booking. Please sign up to set a password and access your account.")
+                        }
+                    }
+                }
+
                 // Login logic
                 const result = await signIn("credentials", {
                     email,
@@ -64,6 +79,9 @@ export default function AuthForm({ isLogin }: Props) {
                 })
 
                 if (result?.error) {
+                    if (result.error === "CredentialsSignin") {
+                        throw new Error("Invalid password. Please try again.")
+                    }
                     throw new Error(result.error)
                 }
 
