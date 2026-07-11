@@ -13,11 +13,13 @@ import {
   FiAlertTriangle,
   FiX,
   FiLoader,
+  FiEdit,
 } from "react-icons/fi";
 import { FaRoute, FaCar } from "react-icons/fa";
 import Image from "next/image";
 import { useToast } from "@/context/ToastContext";
 import { formatMalaysianDateForDisplay, formatDateAsMYT, getMalaysianNow } from "@/lib/dateUtils";
+import Confirmation from "@/components/ui/Confirmation";
 
 type Booking = {
   _id: string;
@@ -70,6 +72,15 @@ export default function MyBookingsContent() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+
+  // Edit Booking Modal States
+  const [selectedBookingForEdit, setSelectedBookingForEdit] = useState<Booking | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditConfirmModal, setShowEditConfirmModal] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editPickupLocation, setEditPickupLocation] = useState("");
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -135,6 +146,143 @@ export default function MyBookingsContent() {
     } catch (err) {
       console.error("Error calculating hours to departure:", err);
       return 0;
+    }
+  };
+
+  const handleEditClick = (booking: Booking) => {
+    const hoursLeft = getHoursToDeparture(booking.date, booking.time);
+    if (hoursLeft < 12) {
+      showToast({
+        type: "error",
+        title: "Editing Not Allowed",
+        message: "Editing is not allowed within 12 hours of the starting time.",
+      });
+      return;
+    }
+
+    setSelectedBookingForEdit(booking);
+    setEditName(booking.contactInfo?.name || "");
+    setEditPhone(booking.contactInfo?.phone || "");
+    setEditPickupLocation(booking.pickupLocation || "");
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate Name (minimum 5 characters)
+    if (!editName || editName.trim().length < 5) {
+      showToast({
+        type: "error",
+        title: "Invalid Name",
+        message: "Name must be at least 5 characters",
+      });
+      return;
+    }
+
+    // Validate Phone (minimum 5 characters)
+    if (!editPhone || editPhone.trim().length < 5) {
+      showToast({
+        type: "error",
+        title: "Invalid Phone Number",
+        message: "Phone number must be at least 5 characters",
+      });
+      return;
+    }
+
+    // Validate Pickup Location (minimum 10 characters)
+    if (!editPickupLocation || editPickupLocation.trim().length < 10) {
+      showToast({
+        type: "error",
+        title: "Invalid Pickup Location",
+        message: "Pickup location must be at least 10 characters",
+      });
+      return;
+    }
+
+    setShowEditConfirmModal(true);
+  };
+
+  const handleConfirmEditSave = async () => {
+    if (!selectedBookingForEdit) return;
+
+    try {
+      setSavingEdit(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/bookings/${selectedBookingForEdit._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            pickupLocation: editPickupLocation.trim(),
+            contactInfo: {
+              name: editName.trim(),
+              phone: editPhone.trim(),
+              email: selectedBookingForEdit.contactInfo?.email,
+            },
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showToast({
+          type: "success",
+          title: "Update Successful",
+          message: "Your booking details have been updated successfully.",
+        });
+
+        // Update local state
+        setBookings((prevBookings) =>
+          prevBookings.map((b) =>
+            b._id === selectedBookingForEdit._id
+              ? {
+                  ...b,
+                  pickupLocation: editPickupLocation.trim(),
+                  contactInfo: {
+                    ...b.contactInfo,
+                    name: editName.trim(),
+                    phone: editPhone.trim(),
+                  },
+                }
+              : b
+          )
+        );
+
+        if (searchResult && searchResult._id === selectedBookingForEdit._id) {
+          setSearchResult({
+            ...searchResult,
+            pickupLocation: editPickupLocation.trim(),
+            contactInfo: {
+              ...searchResult.contactInfo,
+              name: editName.trim(),
+              phone: editPhone.trim(),
+            },
+          });
+        }
+
+        setShowEditModal(false);
+        setShowEditConfirmModal(false);
+        setSelectedBookingForEdit(null);
+      } else {
+        showToast({
+          type: "error",
+          title: "Update Failed",
+          message: result.error || "Failed to update booking details.",
+        });
+      }
+    } catch (err) {
+      console.error("Error updating booking:", err);
+      showToast({
+        type: "error",
+        title: "Update Error",
+        message: "A network error occurred. Please try again later.",
+      });
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -377,22 +525,36 @@ export default function MyBookingsContent() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-100">
-
-              <button
-                onClick={() => handleViewReceipt(booking)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
-              >
-                <FiFileText size={16} className="flex-shrink-0" />
-                <span>Get Receipt</span>
-              </button>
-
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-4 border-t border-gray-100 mt-4">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => handleViewReceipt(booking)}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
+                >
+                  <FiFileText size={15} />
+                  <span>Receipt</span>
+                </button>
+                {booking.status === "confirmed" && (
+                  <button
+                    onClick={() => handleEditClick(booking)}
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg font-medium border text-sm transition-colors ${
+                      getHoursToDeparture(booking.date, booking.time) < 12
+                        ? "bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed"
+                        : "border-primary_green text-primary_green hover:bg-green-50"
+                    }`}
+                  >
+                    <FiEdit size={15} />
+                    <span>Edit</span>
+                  </button>
+                )}
+              </div>
+              
               {showCancelButton && (
                 <button
                   onClick={() => handleCancelClick(booking)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium border border-red-200 text-sm sm:text-base"
+                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2 text-red-500 hover:text-red-700 hover:bg-red-50 sm:hover:bg-transparent rounded-lg sm:rounded-none transition-colors font-medium text-sm border border-red-100 sm:border-none"
                 >
-                  <FiX size={16} className="flex-shrink-0" />
+                  <FiX size={15} />
                   <span>Cancel Booking</span>
                 </button>
               )}
@@ -706,6 +868,139 @@ export default function MyBookingsContent() {
           </div>
         </div>
       )}
+
+      {/* Edit Booking Modal Overlay */}
+      {showEditModal && selectedBookingForEdit && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-fade-in font-poppins max-h-[90vh] flex flex-col">
+            <div className="bg-primary_green text-white px-6 py-4 flex justify-between items-center flex-shrink-0">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <FiEdit />
+                Edit Booking Details
+              </h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+              {/* Disabled/Read-only fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 text-xs">
+                <div>
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider">Number of Persons</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={`${selectedBookingForEdit.adults} Adult${selectedBookingForEdit.adults > 1 ? "s" : ""}${selectedBookingForEdit.children > 0 ? `, ${selectedBookingForEdit.children} Child${selectedBookingForEdit.children > 1 ? "ren" : ""}` : ""}`}
+                    className="w-full bg-gray-200 text-gray-500 px-3 py-2 rounded-lg border border-gray-200 cursor-not-allowed"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider">Date</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={formatDate(selectedBookingForEdit.date)}
+                    className="w-full bg-gray-200 text-gray-500 px-3 py-2 rounded-lg border border-gray-200 cursor-not-allowed"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-gray-400 font-semibold mb-1 uppercase tracking-wider">Email Address</label>
+                  <input
+                    type="email"
+                    disabled
+                    value={selectedBookingForEdit.contactInfo?.email || ""}
+                    className="w-full bg-gray-200 text-gray-500 px-3 py-2 rounded-lg border border-gray-200 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              {/* Editable Fields */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1 text-sm">Full Name</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary_green text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1 text-sm">Phone Number</label>
+                  <input
+                    type="text"
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary_green text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1 text-sm">Pickup Location</label>
+                  <textarea
+                    rows={2}
+                    value={editPickupLocation}
+                    onChange={(e) => setEditPickupLocation(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary_green text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingEdit}
+                  className="flex-1 px-4 py-3 bg-primary_green text-white rounded-lg font-semibold hover:bg-primary_green/90 transition-colors text-sm flex items-center justify-center gap-2"
+                >
+                  {savingEdit ? <FiLoader className="animate-spin" /> : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      <Confirmation
+        isOpen={showEditConfirmModal}
+        onClose={() => setShowEditConfirmModal(false)}
+        onConfirm={handleConfirmEditSave}
+        title="Confirm Updated Details"
+        message={
+          <div className="space-y-3 text-sm">
+            <p className="text-gray-600">Please confirm that you want to save the following updated details:</p>
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2 text-left">
+              <div>
+                <span className="font-semibold text-gray-400 text-xs uppercase tracking-wider block">Full Name</span>
+                <span className="text-gray-900 font-medium">{editName}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-400 text-xs uppercase tracking-wider block">Phone Number</span>
+                <span className="text-gray-900 font-medium">{editPhone}</span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-400 text-xs uppercase tracking-wider block">Pickup Location</span>
+                <span className="text-gray-900 font-medium">{editPickupLocation}</span>
+              </div>
+            </div>
+          </div>
+        }
+        confirmText="Confirm Save"
+        cancelText="Cancel"
+      />
     </div>
   );
 }
