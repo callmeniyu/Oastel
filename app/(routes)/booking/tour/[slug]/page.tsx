@@ -550,16 +550,20 @@ export default function BookingInfoPage() {
 
     const totalPrice = calculateTotalPrice();
 
-    // Fix date handling to prevent offset issues
-    const bookingDate = new Date(selectedDate);
-    // Ensure the date is set to noon to avoid timezone issues
-    bookingDate.setHours(12, 0, 0, 0);
+    // Format selected date as YYYY-MM-DD to send as a date-only string
+    // This avoids timezone/offset shifts on both client and server
+    const dateString =
+      selectedDate.getFullYear() +
+      "-" +
+      String(selectedDate.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(selectedDate.getDate()).padStart(2, "0");
 
     setBooking({
       packageId: tourDetails._id,
       title: tourDetails.title,
       slug: slug,
-      date: bookingDate.toISOString(), // Use full ISO string to preserve date
+      date: dateString,
       time: selectedTime,
       type: tourDetails.type || "Private Tour",
       duration: tourDetails.duration || "4-6 hours",

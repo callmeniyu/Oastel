@@ -706,7 +706,10 @@ export default function BookingUserInfoPage() {
           <div className="w-full">
             <BookingInfoPanel
               title={booking.title}
-              date={new Date(booking.date)}
+              date={(() => {
+                const [year, month, day] = booking.date.split("-").map(Number);
+                return new Date(year, month - 1, day);
+              })()}
               time={booking.time}
               type={booking.type}
               duration={booking.duration}
