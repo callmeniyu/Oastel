@@ -280,7 +280,8 @@ export default function BookingInfoPage() {
         String(selectedDate.getDate()).padStart(2, "0");
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=tour&packageId=${tourDetails._id}&date=${dateString}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=tour&packageId=${tourDetails._id}&date=${dateString}&_t=${Date.now()}`,
+        { cache: "no-store" }
       );
       const data = await response.json();
 

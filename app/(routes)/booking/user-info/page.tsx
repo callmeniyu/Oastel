@@ -52,8 +52,7 @@ export default function BookingUserInfoPage() {
     // Country code must be selected
     const countryCodeValid = form.countryCode.trim() !== "";
 
-    const basicFieldsValid =
-      nameValid && emailValid && phoneValid && countryCodeValid;
+    const basicFieldsValid = nameValid && emailValid && phoneValid && countryCodeValid;
 
     if (isCartBooking) {
       // For cart bookings, pickup location is handled per item
@@ -61,10 +60,7 @@ export default function BookingUserInfoPage() {
     }
 
     // For transfers with admin-defined pickup, don't require user input
-    if (
-      booking?.packageType === "transfer" &&
-      booking?.pickupOption === "admin"
-    ) {
+    if (booking?.packageType === "transfer" && booking?.pickupOption === "admin") {
       return basicFieldsValid;
     }
 
@@ -170,14 +166,13 @@ export default function BookingUserInfoPage() {
       { name: "United States", cca2: "US", callingCode: "+1" },
       { name: "Vietnam", cca2: "VN", callingCode: "+84" },
       { name: "Yemen", cca2: "YE", callingCode: "+967" },
+      { name: "Slovenia", cca2: "SI", callingCode: "+386" },
     ];
 
     setCountries(allCountries);
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => {
       if (name === "countryCode") {
@@ -233,14 +228,9 @@ export default function BookingUserInfoPage() {
 
     // Validate pickup location if required (minimum 10 characters)
     if (!isCartBooking) {
-      const requiresPickupLocation =
-        booking?.packageType !== "transfer" ||
-        booking?.pickupOption !== "admin";
+      const requiresPickupLocation = booking?.packageType !== "transfer" || booking?.pickupOption !== "admin";
 
-      if (
-        requiresPickupLocation &&
-        (!form.pickupLocation || form.pickupLocation.trim().length < 10)
-      ) {
+      if (requiresPickupLocation && (!form.pickupLocation || form.pickupLocation.trim().length < 10)) {
         showToast({
           type: "error",
           title: "Invalid Pickup Location",
@@ -334,10 +324,7 @@ export default function BookingUserInfoPage() {
 
   const handleSingleBookingPayment = async () => {
     // Check pickup location based on transfer type
-    if (
-      booking?.packageType === "transfer" &&
-      booking?.pickupOption === "user"
-    ) {
+    if (booking?.packageType === "transfer" && booking?.pickupOption === "user") {
       if (!form.pickupLocation) {
         showToast({
           type: "error",
@@ -381,11 +368,7 @@ export default function BookingUserInfoPage() {
         // flag to indicate this is a per-vehicle booking (private transfer)
         isVehicleBooking: booking.isVehicleBooking || false,
         // For admin-defined pickup, use admin's pickup location; for user-defined, use user's input
-        pickupLocation:
-          booking?.packageType === "transfer" &&
-          booking?.pickupOption === "admin"
-            ? booking.pickupLocations || ""
-            : form.pickupLocation,
+        pickupLocation: booking?.packageType === "transfer" && booking?.pickupOption === "admin" ? booking.pickupLocations || "" : form.pickupLocation,
         contactInfo: {
           name: form.name,
           email: form.email,
@@ -438,10 +421,7 @@ export default function BookingUserInfoPage() {
   // Calculate total for cart bookings
   const getCartTotal = () => {
     if (!cart || !cart.items) return 0;
-    return cart.items.reduce(
-      (total, item) => total + (item.totalPrice || 0),
-      0,
-    );
+    return cart.items.reduce((total, item) => total + (item.totalPrice || 0), 0);
   };
 
   const getCartItemCount = () => {
@@ -453,18 +433,12 @@ export default function BookingUserInfoPage() {
     <div className="max-w-6xl mx-auto px-4 md:px-12 py-6 grid grid-cols-1 md:grid-cols-3 gap-8 font-poppins">
       {/* Form Section */}
       <div className="md:col-span-2 order-1 md:-order-1">
-        <h2 className="text-primary_green text-2xl font-bold mb-6">
-          {isCartBooking ? "Complete your cart booking" : "Fill your details"}
-        </h2>
+        <h2 className="text-primary_green text-2xl font-bold mb-6">{isCartBooking ? "Complete your cart booking" : "Fill your details"}</h2>
 
         {isCartBooking && cart && cart.items.length > 0 && (
           <div className="mb-6 p-4 bg-green-50 border border-primary_green/40 rounded-lg">
-            <h3 className="font-semibold text-primary_green mb-2">
-              Booking {getCartItemCount()} item(s) from your cart
-            </h3>
-            <p className="text-sm text-gray-700">
-              Total Amount: RM {getCartTotal().toFixed(2)}
-            </p>
+            <h3 className="font-semibold text-primary_green mb-2">Booking {getCartItemCount()} item(s) from your cart</h3>
+            <p className="text-sm text-gray-700">Total Amount: RM {getCartTotal().toFixed(2)}</p>
           </div>
         )}
 
@@ -472,65 +446,39 @@ export default function BookingUserInfoPage() {
           {/* Name and Email */}
           {["name", "email"].map((field) => (
             <div key={field} className="w-full">
-              <input
-                name={field}
-                value={(form as any)[field]}
-                onChange={handleChange}
-                placeholder={`Enter your ${
-                  field === "email" ? "email" : field
-                }`}
-                className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
-              />
+              <input name={field} value={(form as any)[field]} onChange={handleChange} placeholder={`Enter your ${field === "email" ? "email" : field}`} className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green" />
             </div>
           ))}
 
           {/* Pickup Location - Hide for cart bookings (handled per item), show conditional for single booking */}
           {!isCartBooking && (
             <>
-              {booking?.packageType === "transfer" &&
-              booking?.pickupOption === "admin" ? (
+              {booking?.packageType === "transfer" && booking?.pickupOption === "admin" ? (
                 // Admin-defined pickup location - render as a normal select control
                 <div className="w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Pickup Location:
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Location:</label>
                   {/* Render admin-defined pickup options as a select to match add-to-cart flow */}
                   {booking.pickupLocations ? (
-                    <select
-                      name="pickupLocation"
-                      value={form.pickupLocation}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-primary_green/40 rounded-md focus:outline-none focus:ring-2 focus:ring-primary_green focus:border-transparent"
-                    >
+                    <select name="pickupLocation" value={form.pickupLocation} onChange={handleChange} className="w-full px-3 py-2 border border-primary_green/40 rounded-md focus:outline-none focus:ring-2 focus:ring-primary_green focus:border-transparent">
                       <option value="">Choose a pickup location...</option>
-                      {booking.pickupLocations
-                        .split(",")
-                        .map((loc: string, i: number) => {
-                          // Strip any HTML tags saved in admin content before showing
-                          const stripped = loc.replace(/<[^>]*>/g, "").trim();
-                          return (
-                            <option key={i} value={stripped}>
-                              {stripped}
-                            </option>
-                          );
-                        })}
+                      {booking.pickupLocations.split(",").map((loc: string, i: number) => {
+                        // Strip any HTML tags saved in admin content before showing
+                        const stripped = loc.replace(/<[^>]*>/g, "").trim();
+                        return (
+                          <option key={i} value={stripped}>
+                            {stripped}
+                          </option>
+                        );
+                      })}
                     </select>
                   ) : (
-                    <div className="text-sm text-gray-500">
-                      No pickup locations configured
-                    </div>
+                    <div className="text-sm text-gray-500">No pickup locations configured</div>
                   )}
                 </div>
               ) : (
                 // User-defined pickup location - show input field
                 <div className="w-full">
-                  <input
-                    name="pickupLocation"
-                    value={form.pickupLocation}
-                    onChange={handleChange}
-                    placeholder="Enter your Hostel/Hotel name and address"
-                    className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green"
-                  />
+                  <input name="pickupLocation" value={form.pickupLocation} onChange={handleChange} placeholder="Enter your Hostel/Hotel name and address" className="w-full border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green" />
                 </div>
               )}
 
@@ -538,18 +486,13 @@ export default function BookingUserInfoPage() {
               {(() => {
                 // For transfers: Show only pickup guidelines
                 if (booking?.packageType === "transfer") {
-                  const transferGuidelines =
-                    booking?.pickupOption === "admin"
-                      ? (booking as any)?.details?.pickupGuidelines
-                      : booking?.pickupLocations;
+                  const transferGuidelines = booking?.pickupOption === "admin" ? (booking as any)?.details?.pickupGuidelines : booking?.pickupLocations;
 
                   if (transferGuidelines) {
                     return (
                       <div className="mt-3">
                         <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
-                          <h5 className="font-medium text-primary_green mb-2 text-sm">
-                            Pickup Guidelines:
-                          </h5>
+                          <h5 className="font-medium text-primary_green mb-2 text-sm">Pickup Guidelines:</h5>
                           <div
                             className="prose max-w-none text-sm text-gray-700 leading-relaxed"
                             dangerouslySetInnerHTML={{
@@ -565,8 +508,7 @@ export default function BookingUserInfoPage() {
                 // For tours: Show both pickup locations and pickup guidelines
                 if (booking?.packageType === "tour") {
                   const tourLocations = booking?.pickupLocations;
-                  const tourGuidelines = (booking as any)?.details
-                    ?.pickupGuidelines;
+                  const tourGuidelines = (booking as any)?.details?.pickupGuidelines;
 
                   if (tourLocations || tourGuidelines) {
                     return (
@@ -574,9 +516,7 @@ export default function BookingUserInfoPage() {
                         <div className="p-3 bg-green-50 border border-primary_green/40 rounded">
                           {tourLocations && (
                             <div className="mb-3">
-                              <h5 className="font-medium text-primary_green mb-2 text-sm">
-                                Available Pickup Locations:
-                              </h5>
+                              <h5 className="font-medium text-primary_green mb-2 text-sm">Available Pickup Locations:</h5>
                               <div
                                 className="prose max-w-none text-sm text-gray-700"
                                 dangerouslySetInnerHTML={{
@@ -587,9 +527,7 @@ export default function BookingUserInfoPage() {
                           )}
                           {tourGuidelines && (
                             <div>
-                              <h5 className="font-medium text-primary_green mb-2 text-sm">
-                                Pickup Guidelines:
-                              </h5>
+                              <h5 className="font-medium text-primary_green mb-2 text-sm">Pickup Guidelines:</h5>
                               <div
                                 className="prose max-w-none text-sm text-gray-700 leading-relaxed"
                                 dangerouslySetInnerHTML={{
@@ -612,12 +550,7 @@ export default function BookingUserInfoPage() {
           {/* WhatsApp Number Section */}
           <div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <select
-                name="countryCode"
-                value={form.countryCode}
-                onChange={handleChange}
-                className="sm:w-52 border border-primary_green/40 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary_green"
-              >
+              <select name="countryCode" value={form.countryCode} onChange={handleChange} className="sm:w-52 border border-primary_green/40 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-primary_green">
                 <option value="">Select country...</option>
                 {countries.map((c) => (
                   <option key={c.cca2} value={c.callingCode}>
@@ -625,38 +558,13 @@ export default function BookingUserInfoPage() {
                   </option>
                 ))}
               </select>
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder={
-                  form.countryCode
-                    ? "Enter WhatsApp number"
-                    : "Select country first"
-                }
-                disabled={form.countryCode === ""}
-                className={`flex-1 border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green ${
-                  form.countryCode === ""
-                    ? "bg-gray-100 cursor-not-allowed"
-                    : "bg-white"
-                }`}
-              />
+              <input name="phone" value={form.phone} onChange={handleChange} placeholder={form.countryCode ? "Enter WhatsApp number" : "Select country first"} disabled={form.countryCode === ""} className={`flex-1 border border-primary_green/40 rounded px-4 py-2 placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-primary_green ${form.countryCode === "" ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`} />
             </div>
           </div>
         </div>
 
-        <button
-          onClick={goToCheckout}
-          disabled={isLoading}
-          className="mt-6 w-full sm:w-auto px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading
-            ? isCartBooking
-              ? "Creating Bookings..."
-              : "Creating Booking..."
-            : isCartBooking
-              ? "Confirm Cart Booking"
-              : "Confirm Booking"}
+        <button onClick={goToCheckout} disabled={isLoading} className="mt-6 w-full sm:w-auto px-6 py-3 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLoading ? (isCartBooking ? "Creating Bookings..." : "Creating Booking...") : isCartBooking ? "Confirm Cart Booking" : "Confirm Booking"}
         </button>
       </div>
 
@@ -664,39 +572,25 @@ export default function BookingUserInfoPage() {
       {isCartBooking && cart ? (
         <div className="w-full">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Cart Summary
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Cart Summary</h3>
 
             <div className="space-y-3 mb-4">
               {cart.items.map((item, index) => (
                 <div key={item._id} className="flex justify-between text-sm">
-                  <span className="flex-1 truncate">
-                    {(item as any).packageTitle || `Item ${index + 1}`}
-                  </span>
-                  <span className="font-medium">
-                    RM {item.totalPrice.toFixed(2)}
-                  </span>
+                  <span className="flex-1 truncate">{(item as any).packageTitle || `Item ${index + 1}`}</span>
+                  <span className="font-medium">RM {item.totalPrice.toFixed(2)}</span>
                 </div>
               ))}
             </div>
 
             <div className="border-t pt-4">
               <div className="flex justify-between items-center">
-                <span className="font-semibold">
-                  Total ({getCartItemCount()} items)
-                </span>
-                <span className="font-bold text-primary_green text-lg">
-                  RM {getCartTotal().toFixed(2)}
-                </span>
+                <span className="font-semibold">Total ({getCartItemCount()} items)</span>
+                <span className="font-bold text-primary_green text-lg">RM {getCartTotal().toFixed(2)}</span>
               </div>
             </div>
 
-            <button
-              onClick={goToCheckout}
-              disabled={isLoading}
-              className="w-full mt-4 px-4 py-2 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button onClick={goToCheckout} disabled={isLoading} className="w-full mt-4 px-4 py-2 bg-primary_green text-white rounded-md hover:bg-primary_green/90 transition disabled:opacity-50 disabled:cursor-not-allowed">
               {isLoading ? "Processing..." : "Confirm Booking"}
             </button>
           </div>

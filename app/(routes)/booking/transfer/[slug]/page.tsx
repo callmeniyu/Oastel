@@ -64,7 +64,8 @@ export default function BookingInfoPage() {
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferId}&date=${dateString}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferId}&date=${dateString}&_t=${Date.now()}`,
+          { cache: "no-store" }
         );
         const data = await response.json();
 
@@ -140,14 +141,14 @@ export default function BookingInfoPage() {
         "-" +
         String(selectedDate.getDate()).padStart(2, "0");
 
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferDetails._id}&date=${dateString}`;
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/timeslots/available?packageType=transfer&packageId=${transferDetails._id}&date=${dateString}&_t=${Date.now()}`;
       console.debug(
         "[fetchTimeSlots] requesting slots for date:",
         dateString,
         "url:",
         url
       );
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: "no-store" });
       const data = await response.json();
       console.debug("[fetchTimeSlots] response for date:", dateString, data);
 
