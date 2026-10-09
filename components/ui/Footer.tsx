@@ -101,7 +101,7 @@ export default function Footer() {
 
       {/* Copyright */}
       <div className="mt-8 text-center text-xs text-gray-300 font-poppins font-medium">
-        Copyright@2025 Oastel. All Rights Reserved.
+        Copyright@{new Date().getFullYear()} Oastel. All Rights Reserved.
       </div>
     </footer>
   );
