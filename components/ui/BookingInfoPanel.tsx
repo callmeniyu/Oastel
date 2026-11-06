@@ -47,37 +47,12 @@ type Props = {
   tourType?: string; // "private" or other
 };
 
-export default function BookingInfoPanel({
-  title,
-  date,
-  time,
-  type,
-  duration,
-  adults,
-  children,
-  adultPrice,
-  childPrice,
-  action,
-  onClick,
-  onAddToCart,
-  userInfo,
-  packageType,
-  packageId,
-  disabled = false,
-  transferDetails,
-  isVehicleBooking,
-  vehicleSeatCapacity,
-  vehicleName,
-  timeSlots,
-  tourType,
-}: Props) {
+export default function BookingInfoPanel({ title, date, time, type, duration, adults, children, adultPrice, childPrice, action, onClick, onAddToCart, userInfo, packageType, packageId, disabled = false, transferDetails, isVehicleBooking, vehicleSeatCapacity, vehicleName, timeSlots, tourType }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const { user, isAuthenticated } = SessionHook();
   const { addToCart, loading: cartLoading } = useCart();
-  const total = isVehicleBooking
-    ? Number(adultPrice) || 0
-    : adults * adultPrice + children * childPrice;
+  const total = isVehicleBooking ? Number(adultPrice) || 0 : adults * adultPrice + children * childPrice;
   const [isPickupModalOpen, setIsPickupModalOpen] = useState(false);
 
   // Utility to strip HTML tags from any input (protect stored pickupLocation)
@@ -167,11 +142,7 @@ export default function BookingInfoPanel({
           showToast({
             type: "error",
             title: "Minimum adults required",
-            message: `Please select at least ${
-              selectedSlot.minimumPerson
-            } adult${
-              selectedSlot.minimumPerson > 1 ? "s" : ""
-            } for this time slot. Current adults: ${adults}`,
+            message: `Please select at least ${selectedSlot.minimumPerson} adult${selectedSlot.minimumPerson > 1 ? "s" : ""} for this time slot. Current adults: ${adults}`,
           });
           return;
         }
@@ -181,8 +152,7 @@ export default function BookingInfoPanel({
           showToast({
             type: "error",
             title: "Not enough capacity",
-            message:
-              "Selected time slot doesn't have enough capacity for your group",
+            message: "Selected time slot doesn't have enough capacity for your group",
           });
           return;
         }
@@ -233,21 +203,15 @@ export default function BookingInfoPanel({
 
   return (
     <div className="border rounded-md shadow min-w-[250px] font-poppins max-h-max pb-4">
-      <div className="bg-primary_green text-white py-2 px-4 rounded-t-md text-center font-semibold font-poppins mb-4">
-        Booking Details
-      </div>
+      <div className="bg-primary_green text-white py-2 px-4 rounded-t-md text-center font-semibold font-poppins mb-4">Booking Details</div>
       <div className="px-4 flex flex-col gap-2">
         <div className="text-sm mb-2 flex gap-8 justify-between">
-          <h6 className="font-semibold">
-            {packageType === "tour" ? "Tour" : "Transfer"}
-          </h6>
+          <h6 className="font-semibold">{packageType === "tour" ? "Tour" : "Transfer"}</h6>
           <p className="text-desc_gray text-right">{title}</p>
         </div>
         <div className="text-sm mb-2 flex justify-between">
           <h6 className="font-semibold ">Date</h6>
-          <p className="text-desc_gray">
-            {format(new Date(date), "dd MMMM yyyy")}
-          </p>
+          <p className="text-desc_gray">{format(new Date(date), "dd MMMM yyyy")}</p>
         </div>
         <div className="text-sm mb-2 flex justify-between">
           <h6 className="font-semibold">Time</h6>
@@ -285,32 +249,20 @@ export default function BookingInfoPanel({
           </div>
         )}
       </div>
-      <div
-        className={`border-y p-5 flex justify-between ${
-          userInfo ? "hidden" : "flex"
-        }`}
-      >
+      <div className={`border-y p-5 flex justify-between ${userInfo ? "hidden" : "flex"}`}>
         <h4 className="text-xl font-bold">Amount</h4>
         <h4 className="text-xl font-bold"> RM {total}</h4>
       </div>
-      <div
-        className={`border-y p-5 flex flex-col gap-2 justify-between ${
-          userInfo ? "flex" : "hidden"
-        }`}
-      >
+      <div className={`border-y p-5 flex flex-col gap-2 justify-between ${userInfo ? "flex" : "hidden"}`}>
         <div className="flex justify-between">
           <h4 className="text-lg font-semibold">Subtotal</h4>
           <h4 className="text-lg font-semibold"> RM {total}</h4>
         </div>
         <div className="flex justify-between">
           <h4 className="text-lg font-semibold">
-            Bank Charge{" "}
-            <span className="text-desc_gray text-sm font-medium">(2.8%)</span>
+            Bank Charge <span className="text-desc_gray text-sm font-medium">(2.8%)</span>
           </h4>
-          <h4 className="text-lg font-semibold">
-            {" "}
-            RM {(total * 0.028).toFixed(2)}
-          </h4>
+          <h4 className="text-lg font-semibold"> RM {(total * 0.028).toFixed(2)}</h4>
         </div>
         <div className="flex justify-between">
           <h4 className="text-lg font-semibold">SST</h4>
@@ -318,30 +270,14 @@ export default function BookingInfoPanel({
         </div>
       </div>
 
-      <div
-        className={`border-t p-5 flex text-primary_green gap-2 justify-between ${
-          userInfo ? "flex" : "hidden"
-        }`}
-      >
+      <div className={`border-t p-5 flex text-primary_green gap-2 justify-between ${userInfo ? "flex" : "hidden"}`}>
         <h4 className="text-2xl font-semibold">Total</h4>
-        <h4 className="text-2xl font-semibold">
-          {" "}
-          RM {(total + total * 0.028).toFixed(2)}
-        </h4>
+        <h4 className="text-2xl font-semibold"> RM {(total + total * 0.028).toFixed(2)}</h4>
       </div>
-      <div
-        className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "flex" : ""}`}
-      >
+      <div className={`flex flex-col gap-2 mt-4 px-6 ${userInfo ? "flex" : ""}`}>
         {userInfo ? (
           // User info page - show only Proceed to Payment button
-          <div
-            onClick={disabled ? undefined : onClick}
-            className={`${
-              disabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
-            } text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
-          >
+          <div onClick={disabled ? undefined : onClick} className={`${disabled ? "bg-gray-400 cursor-not-allowed" : "bg-primary_green cursor-pointer hover:bg-primary_green/90"} text-white text-sm px-4 py-2 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}>
             <IoBagOutline className="inline mr-2 text-2xl" />
             <p>Proceed to Payment</p>
           </div>
@@ -361,14 +297,7 @@ export default function BookingInfoPanel({
               <IoCartOutline className="inline mr-2 text-2xl" />
               <p>{cartLoading ? "Adding..." : "Add to Cart"}</p>
             </button> */}
-            <div
-              onClick={disabled ? undefined : onClick}
-              className={`${
-                disabled
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-primary_green cursor-pointer hover:bg-primary_green/90"
-              } text-white text-sm px-4 py-3 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}
-            >
+            <div onClick={disabled ? undefined : onClick} className={`${disabled ? "bg-gray-400 cursor-not-allowed" : "bg-primary_green cursor-pointer hover:bg-primary_green/90"} text-white text-sm px-4 py-3 flex gap-2 justify-center items-center rounded-md font-poppins font-semibold transition-colors`}>
               <p>Continue to Payment</p>
             </div>
           </>
@@ -376,14 +305,7 @@ export default function BookingInfoPanel({
       </div>
 
       {/* Pickup Location Modal (used for transfers) */}
-      <PickupLocationModal
-        isOpen={isPickupModalOpen}
-        onClose={() => setIsPickupModalOpen(false)}
-        onConfirm={handlePickupLocationConfirm}
-        packageType={packageType}
-        transferDetails={transferDetails}
-        packageTitle={title}
-      />
+      <PickupLocationModal isOpen={isPickupModalOpen} onClose={() => setIsPickupModalOpen(false)} onConfirm={handlePickupLocationConfirm} packageType={packageType} transferDetails={transferDetails} packageTitle={title} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/context/ToastContext";
 import SessionHook from "@/hooks/SessionHook";
 
+const PAYMENT_DOWN_MESSAGE = "Payment is down currently. Please contact us on WhatsApp for reservation.";
+
 type Country = { name: string; cca2: string; callingCode: string };
 
 export default function BookingUserInfoPage() {
@@ -415,7 +417,8 @@ export default function BookingUserInfoPage() {
   };
 
   const goToCheckout = () => {
-    handleConfirmBooking();
+    // handleConfirmBooking();
+    window.alert(PAYMENT_DOWN_MESSAGE);
   };
 
   // Calculate total for cart bookings
